@@ -1,13 +1,14 @@
 """Craigslist search-results fetcher.
 
-Craigslist has changed its search-results markup and feed support several
-times over the years (RSS support for search pages has come and gone). This
-module is written defensively: it tries a couple of parsing strategies
-against the current HTML search page, logs what it couldn't parse instead of
-silently dropping listings, and is meant to be low-volume, single-user,
-rate-limited traffic — not a bulk crawler. Re-check the selectors in
-`_parse_result_row` if Craigslist changes their page and this starts
-returning zero results.
+Craigslist used to support `&format=rss` on search-result pages; as of this
+writing that's been actively blocked (confirmed live: it now returns an
+HTTP 403 "Your request has been blocked", even with a valid session cookie),
+so this scrapes the plain HTML search page instead, which is not disallowed
+by robots.txt. This module is written defensively: it logs what it couldn't
+parse instead of silently dropping listings, and is meant to be low-volume,
+single-user, rate-limited traffic — not a bulk crawler. Re-check the
+selectors in `_parse_result_row` if Craigslist changes their page and this
+starts returning zero results.
 """
 
 from __future__ import annotations
