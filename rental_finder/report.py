@@ -90,6 +90,57 @@ def write_csv(listings: list[Listing], settings: Settings, out_path: str | Path)
             writer.writerow(row)
 
 
+def tier_counts(listings: list[Listing], settings: Settings) -> dict[int, int]:
+    clean_located = [l for l in listings if l.spam_score == 0 and l.location_precision == PRECISION_ADDRESS]
+    return {
+        tier: sum(1 for l in clean_located if l.clears_buffer(tier, settings.facility_types) is True)
+        for tier in settings.buffer_tiers_ft
+    }
+
+
+def to_json(listings: list[Listing], settings: Settings, generated_at: str) -> dict:
+    """Everything the web UI needs, in ranked order."""
+    rows = []
+    for rank, listing in enumerate(rank_listings(listings, settings), start=1):
+        rows.append({
+            "id": listing.source_id,
+            "rank": rank,
+            "url": listing.url,
+            "title": listing.title,
+            "price": listing.price,
+            "category": listing.category,
+            "bedrooms": listing.bedrooms,
+            "location": listing.best_address,
+            "precision": listing.location_precision,
+            "county": listing.county,
+            "lat": listing.latitude,
+            "lon": listing.longitude,
+            "posted": (listing.posted_at or "")[:10] or None,
+            "first_seen": listing.first_seen,
+            "new": listing.is_new,
+            "spam_score": listing.spam_score,
+            "spam_flags": listing.spam_flags,
+            "clears": {str(tier): listing.clears_buffer(tier, settings.facility_types) for tier in settings.buffer_tiers_ft},
+            "nearest_ft": {
+                ftype: (None if listing.clearance(ftype, settings.buffer_tiers_ft[0]) is None
+                        else (listing.nearest_facility_ft.get(ftype) if listing.nearest_facility_ft.get(ftype) is not None else -1))
+                for ftype in settings.facility_types
+            },
+            "description": (listing.description or "")[:400],
+        })
+    return {
+        "generated_at": generated_at,
+        "settings": {
+            "max_rent": settings.max_rent,
+            "county": settings.county,
+            "buffer_tiers_ft": list(settings.buffer_tiers_ft),
+            "facility_types": list(settings.facility_types),
+        },
+        "tier_counts": {str(k): v for k, v in tier_counts(listings, settings).items()},
+        "listings": rows,
+    }
+
+
 def summarize(listings: list[Listing], settings: Settings) -> str:
     """The inventory-vs-buffer numbers: how many candidates survive at each
     tier. This is the thing to bring to the conversation with your CCO."""
@@ -104,8 +155,7 @@ def summarize(listings: list[Listing], settings: Settings) -> str:
         "",
         "Of the distance-checked, clean listings, how many clear EVERY facility type at:",
     ]
-    for tier in settings.buffer_tiers_ft:
-        n = sum(1 for l in located if l.clears_buffer(tier, settings.facility_types) is True)
+    for tier, n in tier_counts(listings, settings).items():
         lines.append(f"  {tier:>5} ft: {n}")
     blockers = Counter()
     for l in located:

@@ -1,0 +1,19 @@
+name = "rental-finder"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+# The site itself. Any request that doesn't match a file in ./public falls
+# through to src/index.js, which is where /api/* is handled.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# Create with:  npx wrangler kv namespace create STATE
+# then paste the id it prints here.
+[[kv_namespaces]]
+binding = "STATE"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# Secret (never in this file):  npx wrangler secret put API_TOKEN
+# Use a long random string; the same value goes in the GitHub repo secret
+# API_TOKEN and gets pasted into the site once.

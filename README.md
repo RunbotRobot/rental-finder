@@ -111,6 +111,44 @@ source_id,address
 CSV.) The next run geocodes and distance-checks those listings like any
 other.
 
+## Running it as a website (phone-friendly)
+
+The scan can't run in a browser, so the site is three parts: a scheduled
+GitHub Action runs the scan, a Cloudflare Worker serves the results page
+and stores your review state (starred/dismissed, notes, addresses you get
+from posters), and the Action feeds those addresses back into the next
+scan. Nothing is public — one shared token gates everything.
+
+**1. Worker** (`worker/`):
+
+```bash
+cd worker
+npx wrangler kv namespace create STATE        # paste the printed id into wrangler.toml
+openssl rand -hex 32                          # this is your API token; keep it
+npx wrangler secret put API_TOKEN             # paste the token
+npx wrangler deploy                           # prints the site URL
+```
+
+**2. GitHub repo secrets** (Settings → Secrets and variables → Actions):
+`WORKER_URL` = the deployed URL with no trailing slash, `API_TOKEN` = the
+same token.
+
+**3. Run it once** from the Actions tab (`scan` → Run workflow); after that
+it runs every six hours. The Action commits `cache.json` to the repo — that
+file is what makes "new since last run" work — so expect a bot commit per
+run.
+
+Open the site on your phone, paste the token once (it's stored on the
+device, nowhere else), and add it to your home screen. The tiles at the
+top are the per-tier survivor counts. On each card: star, dismiss, a note,
+and an address field for when a poster gives you one — the next scan
+geocodes and distance-checks it.
+
+If Craigslist blocks GitHub's runners, the Action's log will show HTTP 403
+on the search fetch; the fallback is to run `python -m rental_finder.main
+--json data.json` on a home machine and `PUT` the file to
+`$WORKER_URL/api/data` with the token, exactly as the workflow does.
+
 ## Limitations, read before relying on this
 
 - **Not legal advice, not a compliance guarantee.** Public facility data

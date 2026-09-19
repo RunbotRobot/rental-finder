@@ -12,8 +12,9 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import logging
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 import requests
@@ -23,7 +24,7 @@ from .cache import Cache
 from .config import DEFAULT_SETTINGS, Settings
 from .geocode import county_for_point, geocode_address, has_street_number, is_plausible
 from .models import PRECISION_ADDRESS, PRECISION_AREA, PRECISION_NONE, Listing
-from .report import summarize, write_csv
+from .report import summarize, to_json, write_csv
 from .sources import craigslist
 from .spam_filter import flag_listings
 
@@ -75,7 +76,7 @@ def locate(listing: Listing, cache: Cache, settings: Settings, session: requests
     return None
 
 
-def run(settings: Settings, out_path: str, limit: int = 0) -> None:
+def run(settings: Settings, out_path: str, limit: int = 0, json_path: str | None = None) -> None:
     session = requests.Session()
     session.headers["User-Agent"] = settings.user_agent
     today = date.today()
@@ -124,13 +125,17 @@ def run(settings: Settings, out_path: str, limit: int = 0) -> None:
     cache.save()
 
     write_csv(in_county, settings, out_path)
+    if json_path:
+        payload = to_json(in_county, settings, datetime.now(timezone.utc).isoformat(timespec="seconds"))
+        Path(json_path).write_text(json.dumps(payload), encoding="utf-8")
     print(summarize(in_county, settings))
-    print(f"\nWrote {out_path}")
+    print(f"\nWrote {out_path}" + (f" and {json_path}" if json_path else ""))
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Pre-screen King County rentals for affordability and facility proximity.")
     parser.add_argument("--out", default="candidates.csv", help="Output CSV path")
+    parser.add_argument("--json", default=None, help="Also write the web UI's data.json here")
     parser.add_argument("--max-rent", type=float, default=DEFAULT_SETTINGS.max_rent)
     parser.add_argument("--postal", default=DEFAULT_SETTINGS.postal_code)
     parser.add_argument("--radius-miles", type=int, default=DEFAULT_SETTINGS.search_radius_miles)
@@ -153,7 +158,7 @@ def main() -> None:
         cache_path=args.cache,
         overrides_path=args.overrides,
     )
-    run(settings, args.out, limit=args.limit)
+    run(settings, args.out, limit=args.limit, json_path=args.json)
 
 
 if __name__ == "__main__":
