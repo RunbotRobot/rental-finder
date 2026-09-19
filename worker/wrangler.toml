@@ -1,0 +1,19 @@
+name = "rental-finder"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+# The site itself. Any request that doesn't match a file in ./public falls
+# through to src/index.js, which is where /api/* is handled.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# KV namespace "rental-finder-STATE" (Cloudflare dashboard -> Storage & Databases -> KV).
+[[kv_namespaces]]
+binding = "STATE"
+id = "1f993464288f413598fa3c74d5518e7e"
+
+# Secret (never in this file): API_TOKEN, set in the dashboard under the
+# Worker's Settings -> Variables and Secrets (or `npx wrangler secret put`).
+# Use a long random string; the same value goes in the GitHub repo secret
+# API_TOKEN and gets pasted into the site once.

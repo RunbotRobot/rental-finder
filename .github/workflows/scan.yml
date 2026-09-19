@@ -1,0 +1,57 @@
+name: scan
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # Addresses you've added to listings on the site come back as overrides.
+      - name: Fetch address overrides from the site
+        env:
+          WORKER_URL: ${{ secrets.WORKER_URL }}
+          API_TOKEN: ${{ secrets.API_TOKEN }}
+        run: |
+          curl -sSf -H "Authorization: Bearer $API_TOKEN" "$WORKER_URL/api/overrides" -o address_overrides.csv
+          echo "$(($(wc -l < address_overrides.csv) - 1)) overrides"
+
+      - name: Run the scan
+        run: python -m rental_finder.main --out candidates.csv --json data.json -v
+
+      - name: Publish results to the site
+        env:
+          WORKER_URL: ${{ secrets.WORKER_URL }}
+          API_TOKEN: ${{ secrets.API_TOKEN }}
+        run: |
+          curl -sSf -X PUT -H "Authorization: Bearer $API_TOKEN" -H "Content-Type: application/json" \
+            --data-binary @data.json "$WORKER_URL/api/data"
+
+      # The cache is what makes "new since last run" and the detail-page cap
+      # work across runs, so it lives in the repo.
+      - name: Commit cache
+        run: |
+          git config user.name "scan-bot"
+          git config user.email "scan-bot@users.noreply.github.com"
+          git add -f cache.json
+          git diff --cached --quiet || git commit -m "Update scan cache [skip ci]"
+          git push

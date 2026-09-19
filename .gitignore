@@ -2,4 +2,11 @@
 __pycache__/
 *.pyc
 *.csv
+cache.json
 .pytest_cache/
+worker/node_modules/
+worker/.wrangler/
+worker/package.json
+worker/package-lock.json
+data.json
+worker/.dev.vars

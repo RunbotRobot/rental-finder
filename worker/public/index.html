@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Rental Finder</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 8l6-5 6 5v6H2z' fill='%232f5fd1'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <h1>Rental Finder</h1>
+  <button id="settings-btn" class="ghost" aria-label="Settings">⚙</button>
+</header>
+
+<section id="auth" class="panel hidden">
+  <p>Paste the access token to load your scan results. It's kept on this device only.</p>
+  <form id="auth-form">
+    <input id="token" type="password" autocomplete="off" placeholder="access token" required>
+    <button type="submit">Save</button>
+  </form>
+</section>
+
+<section id="summary" class="panel hidden">
+  <div class="tiles" id="tiles"></div>
+  <p class="meta" id="meta"></p>
+</section>
+
+<section id="filters" class="filters hidden">
+  <select id="f-tier" aria-label="Minimum buffer cleared">
+    <option value="">any distance</option>
+  </select>
+  <select id="f-category" aria-label="Category">
+    <option value="">apartments + rooms</option>
+    <option value="apa">apartments</option>
+    <option value="roo">rooms</option>
+  </select>
+  <select id="f-status" aria-label="Review status">
+    <option value="active">not dismissed</option>
+    <option value="starred">starred</option>
+    <option value="dismissed">dismissed</option>
+    <option value="all">everything</option>
+  </select>
+  <label class="check"><input type="checkbox" id="f-new"> new only</label>
+  <label class="check"><input type="checkbox" id="f-clean" checked> hide spam-flagged</label>
+  <input id="f-search" type="search" placeholder="search title / address">
+</section>
+
+<p id="status" class="meta"></p>
+<main id="list"></main>
+
+<template id="card-tpl">
+  <article class="card">
+    <div class="card-head">
+      <span class="price"></span>
+      <span class="badges"></span>
+    </div>
+    <h2 class="title"><a target="_blank" rel="noopener"></a></h2>
+    <p class="location"></p>
+    <div class="tiers"></div>
+    <p class="distances"></p>
+    <p class="flags"></p>
+    <p class="desc"></p>
+    <p class="dates"></p>
+    <div class="actions">
+      <button class="act-star">☆ star</button>
+      <button class="act-dismiss">dismiss</button>
+      <button class="act-edit">note / address</button>
+      <a class="act-map" target="_blank" rel="noopener">map</a>
+      <a class="act-ccc" href="https://www.findchildcarewa.org/" target="_blank" rel="noopener">child care check</a>
+    </div>
+    <form class="edit hidden">
+      <input class="edit-address" placeholder="street address from the poster (measured on next run)">
+      <textarea class="edit-note" rows="2" placeholder="notes"></textarea>
+      <div class="edit-buttons"><button type="submit">save</button><button type="button" class="edit-cancel ghost">cancel</button></div>
+    </form>
+    <p class="note"></p>
+  </article>
+</template>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,4 +1,33 @@
+import re
 from dataclasses import dataclass, field
+
+# How much we trust a listing's coordinates:
+#   "address" -- geocoded from a street address with a house number; distance
+#                checks are meaningful at the buffer sizes we care about.
+#   "area"    -- only a city/neighborhood name, or a coarse map pin. Good
+#                enough to tell which county it's in, NOT good enough to
+#                measure feet to a school. Distance checks are skipped rather
+#                than reported as fake precision.
+#   "none"    -- no usable location at all.
+PRECISION_ADDRESS = "address"
+PRECISION_AREA = "area"
+PRECISION_NONE = "none"
+
+_STREET_NUMBER_RE = re.compile(r"^\s*\d+[A-Za-z]?\s+\S+")
+
+
+def has_street_number(text: str | None) -> bool:
+    """'2619 5th Avenue, Seattle' -> True; 'Belltown / Downtown' -> False."""
+    return bool(text) and bool(_STREET_NUMBER_RE.match(text))
+
+
+def primary_street(map_address: str | None) -> str | None:
+    """Craigslist renders a poster's street + cross street as
+    '9029 16th Ave SW near # 300' or '4th Ave near Clay St'. Keep the part
+    before 'near'; the cross street only confuses a geocoder."""
+    if not map_address:
+        return None
+    return re.split(r"\s+near\s+", map_address, maxsplit=1)[0].strip() or None
 
 
 @dataclass
@@ -8,30 +37,77 @@ class Listing:
     url: str
     title: str
     price: float | None
-    neighborhood: str | None
-    raw_address_text: str | None
-    posted_at: str | None
+    category: str  # craigslist category code: "apa" apartments, "roo" rooms
+    location_text: str | None  # whatever the listing shows: an address, or just "Shoreline"
+
+    posted_at: str | None = None
+    bedrooms: int | None = None
+    description: str | None = None
+    map_address: str | None = None  # street (+ cross street) from the detail page, when given
+    override_address: str | None = None  # from address_overrides.csv; always wins
+    details_fetched: bool = False
+
+    # Craigslist's own map pin. Verified live to be coarse (neighborhood-ish)
+    # for most listings, occasionally plain wrong, so it's only used for the
+    # county check -- never for buffer distances.
+    pin_lat: float | None = None
+    pin_lon: float | None = None
+    pin_accuracy: int | None = None
 
     latitude: float | None = None
     longitude: float | None = None
-    location_precision: str = "unknown"  # "exact" (from source geotag), "geocoded", "none"
+    location_precision: str = PRECISION_NONE
+    county: str | None = None
+
+    first_seen: str | None = None  # ISO date this tool first saw the listing
+    is_new: bool = True
 
     spam_flags: list[str] = field(default_factory=list)
     spam_score: int = 0
 
-    # filled in by compliance.py: {facility_type: distance_ft_to_nearest or None}
+    # Filled in by compliance.py.
+    # nearest_facility_ft[type]: distance to the nearest facility of that type,
+    #   or None if none exists within the largest configured buffer.
+    # facility_checked[type]: True only if the query actually succeeded. A
+    #   type that isn't marked checked is reported as unknown -- never as a
+    #   pass -- no matter what nearest_facility_ft says.
     nearest_facility_ft: dict[str, float | None] = field(default_factory=dict)
+    facility_checked: dict[str, bool] = field(default_factory=dict)
 
-    def is_affordable(self, max_rent: float) -> bool:
-        return self.price is not None and self.price <= max_rent
+    @property
+    def best_address(self) -> str | None:
+        """The most geocodable string we have. An override wins outright.
+        The search-result location usually carries city and state, so it's
+        preferred when it has a street number; the detail page's map
+        address lacks a city, so it borrows the search-result place name
+        (or falls back to the state) to keep the geocoder in the right
+        town."""
+        if self.override_address:
+            return self.override_address
+        if has_street_number(self.location_text):
+            return self.location_text
+        street = primary_street(self.map_address)
+        if has_street_number(street):
+            place = self.location_text if self.location_text else "WA"
+            return f"{street}, {place}"
+        return self.location_text
+
+    def clearance(self, facility_type: str, buffer_ft: int) -> bool | None:
+        if self.location_precision != PRECISION_ADDRESS or not self.facility_checked.get(facility_type):
+            return None
+        nearest = self.nearest_facility_ft.get(facility_type)
+        return True if nearest is None else nearest >= buffer_ft
 
     def clears_buffer(self, buffer_ft: int, facility_types: tuple[str, ...]) -> bool | None:
-        """True/False if we have distance data for all required facility types,
-        None if we couldn't determine location well enough to say."""
-        if self.location_precision == "none":
+        """False if any facility type is confirmed too close, None if any
+        facility type couldn't be verified at this tier, True only if every
+        facility type was checked and came back clear."""
+        results = [self.clearance(ftype, buffer_ft) for ftype in facility_types]
+        if any(result is False for result in results):
+            return False
+        if any(result is None for result in results):
             return None
-        for ftype in facility_types:
-            dist = self.nearest_facility_ft.get(ftype)
-            if dist is not None and dist < buffer_ft:
-                return False
         return True
+
+    def tiers_cleared(self, tiers: tuple[int, ...], facility_types: tuple[str, ...]) -> int:
+        return sum(1 for tier in tiers if self.clears_buffer(tier, facility_types) is True)
