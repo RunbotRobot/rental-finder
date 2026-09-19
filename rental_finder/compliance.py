@@ -1,38 +1,41 @@
 """Facility-proximity checks against real King County / WA state open data.
 
-Sources (verified live before wiring this up -- see PR description for how):
+What each facility type covers -- and doesn't. Every endpoint below was
+verified live before being wired in.
 
-- Schools (public AND private): King County GIS "School Sites" layer.
-- Parks: King County GIS's countywide "Parks in King County" polygon layer,
-  which covers city, county, and state-owned park sites throughout the
-  county (confirmed live: returns City of Seattle parks as well as county
-  and state ones, so no separate per-city source is needed).
-- Licensed childcare: WA DCYF's open dataset on data.wa.gov. King County GIS
-  does not publish a childcare layer at all.
+school     King County GIS "School Sites" layer. Public AND private K-12.
+           Per its own description it does NOT include preschools.
+park       King County GIS "Parks in King County" polygon layer: city,
+           county, and state park sites countywide (confirmed live to
+           include City of Seattle parks, so no separate city source).
+           Distances are measured to the park boundary, and a point inside
+           a park reports 0 ft.
+childcare  Three WA DCYF open datasets on data.wa.gov, merged:
+             - licensed child care CENTERS and school-age programs
+             - ECEAP (state-funded preschool) sites
+             - Head Start sites
+           NOT COVERED: licensed FAMILY HOME child care (in-home daycares).
+           DCYF does not publish those locations as open data -- they're
+           only in its interactive Child Care Check tool. There are far
+           more family homes than centers, and they're spread through
+           residential neighborhoods, so a listing that clears every check
+           here can still be next door to one. Check Child Care Check
+           (findchildcarewa.org) by hand for any address you're serious
+           about, and expect your CCO to.
 
-(An older, separately-hosted King County parks service at
-gismaps.kingcounty.gov was tried first and consistently returned a generic
-"Unable to perform query operation" error on every query -- including the
-simplest possible one -- suggesting it's currently broken server-side
-independent of anything this code sends it. The AGOL-hosted layer used here
-is a different, working service with better coverage anyway.)
+An older, separately-hosted King County parks service (gismaps.kingcounty.gov)
+was tried first and returned a generic "Unable to perform query operation"
+on every query, including the simplest possible one -- broken server-side.
+The AGOL-hosted layer used here is a different, working service.
 
-Two different strategies depending on how each source is queried:
-- Schools and parks are ArcGIS FeatureServers, queried live per listing at
-  the single largest configured buffer tier, then an exact distance in feet
-  is computed client-side from the returned geometry (point or polygon) --
-  one query covers every tier at once instead of one query per tier.
-- Childcare comes from a flat, small (~900 active King County providers)
-  dataset that's cheaper to fetch once per run and check locally than to
-  query remotely per listing.
+Query strategy: schools and parks are ArcGIS FeatureServers, queried once
+per listing at the largest configured buffer, with the exact distance then
+computed client-side from the returned geometry so every smaller tier is
+answered by the same query. The childcare datasets are small (~1,000 King
+County points combined) and are fetched once per run and checked locally.
 
-None of these datasets are guaranteed complete or current (a park or
-provider that opened recently might not show up yet). Treat every result
-here as a starting point for manual verification against a map -- never as
-a final answer, and NEVER as a substitute for your CCO's own judgment.
-
-A query that fails outright (network error, bad response) is recorded as
-*unverified* (None), not as a pass -- a failed check should never silently
+A query that fails (network error, bad response) leaves that facility type
+unchecked, which the report shows as unknown. A failed check must never
 read as "far enough away."
 """
 
@@ -44,7 +47,7 @@ import requests
 
 from .config import Settings
 from .geometry import distance_ft, distance_ft_to_esri_geometry
-from .models import Listing
+from .models import PRECISION_ADDRESS, Listing
 
 logger = logging.getLogger(__name__)
 
@@ -56,17 +59,40 @@ PARKS_URL = (
     "https://services.arcgis.com/Ej0PsM5Aw677QF1W/arcgis/rest/services/"
     "PARK_AREA_228/FeatureServer/0/query"
 )
-DCYF_CHILDCARE_URL = "https://data.wa.gov/resource/was8-3ni8.json"
 
-# Sentinel: the query failed, so the distance is genuinely unknown -- distinct
-# from a successful query that found nothing within the max tier (which does
-# mean "clear at every configured buffer").
-UNVERIFIED = object()
+# (url, params, lat_field, lon_field)
+CHILDCARE_SOURCES = (
+    (
+        "https://data.wa.gov/resource/was8-3ni8.json",  # licensed centers + school-age programs
+        {"physicalcounty": "KING", "latestoperatingstatus": "Active", "$limit": 5000},
+        "physciallatitude",  # sic -- the field really is misspelled upstream
+        "physicallongitude",
+    ),
+    (
+        "https://data.wa.gov/resource/f8ky-qzze.json",  # ECEAP sites
+        {"$where": "upper(physicalcounty)='KING'", "$limit": 5000},
+        "latitude",
+        "longitude",
+    ),
+    (
+        "https://data.wa.gov/resource/adad-395d.json",  # Head Start sites
+        {"$where": "upper(physicalcounty)='KING'", "$limit": 5000},
+        "latitude",
+        "longitude",
+    ),
+)
 
 
 def _arcgis_query(
-    url: str, lat: float, lon: float, max_distance_ft: float, out_fields: str, settings: Settings, session: requests.Session
-) -> tuple[bool, list[dict]]:
+    url: str,
+    lat: float,
+    lon: float,
+    max_distance_ft: float,
+    out_fields: str,
+    settings: Settings,
+    session: requests.Session,
+) -> list[dict] | None:
+    """Features within max_distance_ft, or None if the query failed."""
     params = {
         "geometry": f"{lon},{lat}",
         "geometryType": "esriGeometryPoint",
@@ -85,102 +111,80 @@ def _arcgis_query(
         data = resp.json()
         if "error" in data:
             logger.warning("ArcGIS query error from %s: %s", url, data["error"])
-            return False, []
-        return True, data.get("features", [])
+            return None
+        return data.get("features", [])
     except (requests.RequestException, ValueError) as exc:
         logger.warning("ArcGIS query failed for %s: %s", url, exc)
-        return False, []
+        return None
 
 
-def _nearest_distance_ft(features: list[dict], lat: float, lon: float) -> float | None:
-    best = None
-    for feature in features:
-        dist = distance_ft_to_esri_geometry(lat, lon, feature.get("geometry"))
-        if dist is not None and (best is None or dist < best):
-            best = dist
-    return best
+def _nearest_feature_ft(features: list[dict], lat: float, lon: float) -> float | None:
+    distances = [distance_ft_to_esri_geometry(lat, lon, f.get("geometry")) for f in features]
+    distances = [d for d in distances if d is not None]
+    return min(distances) if distances else None
 
 
-def _fetch_childcare_providers(settings: Settings, session: requests.Session) -> tuple[bool, list[dict]]:
-    params = {
-        "physicalcounty": "KING",
-        "latestoperatingstatus": "Active",
-        "$select": "providername,physciallatitude,physicallongitude",
-        "$limit": 5000,
-    }
-    try:
-        resp = session.get(DCYF_CHILDCARE_URL, params=params, timeout=settings.request_timeout_seconds)
-        resp.raise_for_status()
-        rows = resp.json()
-    except (requests.RequestException, ValueError) as exc:
-        logger.warning("Failed to fetch DCYF childcare data: %s", exc)
-        return False, []
-
-    providers = []
-    for row in rows:
+def fetch_childcare_points(settings: Settings, session: requests.Session) -> list[tuple[float, float]] | None:
+    """All King County childcare points from every source, or None if any
+    source failed -- a partial list would understate what's nearby."""
+    points: set[tuple[float, float]] = set()
+    for url, params, lat_field, lon_field in CHILDCARE_SOURCES:
         try:
-            providers.append(
-                {
-                    "name": row.get("providername"),
-                    "lat": float(row["physciallatitude"]),
-                    "lon": float(row["physicallongitude"]),
-                }
-            )
-        except (KeyError, TypeError, ValueError):
-            continue
-    return True, providers
+            resp = session.get(url, params=params, timeout=settings.request_timeout_seconds)
+            resp.raise_for_status()
+            rows = resp.json()
+        except (requests.RequestException, ValueError) as exc:
+            logger.warning("Failed to fetch childcare data from %s: %s", url, exc)
+            return None
+        added = 0
+        for row in rows:
+            try:
+                points.add((round(float(row[lat_field]), 6), round(float(row[lon_field]), 6)))
+                added += 1
+            except (KeyError, TypeError, ValueError):
+                continue
+        logger.info("childcare source %s: %d points", url.rsplit("/", 1)[-1], added)
+    return sorted(points)
 
 
-def _apply_result(listing: Listing, facility_type: str, nearest_ft, settings: Settings) -> None:
-    if nearest_ft is UNVERIFIED:
-        listing.nearest_facility_ft[facility_type] = None
-        listing.facility_clearance[facility_type] = {tier: None for tier in settings.buffer_tiers_ft}
-        return
-
-    listing.nearest_facility_ft[facility_type] = nearest_ft
-    if nearest_ft is None:
-        listing.facility_clearance[facility_type] = {tier: True for tier in settings.buffer_tiers_ft}
-    else:
-        listing.facility_clearance[facility_type] = {
-            tier: nearest_ft >= tier for tier in settings.buffer_tiers_ft
-        }
+def _nearest_point_ft(points: list[tuple[float, float]], lat: float, lon: float) -> float | None:
+    return min((distance_ft(lat, lon, plat, plon) for plat, plon in points), default=None)
 
 
 def annotate_distances(listings: list[Listing], settings: Settings, session: requests.Session) -> None:
-    """Mutates each listing's nearest_facility_ft / facility_clearance in place."""
+    """For each address-precision listing, fill nearest_facility_ft and
+    facility_checked for every configured facility type not already
+    checked (cached results are skipped)."""
     max_tier = max(settings.buffer_tiers_ft)
+    todo = [
+        l for l in listings
+        if l.location_precision == PRECISION_ADDRESS
+        and not all(l.facility_checked.get(t) for t in settings.facility_types)
+    ]
+    if not todo:
+        return
 
-    childcare_providers: list[dict] = []
-    childcare_ok = True
+    childcare_points = None
     if "childcare" in settings.facility_types:
-        childcare_ok, childcare_providers = _fetch_childcare_providers(settings, session)
+        childcare_points = fetch_childcare_points(settings, session)
 
-    for listing in listings:
-        if listing.latitude is None or listing.longitude is None:
-            for ftype in settings.facility_types:
-                _apply_result(listing, ftype, UNVERIFIED, settings)
+    for listing in todo:
+        lat, lon = listing.latitude, listing.longitude
+        if lat is None or lon is None:
             continue
 
-        lat, lon = listing.latitude, listing.longitude
+        if "school" in settings.facility_types and not listing.facility_checked.get("school"):
+            features = _arcgis_query(SCHOOLS_URL, lat, lon, max_tier, "NAME,ADDRESS", settings, session)
+            if features is not None:
+                listing.nearest_facility_ft["school"] = _nearest_feature_ft(features, lat, lon)
+                listing.facility_checked["school"] = True
 
-        if "school" in settings.facility_types:
-            ok, features = _arcgis_query(SCHOOLS_URL, lat, lon, max_tier, "NAME,ADDRESS", settings, session)
-            dist = _nearest_distance_ft(features, lat, lon) if ok else UNVERIFIED
-            _apply_result(listing, "school", dist, settings)
+        if "park" in settings.facility_types and not listing.facility_checked.get("park"):
+            features = _arcgis_query(PARKS_URL, lat, lon, max_tier, "SITENAME,OWNER", settings, session)
+            if features is not None:
+                listing.nearest_facility_ft["park"] = _nearest_feature_ft(features, lat, lon)
+                listing.facility_checked["park"] = True
 
-        if "park" in settings.facility_types:
-            ok, features = _arcgis_query(PARKS_URL, lat, lon, max_tier, "SITENAME,OWNER", settings, session)
-            dist = _nearest_distance_ft(features, lat, lon) if ok else UNVERIFIED
-            _apply_result(listing, "park", dist, settings)
-
-        if "childcare" in settings.facility_types:
-            if not childcare_ok:
-                dist = UNVERIFIED
-            else:
-                nearest = None
-                for provider in childcare_providers:
-                    d = distance_ft(lat, lon, provider["lat"], provider["lon"])
-                    if nearest is None or d < nearest:
-                        nearest = d
-                dist = nearest
-            _apply_result(listing, "childcare", dist, settings)
+        if childcare_points is not None and not listing.facility_checked.get("childcare"):
+            listing.nearest_facility_ft["childcare"] = _nearest_point_ft(childcare_points, lat, lon)
+            listing.facility_checked["childcare"] = True
