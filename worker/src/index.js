@@ -96,9 +96,11 @@ async function handleApi(request, env, path) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname.startsWith("/api/")) {
+    // Tolerate a WORKER_URL with a trailing slash ("//api/...") and trailing slashes generally.
+    const path = url.pathname.replace(/\/{2,}/g, "/").replace(/\/+$/, "") || "/";
+    if (path.startsWith("/api/")) {
       try {
-        return await handleApi(request, env, url.pathname);
+        return await handleApi(request, env, path);
       } catch (err) {
         return json({ error: err.message || "bad request" }, 400);
       }
