@@ -119,18 +119,17 @@ and stores your review state (starred/dismissed, notes, addresses you get
 from posters), and the Action feeds those addresses back into the next
 scan. Nothing is public — one shared token gates everything.
 
-**1. Worker** (`worker/`):
-
-```bash
-cd worker
-npx wrangler kv namespace create STATE        # paste the printed id into wrangler.toml
-openssl rand -hex 32                          # this is your API token; keep it
-npx wrangler secret put API_TOKEN             # paste the token
-npx wrangler deploy                           # prints the site URL
-```
+**1. Worker** (`worker/`) — no terminal needed. In the Cloudflare
+dashboard: Workers & Pages → Create → Import a repository → pick this
+repo, branch `main`, **root directory `worker`**, build command left
+default (`npx wrangler deploy`). It deploys on every push to `main`.
+`wrangler.toml` already names the KV namespace. Then under the Worker's
+Settings → Variables and Secrets add a secret `API_TOKEN` — a long random
+string (a password manager's generator is fine); keep it. (Or from a
+terminal: `cd worker && npx wrangler secret put API_TOKEN && npx wrangler deploy`.)
 
 **2. GitHub repo secrets** (Settings → Secrets and variables → Actions):
-`WORKER_URL` = the deployed URL with no trailing slash, `API_TOKEN` = the
+`WORKER_URL` = the Worker's URL with no trailing slash, `API_TOKEN` = the
 same token.
 
 **3. Run it once** from the Actions tab (`scan` → Run workflow); after that
