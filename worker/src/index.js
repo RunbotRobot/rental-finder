@@ -38,6 +38,19 @@ function csvCell(value) {
 }
 
 async function handleApi(request, env, path) {
+  // Unauthenticated on purpose: says whether the secret reached the runtime
+  // and how long it is, never what it is. Lets a mismatch be diagnosed
+  // without a terminal.
+  if (path === "/api/health" && request.method === "GET") {
+    const token = env.API_TOKEN;
+    return json({
+      ok: true,
+      token_configured: typeof token === "string" && token.length > 0,
+      token_length: typeof token === "string" ? token.length : 0,
+      token_has_whitespace: typeof token === "string" && /\s/.test(token),
+    });
+  }
+
   if (!authorized(request, env)) return json({ error: "unauthorized" }, 401);
 
   if (path === "/api/data") {

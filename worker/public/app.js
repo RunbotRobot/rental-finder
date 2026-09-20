@@ -34,7 +34,18 @@
     try {
       [data, state] = await Promise.all([api("/api/data"), api("/api/state")]);
     } catch (err) {
-      if (err.message === "unauthorized") { token = ""; try { localStorage.removeItem(TOKEN_KEY); } catch {} ; return showAuth("That token wasn't accepted."); }
+      if (err.message === "unauthorized") {
+        const typedLength = token.length;
+        token = ""; try { localStorage.removeItem(TOKEN_KEY); } catch {}
+        let detail = "";
+        try {
+          const h = await (await fetch("/api/health")).json();
+          detail = h.token_configured
+            ? ` The site's secret is ${h.token_length} characters${h.token_has_whitespace ? " and contains whitespace" : ""}; what you entered is ${typedLength}.`
+            : " The site has no API_TOKEN secret configured at all.";
+        } catch {}
+        return showAuth("That token wasn't accepted." + detail);
+      }
       $("#status").textContent = err.message === "no scan results yet" ? "No scan has run yet. Results appear after the first GitHub Action run." : `Couldn't load: ${err.message}`;
       return;
     }
