@@ -65,14 +65,40 @@ street address — shows as **unknown**, never as a pass.
 
 ## What it does NOT cover — read this
 
-**Licensed family home child care (in-home daycares) is not in any open
-dataset.** DCYF only exposes those locations through its interactive
-[Child Care Check](https://www.findchildcarewa.org/) tool. There are far
-more family homes than centers, and they're scattered through exactly the
-residential neighborhoods where affordable rentals are, so a listing that
-clears every check here can still be next door to one. **Look up every
-address you're serious about in Child Care Check by hand before it goes
-anywhere near your CCO** — and expect your CCO to do the same.
+Two categories of real, operating childcare are invisible to every check
+in this tool, for two different reasons:
+
+**1. Licensed family home child care (in-home daycares)** isn't in any open
+dataset. DCYF only exposes those locations through its interactive
+[Child Care Check](https://www.findchildcarewa.org/) tool. Look these up
+there by hand.
+
+**2. Parent cooperative preschools are exempt from DCYF licensing
+entirely** (WA law excuses parents providing reciprocal, non-commercial
+care from needing a license), so DCYF has no authority over them —
+**they're absent from Child Care Check too, not just from this tool.**
+This isn't theoretical: while testing, a candidate listing at 8500 20th Ave
+NE, Seattle came back clearing the childcare check at every tier down to
+1,000 ft. Wedgwood Cooperative Preschool, a real operating preschool, is
+828 feet away — and it appears in neither the DCYF dataset this tool
+queries nor, as far as we could determine, Child Care Check itself.
+
+Both categories are common in exactly the residential neighborhoods where
+affordable rentals are, so a listing that clears every check here can
+still be next to one. **For any address you're serious about: check Child
+Care Check by hand (it has family homes, but not co-ops), AND separately
+search an ordinary map for "preschool" and "daycare" near the address**
+(co-ops usually show up there as an ordinary business listing even though
+they're outside DCYF's system entirely). Do this before an address goes
+anywhere near your CCO — expect your CCO to do the same, and expect them
+to find things this tool can't.
+
+A related caution: if you use an AI chatbot to sanity-check an address the
+way you'd use this tool, verify anything it tells you against a real
+source before trusting it. One check during testing confidently named a
+specific nonexistent address for a real nearby preschool — right
+conclusion, fabricated evidence. Coordinates and distances from a chatbot
+with no tool behind them are guesses dressed up as facts.
 
 Other things a CCO might count that this tool doesn't measure: school bus
 stops, libraries, community centers, pools, churches with youth programs,

@@ -70,7 +70,7 @@
     }
     const when = new Date(data.generated_at);
     const newCount = data.listings.filter((l) => l.new).length;
-    $("#meta").textContent = `${data.listings.length} listings in ${data.settings.county} at or under $${fmt(data.settings.max_rent)} · ${newCount} new · scanned ${when.toLocaleString()}. Tiles count clean listings with a street address that clear every facility type. Family-home daycares aren't in any dataset — check Child Care Check by hand.`;
+    $("#meta").textContent = `${data.listings.length} listings in ${data.settings.county} at or under $${fmt(data.settings.max_rent)} · ${newCount} new · scanned ${when.toLocaleString()}. Tiles count clean listings with a street address that clear every facility type. Family-home daycares and co-op preschools aren't in ANY dataset this checks, and co-ops aren't in Child Care Check either — search a map for "preschool"/"daycare" near any address you're serious about.`;
   }
 
   function renderTierOptions() {

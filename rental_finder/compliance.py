@@ -14,14 +14,36 @@ childcare  Three WA DCYF open datasets on data.wa.gov, merged:
              - licensed child care CENTERS and school-age programs
              - ECEAP (state-funded preschool) sites
              - Head Start sites
-           NOT COVERED: licensed FAMILY HOME child care (in-home daycares).
-           DCYF does not publish those locations as open data -- they're
-           only in its interactive Child Care Check tool. There are far
-           more family homes than centers, and they're spread through
-           residential neighborhoods, so a listing that clears every check
-           here can still be next door to one. Check Child Care Check
-           (findchildcarewa.org) by hand for any address you're serious
-           about, and expect your CCO to.
+           NOT COVERED, and not in Child Care Check either:
+
+           1. Licensed FAMILY HOME child care (in-home daycares). DCYF
+              doesn't publish those locations as open data -- they're only
+              in its interactive Child Care Check tool. Look those up by
+              hand (findchildcarewa.org).
+
+           2. Parent COOPERATIVE preschools. These are explicitly exempt
+              from DCYF licensing under WA law (parents providing reciprocal,
+              non-commercial care), so DCYF has no authority over them and
+              they are absent from BOTH this dataset AND Child Care Check --
+              hand-checking Child Care Check will not find one. Confirmed
+              concretely: Wedgwood Cooperative Preschool (8208 18th Ave NE,
+              Seattle) does not appear in the was8-3ni8 dataset under any
+              name or address search, despite being a real, currently
+              operating preschool. A candidate listing 828 ft away was
+              reported by this tool as clearing the childcare check at every
+              tier down to 1000 ft, when the real nearest distance to an
+              actual preschool was under 1000 ft.
+
+           There are far more family homes and co-ops than centers, spread
+           through the same residential neighborhoods as affordable
+           rentals, so a listing that clears every check here can still be
+           next to one of either. For any address you're serious about:
+           check Child Care Check by hand (catches nothing for co-ops, but
+           is the only source for family homes), AND separately search an
+           ordinary map for "preschool" and "daycare" near the address
+           (co-ops usually have an ordinary business listing there even
+           though they're outside DCYF's system). Expect your CCO to do
+           the same.
 
 An older, separately-hosted King County parks service (gismaps.kingcounty.gov)
 was tried first and returned a generic "Unable to perform query operation"
