@@ -205,8 +205,9 @@ def main() -> None:
     parser.add_argument(
         "--send-emails",
         action="store_true",
-        help="Actually send outreach emails for listings that clear the gate. Off by default, "
-        "even with Gmail credentials configured -- this is the one flag a plain local run should never pass.",
+        help="Actually send outreach emails via this code path, for listings that clear the gate. "
+        "The scheduled Action never passes this -- outreach is drafted and sent by a Claude session "
+        "instead (see README). This flag exists for local testing of the Gmail-SMTP send path only.",
     )
     parser.add_argument("--auto-send-buffer-ft", type=int, default=DEFAULT_SETTINGS.auto_send_buffer_ft)
     parser.add_argument(

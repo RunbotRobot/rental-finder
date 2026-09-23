@@ -1,12 +1,21 @@
-"""The auto-send gate.
+"""The outreach eligibility gate.
 
 Every rule here is a deterministic, auditable check -- never a model's
-self-reported confidence -- because the action being gated (an email you
+self-reported confidence -- because the thing being gated (an email you
 can't unsend, disclosing something consequential, to a stranger) is not
-something to trust to "the AI seemed sure." A listing auto-sends only when
-every one of these holds; anything else gets a drafted email attached
-(for you to review or send yourself, e.g. via Craigslist's own reply box)
-and a stated reason it wasn't sent automatically -- never a silent skip.
+something to trust to "the AI seemed sure."
+
+This module never sends email itself unless `settings.send_emails` is set
+(only ever true for a local, deliberate test run -- see mailer.py and
+main.py; the scheduled GitHub Action never sets it). In normal operation, a
+listing that clears every rule below is marked "ready to send" and left
+there: a separate Claude session, woken on a recurring check-in, reads
+those through the Worker's narrow `AGENT_TOKEN`-gated endpoint, drafts each
+email itself (real per-listing judgment, not a template), and sends it
+directly -- see README's "Outreach and auto-send". Anything that doesn't
+clear every rule gets a drafted email attached anyway (for you to review or
+send yourself, e.g. via Craigslist's own reply box) and a stated reason it
+isn't gate-eligible -- never a silent skip.
 """
 
 from __future__ import annotations
