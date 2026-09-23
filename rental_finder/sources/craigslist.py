@@ -137,6 +137,14 @@ def parse_detail_page(html: str, listing: Listing) -> None:
             listing.bedrooms = int(match.group(1))
             break
 
+    # Structured attribute badges ("private room", "no private bath", "in-law", ...)
+    # -- each rendered as its own <div class="attr"><span class="valu"><a>label</a>.
+    listing.room_attrs = [
+        a.get_text(strip=True).lower()
+        for a in soup.select(".attrgroup .attr .valu a")
+        if a.get_text(strip=True)
+    ]
+
     map_address_el = soup.select_one(".mapaddress")
     if map_address_el is not None:
         listing.map_address = map_address_el.get_text(" ", strip=True) or None

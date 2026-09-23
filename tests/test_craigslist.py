@@ -46,6 +46,26 @@ def test_parse_detail_page():
     assert listing.bedrooms == 0
     assert listing.map_address == "2619 5th Avenue"
     assert (listing.pin_lat, listing.pin_lon, listing.pin_accuracy) == (47.6151, -122.3447, 5)
+    assert listing.room_attrs == []  # this fixture's attrgroup has no .attr/.valu/a badges
+
+
+# Trimmed from a live "rooms & shares" detail page.
+ROOM_SHARE_DETAIL_PAGE = """
+<html><body>
+<div class="attrgroup">
+  <div class="attr"><span class="valu"><a href="?private_room=1">private room</a></span></div>
+  <div class="attr"><span class="valu"><a href="?housing_type=1">apartment</a></span></div>
+  <div class="attr"><span class="valu"><a href="?private_bath=0">no private bath</a></span></div>
+</div>
+<section id="postingbody">A room in a shared house near campus.</section>
+</body></html>
+"""
+
+
+def test_parse_detail_page_captures_room_attrs():
+    listing = Listing(source="craigslist", source_id="x", url="u", title="t", price=1.0, category="roo", location_text=None)
+    parse_detail_page(ROOM_SHARE_DETAIL_PAGE, listing)
+    assert listing.room_attrs == ["private room", "apartment", "no private bath"]
 
 
 def test_parse_detail_page_without_map_or_body():

@@ -50,25 +50,35 @@ result is a starting point for that conversation, not an answer.
    weighted signals that sort the junk to the bottom; they never delete
    anything. RentCast listings, from an authenticated structured provider,
    always score 0 — the Craigslist-tuned heuristics don't apply to them.
-4. Geocodes Craigslist listings that have a **street address**, via the US
+4. Drops Craigslist "rooms & shares" listings that are an actual private
+   bedroom in someone else's occupied home — Craigslist's own "no private
+   bath" attribute, or language like "roommate"/"shared kitchen" — while
+   keeping mother-in-law suites, ADUs, and studios that get posted in that
+   same category despite being self-contained. See `room_share_filter.py`;
+   like the spam flags, this is a signal-based judgment call, deliberately
+   biased toward keeping a listing when it's ambiguous (an explicit
+   self-contained signal like "ADU" or "private entrance" always wins over
+   an unclear or absent shared-housing signal) rather than risking a real
+   self-contained unit getting silently dropped.
+5. Geocodes Craigslist listings that have a **street address**, via the US
    Census geocoder (with an OpenStreetMap fallback that's only accepted
    when it resolves to a specific building). Listings that only give a
    neighborhood or city are *not* geocoded to a centroid and then measured
    from — they're reported as "unknown" until you get the address from
    the poster (see **Address overrides** below).
-5. Drops listings confirmed to be outside King County (the search radius
+6. Drops listings confirmed to be outside King County (the search radius
    reaches into Pierce and Snohomish).
-6. Measures distance from each located listing to the nearest:
+7. Measures distance from each located listing to the nearest:
    - **school** — King County GIS "School Sites" (public **and** private)
    - **park** — King County GIS countywide parks layer (city, county, and
      state park sites, including Seattle's), measured to the park boundary
    - **childcare** — WA DCYF open data: licensed child care *centers* and
      school-age programs, ECEAP preschool sites, and Head Start sites
-7. Drafts an outreach email for every listing once your applicant profile
+8. Drafts an outreach email for every listing once your applicant profile
    is complete (see **Outreach and auto-send**), and — only for listings
    that clear every automated check — either sends it or marks it ready to
    send, depending on the `--send-emails` flag.
-8. Writes `candidates.csv`, ranked: no spam flags first, then by how many
+9. Writes `candidates.csv`, ranked: no spam flags first, then by how many
    buffer tiers the listing clears, then cheapest first. Prints the
    per-tier survivor counts.
 

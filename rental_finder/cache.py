@@ -41,6 +41,7 @@ _RESTORE_FIELDS = (
     "bedrooms",
     "description",
     "map_address",
+    "room_attrs",
     "details_fetched",
     "pin_lat",
     "pin_lon",

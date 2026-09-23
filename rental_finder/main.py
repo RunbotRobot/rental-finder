@@ -4,8 +4,10 @@
 
 Pipeline: fetch search results (Craigslist + RentCast) -> drop over-budget
 -> restore cache -> apply address overrides -> fetch detail pages (capped)
--> spam flags -> geocode/locate -> drop out-of-county -> distance checks ->
-draft + (maybe) send outreach emails -> save cache -> CSV + JSON + summary.
+-> spam flags -> drop occupied shared rooms (keeping mother-in-law
+suites/ADUs/studios) -> geocode/locate -> drop out-of-county -> distance
+checks -> draft + (maybe) send outreach emails -> save cache -> CSV + JSON
++ summary.
 """
 
 from __future__ import annotations
@@ -28,6 +30,7 @@ from .config import DEFAULT_SETTINGS, Settings
 from .geocode import county_for_point, geocode_address, has_street_number, is_plausible
 from .models import PRECISION_ADDRESS, PRECISION_AREA, PRECISION_NONE, Listing
 from .report import summarize, to_json, write_csv
+from .room_share_filter import is_occupied_shared_room
 from .sources import craigslist, rentcast
 from .spam_filter import flag_listings
 
@@ -153,6 +156,14 @@ def run(
         craigslist.fetch_details(todo, settings, session)
 
     flag_listings(listings)
+
+    shared_room_ids = {l.source_id for l in listings if is_occupied_shared_room(l)}
+    if shared_room_ids:
+        listings = [l for l in listings if l.source_id not in shared_room_ids]
+        logger.info(
+            "Dropping %d occupied shared-room listing(s) (mother-in-law suites/ADUs/studios kept -- see room_share_filter.py)",
+            len(shared_room_ids),
+        )
 
     geocoded_from: dict[str, str | None] = {}
     for listing in listings:

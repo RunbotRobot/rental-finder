@@ -47,6 +47,14 @@ class Listing:
     override_address: str | None = None  # from address_overrides.csv; always wins
     details_fetched: bool = False
 
+    # Craigslist's own structured attribute badges from the detail page
+    # (e.g. "private room", "no private bath", "in-law"), lowercased. Only
+    # meaningful for category "roo" -- see room_share_filter.py, which uses
+    # these (a much more reliable signal than free-text guessing) plus the
+    # description to tell an actual shared room from a self-contained
+    # mother-in-law suite/ADU/studio that happened to get posted there.
+    room_attrs: list[str] = field(default_factory=list)
+
     # Craigslist's own map pin. Verified live to be coarse (neighborhood-ish)
     # for most listings, occasionally plain wrong, so it's only used for the
     # county check -- never for buffer distances.

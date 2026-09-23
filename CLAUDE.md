@@ -12,6 +12,16 @@
   cooperative preschools are exempt from DCYF licensing entirely (absent
   from Child Care Check too, not just this tool). Don't claim coverage for
   either anywhere.
+- `room_share_filter.py` drops Craigslist "rooms & shares" listings that
+  are an actual occupied shared room, while keeping mother-in-law
+  suites/ADUs/studios that get posted in that category anyway. Same
+  "uncertain means keep" bias as the county filter: only exclude on a real
+  signal (Craigslist's own "no private bath"/"shared room" attribute, or
+  explicit roommate/shared-kitchen language), and an explicit
+  self-contained signal always overrides an ambiguous or absent
+  shared-housing one. If you touch this, keep that asymmetry -- the owner
+  asked for this specifically to stop seeing occupied-room listings, not to
+  risk losing a real self-contained option to an over-eager keyword match.
 - Outreach *eligibility* (`outreach.py`) is gated by deterministic,
   auditable rules only — never a model's self-reported confidence. A
   listing is only ever marked "ready to send" (RentCast listings alone;
