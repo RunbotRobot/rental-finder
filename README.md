@@ -126,7 +126,7 @@ turning it on — the design choices here were deliberate and matter.
 can't exercise judgment about whether an email reads naturally, so this
 project splits the two: a deterministic, auditable gate (`outreach.py`)
 decides *which* listings are safe to contact automatically, and a Claude
-session — woken on a recurring check-in, not a line of this codebase —
+session — asked to check in by you, not a line of this codebase —
 personally writes and sends the email for each one. A listing is marked
 **"ready to send"** only when *every one* of these is true —
 
@@ -150,20 +150,24 @@ personally writes and sends the email for each one. A listing is marked
 Anything that fails even one of these gets a drafted email anyway, marked
 with the specific reason it isn't gate-eligible, instead of a silent skip.
 
-**Who actually sends it.** A Claude Code session reads eligible listings
-through a narrow, read-mostly `AGENT_TOKEN` (see Setup below — deliberately
-*not* the same token the site uses, so if it were ever exposed it can't
-touch your review state, your profile, or the raw scan data, only read
-eligible listings and mark one as contacted), writes each email itself —
-real per-listing phrasing, not a template, dropping irrelevant profile
-fields rather than mechanically inserting them — and sends it through the
-connected Gmail account. **This is intentionally session-bound**: it only
-runs while that Claude session is active, with no fixed schedule guarantee
-the way the GitHub Action has. If the session ends, outreach simply pauses
-— eligible listings stay queued and nothing is lost, but nothing sends
-either until a session resumes checking. This trade-off (occasionally
-paused, vs. always-on but template-written) was a deliberate choice over
-having the Action itself call an LLM API to draft and send unattended.
+**Who actually sends it, and when.** This runs when you ask for it, not on
+a schedule. Message a Claude Code session in this repo (any time — there's
+no fixed cadence) something like "check for outreach candidates." It reads
+eligible listings through a narrow, read-mostly `AGENT_TOKEN` (see Setup
+below — deliberately *not* the same token the site uses, so if it were
+ever exposed it can't touch your review state, your profile, or the raw
+scan data, only read eligible listings and mark one as contacted), writes
+each email itself — real per-listing phrasing, not a template, dropping
+irrelevant profile fields rather than mechanically inserting them — and
+sends it directly through the connected Gmail account, no draft-then-
+approve step. An unattended, recurring version of this (a session waking
+itself on a timer, indefinitely, to send real email with no one present)
+was tried first and refused by the coding environment's own safety
+controls, independent of any setting in this repo — that's a reasonable
+line to hold given what's being automated, so the fallback is manual: you
+decide when a check-in happens, which also means nothing gets sent at a
+moment you didn't choose to trigger. Eligible listings simply queue up
+("ready to send" on the site) until you ask.
 
 The Gmail SMTP path (`mailer.py`, the `--send-emails` flag) still exists
 in the code but is no longer used by the live flow — it's kept for local
@@ -211,10 +215,10 @@ a guess from this README or from any AI chatbot.
 - **Agent access** (needed for a Claude session to draft/send at all): in
   the Cloudflare dashboard, add a second Worker secret `AGENT_TOKEN` — a
   different long random string from `API_TOKEN`, not shared with GitHub.
-  A Claude Code session doing outreach check-ins holds this token for the
-  life of that session, since it needs to call `/api/agent/candidates`
-  and `/api/emailed` repeatedly; that's the reason it's a separate, narrow
-  credential rather than the site's full-access one.
+  A Claude Code session doing an outreach check-in holds this token for
+  the life of that session, since it calls `/api/agent/candidates` and
+  `/api/emailed`; that's the reason it's a separate, narrow credential
+  rather than the site's full-access one.
 - **Gmail sending**: no setup needed for the live flow — a Claude session
   sends through its already-connected Gmail integration. The
   `GMAIL_ADDRESS` / `GMAIL_APP_PASSWORD` secrets and the App Password flow

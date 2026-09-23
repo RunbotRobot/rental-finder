@@ -20,18 +20,25 @@
 - Outreach *drafting and sending* is deliberately NOT done by
   `email_draft.py`'s template for the live flow — the owner found the
   templated output choppy (raw profile-field text slotted into fixed
-  sentences, e.g. a literal "around When available"). A Claude session,
-  woken on a recurring check-in, reads eligible listings via the Worker's
-  `AGENT_TOKEN`-gated `/api/agent/candidates` endpoint, personally writes
-  each email with real per-listing judgment, and sends it via its
-  connected Gmail integration directly (no draft-then-approve step — the
-  owner explicitly chose immediate sending). `email_draft.py`/`mailer.py`
-  still exist for the Craigslist manual-copy draft and for local testing
-  of the SMTP path, but are not part of the live send path. If you are the
-  session doing these check-ins: keep drafting real per-listing prose
-  (skip irrelevant profile fields, phrase things naturally), never
-  reintroduce template-based auto-send as the live mechanism without the
-  owner asking for it back.
+  sentences, e.g. a literal "around When available"). Instead, a Claude
+  session reads eligible listings via the Worker's `AGENT_TOKEN`-gated
+  `/api/agent/candidates` endpoint, personally writes each email with real
+  per-listing judgment, and sends it via its connected Gmail integration
+  directly (no draft-then-approve step — the owner explicitly chose
+  immediate sending). **This runs only when the owner pings a session and
+  asks for a check-in — not on a recurring schedule.** An unattended,
+  self-rewaking version was tried and refused by the coding environment's
+  own safety controls (an autonomous job that repeatedly sends real email
+  with no one present, even with the owner's prior sign-off on immediate
+  sending, isn't something to force through); manual triggering is the
+  accepted fallback, not a placeholder for a future recurring version — don't
+  re-attempt scheduling this without the owner asking for it back.
+  `email_draft.py`/`mailer.py` still exist for the Craigslist manual-copy
+  draft and for local testing of the SMTP path, but are not part of the
+  live send path. If you are the session doing a check-in: keep drafting
+  real per-listing prose (skip irrelevant profile fields, phrase things
+  naturally), and never reintroduce template-based auto-send as the live
+  mechanism without the owner asking for it back.
 - The disclosure paragraph in an outreach email is the applicant's own
   words from their profile, verbatim, regardless of who or what drafts the
   rest of the email. Never draft, edit, or suggest that paragraph, and
