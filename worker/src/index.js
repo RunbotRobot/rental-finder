@@ -16,10 +16,29 @@
 //   chat session is a much smaller exposure than the full token would be):
 //     GET  /api/agent/candidates   listings ready for outreach, plus the
 //                                  profile (read-only, bundled in so the
-//                                  agent never needs a second call)
+//                                  agent never needs a second call). Two
+//                                  kinds, told apart by each entry's
+//                                  `action` field:
+//                                    "send"  -- RentCast, gate-eligible; the
+//                                               agent drafts AND sends.
+//                                    "draft" -- Craigslist, eligible except
+//                                               for having no automatable
+//                                               contact; the agent drafts a
+//                                               reply-box-sized message and
+//                                               leaves it for you to paste
+//                                               into Craigslist's own reply
+//                                               flow yourself.
 //
 //   Either token:
 //     POST /api/emailed         body: array of ids to mark emailed just now
+//     POST /api/agent/draft     body: {id, subject, body}. Saves a
+//                               personally-written draft for one listing,
+//                               for a "draft"-kind candidate above. Can only
+//                               write draft_subject/draft_body/drafted_at --
+//                               not status, note, address, or emailed, which
+//                               stay full-token-only (or the site's own
+//                               buttons) so this narrow token can't touch
+//                               your review state.
 //
 // State is one KV value ("state") holding a JSON object. It's a few hundred
 // listings at most, so a single document is simpler than a key per listing.
@@ -76,20 +95,58 @@ async function handleApi(request, env, path) {
   const scope = tokenScope(request, env);
   if (!scope) return json({ error: "unauthorized" }, 401);
 
+  // Craigslist has no scriptable send target, so a Craigslist listing can
+  // never be auto-sent -- but it can still be personally drafted for you to
+  // paste into Craigslist's own reply box. This is Craigslist's own limit on
+  // that box, not this project's -- kept here as a single source of truth
+  // and mirrored in public/app.js's character counter. Verify it still
+  // matches what Craigslist actually shows you; it's an estimate, not
+  // something this tool has ever gotten to measure against a real send.
+  const CRAIGSLIST_BODY_LIMIT = 4000;
+
   if (path === "/api/agent/candidates" && request.method === "GET") {
     const raw = await env.STATE.get("data", "json");
     if (!raw) return json({ error: "no scan results yet" }, 404);
     const state = await readState(env);
-    const candidates = (raw.listings || []).filter(
-      (l) => l.outreach_result === "ready to send" && !state[l.id]?.emailed
-    );
+    const sendReady = (raw.listings || [])
+      .filter((l) => l.outreach_result === "ready to send" && !state[l.id]?.emailed)
+      .map((l) => ({ ...l, action: "send" }));
+    const draftReady = (raw.listings || [])
+      .filter(
+        (l) =>
+          l.source === "craigslist" &&
+          l.outreach_result === "no automatable contact (Craigslist has no real send address)" &&
+          !state[l.id]?.emailed &&
+          !state[l.id]?.draft_body
+      )
+      .map((l) => ({ ...l, action: "draft" }));
     const profile = (await env.STATE.get("profile", "json")) || {};
-    return json({ profile, candidates });
+    return json({ profile, craigslist_body_limit: CRAIGSLIST_BODY_LIMIT, candidates: [...sendReady, ...draftReady] });
+  }
+
+  if (path === "/api/agent/draft" && request.method === "POST") {
+    const body = await request.json();
+    const idMatch = typeof body.id === "string" && body.id.match(/^[A-Za-z0-9_-]{1,64}$/);
+    if (!idMatch || typeof body.subject !== "string" || typeof body.body !== "string") {
+      return json({ error: "expected {id, subject, body}" }, 400);
+    }
+    if (body.body.length > CRAIGSLIST_BODY_LIMIT) {
+      return json({ error: `body exceeds the ${CRAIGSLIST_BODY_LIMIT}-character estimate for Craigslist's reply box` }, 400);
+    }
+    const state = await readState(env);
+    const entry = { ...(state[body.id] || {}) };
+    entry.draft_subject = body.subject.slice(0, 200);
+    entry.draft_body = body.body;
+    entry.drafted_at = new Date().toISOString();
+    entry.updated = entry.drafted_at;
+    state[body.id] = entry;
+    await env.STATE.put("state", JSON.stringify(state));
+    return json({ ok: true });
   }
 
   if (scope !== "full") {
-    // Everything below here is full-token-only except /api/emailed POST,
-    // handled inside its own block further down.
+    // Everything below here is full-token-only except /api/emailed POST and
+    // /api/agent/draft POST, each handled inside its own block above/below.
     if (!(path === "/api/emailed" && request.method === "POST")) {
       return json({ error: "unauthorized" }, 401);
     }

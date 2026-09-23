@@ -105,5 +105,14 @@ def fetch_listings(settings: Settings, session: requests.Session) -> tuple[bool,
         listing = _to_listing(item)
         if listing is not None:
             listings.append(listing)
-    logger.info("RentCast: %d listings", len(listings))
+
+    with_agent = sum(1 for item in items if (item.get("listingAgent") or {}).get("email"))
+    with_office = sum(1 for item in items if (item.get("listingOffice") or {}).get("email"))
+    with_contact = sum(1 for listing in listings if listing.contact_email)
+    logger.info(
+        "RentCast: %d listings (%d with a listingAgent email, %d with a listingOffice email, "
+        "%d with a usable contact overall). A low count here isn't necessarily a bug -- "
+        "RentCast's own docs say these fields are omitted on some listings.",
+        len(listings), with_agent, with_office, with_contact,
+    )
     return True, listings

@@ -131,12 +131,11 @@ personally writes and sends the email for each one. A listing is marked
 **"ready to send"** only when *every one* of these is true —
 
 - the listing came from **RentCast**, never Craigslist. Craigslist has no
-  real, stable contact address — only its own JS "reply" relay, which
-  usually requires phone verification and can't be scripted without
-  automating a live, logged-in browser session. Craigslist listings always
-  get a drafted email instead, for you to paste into Craigslist's own
-  reply box yourself — see the "view draft" / "copy draft" buttons on the
-  site.
+  real, stable contact address — only its own JS "reply" widget, which for
+  housing posts is usually an in-page message box, not something a script
+  can submit on your behalf. A Craigslist listing that clears every other
+  rule below still gets drafted (see **Craigslist outreach** below for how)
+  — it's only the *sending* that's never automatic for this source.
 - it has a real contact email from the listing provider
 - it has a verified street address (never a geocoded guess)
 - it has zero spam flags
@@ -153,26 +152,65 @@ with the specific reason it isn't gate-eligible, instead of a silent skip.
 **Who actually sends it, and when.** This runs when you ask for it, not on
 a schedule. Message a Claude Code session in this repo (any time — there's
 no fixed cadence) something like "check for outreach candidates." It reads
-eligible listings through a narrow, read-mostly `AGENT_TOKEN` (see Setup
-below — deliberately *not* the same token the site uses, so if it were
-ever exposed it can't touch your review state, your profile, or the raw
-scan data, only read eligible listings and mark one as contacted), writes
-each email itself — real per-listing phrasing, not a template, dropping
-irrelevant profile fields rather than mechanically inserting them — and
-sends it directly through the connected Gmail account, no draft-then-
-approve step. An unattended, recurring version of this (a session waking
+candidates through a narrow, read-mostly `AGENT_TOKEN` (see Setup below —
+deliberately *not* the same token the site uses, so if it were ever
+exposed it can't touch your review state, your profile, or the raw scan
+data), and handles each one of two ways:
+
+- **RentCast, gate-eligible** ("ready to send"): writes the email itself —
+  real per-listing phrasing, not a template, dropping irrelevant profile
+  fields rather than mechanically inserting them — and sends it directly
+  through the connected Gmail account, no draft-then-approve step.
+- **Craigslist, eligible except for having no automatable contact**: writes
+  a message sized for Craigslist's reply box and saves it back to the site
+  (same real-judgment drafting, no template) for you to send yourself —
+  see **Craigslist outreach** below. It never touches Craigslist itself;
+  there's nothing here that could.
+
+An unattended, recurring version of the sending half (a session waking
 itself on a timer, indefinitely, to send real email with no one present)
 was tried first and refused by the coding environment's own safety
 controls, independent of any setting in this repo — that's a reasonable
 line to hold given what's being automated, so the fallback is manual: you
 decide when a check-in happens, which also means nothing gets sent at a
 moment you didn't choose to trigger. Eligible listings simply queue up
-("ready to send" on the site) until you ask.
+("ready to send" on the site, or with a stale/no draft for Craigslist)
+until you ask.
 
 The Gmail SMTP path (`mailer.py`, the `--send-emails` flag) still exists
 in the code but is no longer used by the live flow — it's kept for local
 testing of that mechanism only. The scheduled Action never sends email; it
 only computes and publishes which listings are eligible.
+
+**Craigslist outreach.** Every Craigslist listing with a complete profile
+gets a draft the moment the scan runs — from `email_draft.py`'s plain
+template, so it's there immediately, before any check-in ever happens.
+That template only ever inserts data this tool has verified (address,
+price, bedrooms) plus your own profile text unchanged, so it's safe but
+sometimes reads mechanically (it includes your whole employment/income
+text as its own paragraph, verbatim, whether or not it's relevant to this
+particular listing — a template can't make that judgment call). A Claude
+check-in replaces it with a personally-written one when it gets to that
+listing; the site always shows whichever is newer, labeled "personally
+drafted" or "auto-drafted template" so you know which you're looking at.
+Either way, on each listing's card:
+
+- **view draft** shows the message (Craigslist's reply box has no subject
+  line, so only the body matters here) and a running character count
+  against ~4,000 characters — Craigslist's own limit on that box, not this
+  project's, and an estimate this tool has never had the chance to measure
+  against a real send. If your box shows a different limit, or no counter
+  at all, trust what's actually in front of you over this number.
+- **copy draft** copies just that body, ready to paste.
+- **reply on Craigslist** opens the listing's own page in a new tab. It
+  can't jump straight to the reply box itself — that widget has no
+  separate URL, it's rendered by Craigslist's own JS on top of the same
+  page — so you'll still click "reply" there yourself.
+- **mark replied** flips the listing to the same "✓ emailed" state RentCast
+  listings get after a real send. This is the one step nothing here can do
+  for you (there's no way to script Craigslist's box), so it's a manual
+  button rather than something a check-in sets on its own — a check-in
+  will draft a Craigslist listing again next time if you never mark it.
 
 **The disclosure paragraph is yours, not this tool's — and not the
 drafting session's either.** Fill in your profile once on the site (✎
@@ -216,9 +254,10 @@ a guess from this README or from any AI chatbot.
   the Cloudflare dashboard, add a second Worker secret `AGENT_TOKEN` — a
   different long random string from `API_TOKEN`, not shared with GitHub.
   A Claude Code session doing an outreach check-in holds this token for
-  the life of that session, since it calls `/api/agent/candidates` and
-  `/api/emailed`; that's the reason it's a separate, narrow credential
-  rather than the site's full-access one.
+  the life of that session, since it calls `/api/agent/candidates`,
+  `/api/agent/draft`, and `/api/emailed`; that's the reason it's a
+  separate, narrow credential rather than the site's full-access one --
+  it still can't touch review state, the profile editor, or raw scan data.
 - **Gmail sending**: no setup needed for the live flow — a Claude session
   sends through its already-connected Gmail integration. The
   `GMAIL_ADDRESS` / `GMAIL_APP_PASSWORD` secrets and the App Password flow

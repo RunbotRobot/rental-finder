@@ -37,6 +37,30 @@ def test_round_trip(tmp_path):
     assert restored.geocoded_from(fresh) == "123 Main St, Kent, WA"
 
 
+def test_restore_never_overwrites_a_fresh_fetch_with_a_stale_cached_value(tmp_path):
+    """Regression test: contact_email (and the other reconstruction-only
+    fields) must come from THIS run's fetch when the listing was fetched
+    this run, never from an old cache entry -- otherwise a listing whose
+    contact info was missing (or a price that later changed) the first time
+    it was ever seen would stay frozen at that stale value forever, even
+    once a fresh fetch has better data."""
+    cache = Cache(tmp_path / "cache.json")
+    first_seen = Listing(
+        source="rentcast", source_id="rc1", url="u", title="t", price=1000.0,
+        category="Apartment", location_text="1 Main St",
+    )
+    cache.store(first_seen, None, date(2026, 9, 20))
+
+    later_fetch = Listing(
+        source="rentcast", source_id="rc1", url="u", title="t", price=1200.0,
+        category="Apartment", location_text="1 Main St",
+        contact_name="Jane Agent", contact_email="jane@example.com",
+    )
+    cache.restore(later_fetch)
+    assert later_fetch.contact_email == "jane@example.com"
+    assert later_fetch.price == 1200.0
+
+
 def test_unseen_listing_is_new(tmp_path):
     cache = Cache(tmp_path / "cache.json")
     listing = _listing()

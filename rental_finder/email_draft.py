@@ -50,7 +50,7 @@ def build_draft(listing: Listing, profile: ApplicantProfile) -> tuple[str, str] 
     if profile.income_text.strip():
         lines += [profile.income_text.strip(), ""]
     if profile.move_in_date.strip():
-        lines += [f"I'm hoping to move in around {profile.move_in_date.strip()}.", ""]
+        lines += [f"Move-in timeline: {profile.move_in_date.strip()}.", ""]
 
     lines += [profile.disclosure_text.strip(), ""]
 
