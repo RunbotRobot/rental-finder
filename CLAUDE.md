@@ -67,6 +67,34 @@
   check-in: keep drafting real per-listing prose (skip irrelevant profile
   fields, phrase things naturally), and never reintroduce template-based
   auto-send as the live mechanism without the owner asking for it back.
+- Before drafting each candidate in a check-in, personally read its
+  category, attributes, price, and description together for internal
+  consistency -- that's exactly the kind of judgment `spam_filter.py`'s
+  regexes can't apply, and it's why a human/agent review layer on top of
+  the deterministic gate is worth having. Concretely: a Craigslist "rooms &
+  shares" listing with a "private room" attribute and a whole-house
+  description (fireplace, garden, garage) is normal, not suspicious --
+  Craigslist's own "$620 / 2br" title format states the ASKING price
+  alongside the UNIT's total bedroom count regardless of whether a whole
+  unit or one room is being rented, so the price is for the room, not the
+  house; `_price_floor_by_category()` already compares it against other
+  room prices for exactly this reason (see its docstring). Skip and flag to
+  the owner only for a genuine inconsistency (e.g. the described property
+  type contradicts the category in a way no normal posting convention
+  explains, or specifics in the text contradict each other). Do NOT try to
+  cross-verify a listing's price against Zillow/Trulia/HotPads/etc: they're
+  far more aggressive against scraping than Craigslist (confirmed live --
+  one direct request 403'd), and treating whatever they show as ground
+  truth repeats the exact mistake this file already warns about with AI
+  chatbots (see README's "What it does NOT cover"). Live-verified case: an
+  outside chatbot claimed Trulia "independently verified" $2,775/mo for a
+  Craigslist room listed at $620, as proof of fraud. Fetching that exact
+  Trulia page directly showed the property marked OFF MARKET, with a
+  different bed/bath/sqft profile than either source described, and an
+  automated rent *estimate* of $1,383 -- nothing resembling $2,775, and
+  not an active listing to compare against in the first place. The
+  chatbot's specific citation didn't hold up; don't take a chatbot's
+  claimed citations, including this file's or your own, on faith.
 - The disclosure paragraph in an outreach email is the applicant's own
   words from their profile, verbatim, regardless of who or what drafts the
   rest of the email. Never draft, edit, or suggest that paragraph, and
