@@ -96,6 +96,8 @@
       <button class="act-draft hidden">view draft</button>
       <a class="act-map" target="_blank" rel="noopener">map</a>
       <a class="act-ccc" href="https://www.findchildcarewa.org/" target="_blank" rel="noopener">child care check</a>
+      <a class="act-reply-cl hidden" target="_blank" rel="noopener">reply on Craigslist</a>
+      <button class="act-replied hidden">mark replied</button>
     </div>
     <form class="edit hidden">
       <input class="edit-address" placeholder="street address from the poster (measured on next run)">
@@ -103,8 +105,10 @@
       <div class="edit-buttons"><button type="submit">save</button><button type="button" class="edit-cancel ghost">cancel</button></div>
     </form>
     <div class="draft hidden">
+      <p class="draft-source"></p>
       <p class="draft-subject"></p>
       <pre class="draft-body"></pre>
+      <p class="draft-count"></p>
       <button type="button" class="draft-copy">copy draft</button>
     </div>
     <p class="note"></p>

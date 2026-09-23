@@ -28,7 +28,15 @@ MAX_AGE_DAYS = 60
 # or RentCast id starts with "_"). Currently just the RentCast quota gate.
 _META_KEY = "_meta"
 
-_CACHED_FIELDS = (
+# Fields restore() copies onto a listing this run's fetch already produced --
+# supplementary state a fresh basic search result doesn't carry (geocoding,
+# distance checks, detail-page content that may not have been re-fetched this
+# run). Never fields the current fetch already set authoritatively: doing so
+# would silently freeze that field at whatever the FIRST-ever sighting
+# happened to return, even after a source starts supplying something better
+# (a price change, a contact email that becomes available) -- restore()
+# would keep re-imposing the stale value from that first sighting forever.
+_RESTORE_FIELDS = (
     "posted_at",
     "bedrooms",
     "description",
@@ -43,9 +51,11 @@ _CACHED_FIELDS = (
     "county",
     "nearest_facility_ft",
     "facility_checked",
-    # Not needed by restore() (the listing object already has these, freshly
-    # fetched) but needed to fully reconstruct a listing that wasn't
-    # re-fetched this run at all -- see all_source_listings().
+)
+
+# Superset of _RESTORE_FIELDS: also the fields needed to fully reconstruct a
+# listing that wasn't fetched at all this run -- see all_source_listings().
+_CACHED_FIELDS = _RESTORE_FIELDS + (
     "source",
     "url",
     "title",
@@ -74,7 +84,7 @@ class Cache:
         entry = self.entries.get(listing.source_id)
         if entry is None:
             return False
-        for name in _CACHED_FIELDS:
+        for name in _RESTORE_FIELDS:
             if name in entry:
                 setattr(listing, name, entry[name])
         listing.first_seen = entry.get("first_seen")
@@ -98,6 +108,8 @@ class Cache:
                 price=entry.get("price"),
                 category=entry.get("category", ""),
                 location_text=entry.get("location_text"),
+                contact_name=entry.get("contact_name"),
+                contact_email=entry.get("contact_email"),
             )
             self.restore(listing)
             listings.append(listing)

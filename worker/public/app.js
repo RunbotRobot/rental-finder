@@ -10,6 +10,12 @@
 
   const fmt = (n) => Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
   const tierLabel = (ft) => (ft === 1320 ? "¼ mi" : ft === 2640 ? "½ mi" : `${ft} ft`);
+  // Craigslist's own limit on its reply-box textarea, not this project's --
+  // must match worker/src/index.js's CRAIGSLIST_BODY_LIMIT (that's what
+  // actually rejects an over-length draft; this is just the on-page
+  // warning). Verify it against what Craigslist shows you if it ever seems
+  // off -- it's an estimate this tool has never measured against a real send.
+  const CRAIGSLIST_BODY_LIMIT = 4000;
 
   async function api(path, options = {}) {
     const resp = await fetch(path, {
@@ -195,20 +201,58 @@
       outreach.textContent = `not auto-sent: ${listing.outreach_result}`;
     }
 
+    const isCraigslist = listing.source === "craigslist";
+    // A personally-written draft (state, from a Claude check-in) takes
+    // priority over the scan's own template draft -- see README's "Outreach
+    // and auto-send".
+    const personalDraft = Boolean(review.draft_body);
+    const draftSubject = review.draft_subject || listing.draft_subject || "";
+    const draftBody = review.draft_body || listing.draft_body || "";
+
     const draftBtn = $(".act-draft", node);
     const draftBox = $(".draft", node);
-    if (listing.draft_body) {
+    if (draftBody) {
       draftBtn.classList.remove("hidden");
-      $(".draft-subject", draftBox).textContent = listing.draft_subject || "";
-      $(".draft-body", draftBox).textContent = listing.draft_body;
+      $(".draft-source", draftBox).textContent = personalDraft
+        ? `personally drafted ${new Date(review.drafted_at).toLocaleString()}`
+        : "auto-drafted template -- read before sending; see README's known wording issues";
+      $(".draft-subject", draftBox).textContent = isCraigslist ? "" : draftSubject;
+      $(".draft-body", draftBox).textContent = draftBody;
       draftBtn.onclick = () => draftBox.classList.toggle("hidden");
+
+      const countEl = $(".draft-count", draftBox);
+      if (isCraigslist) {
+        const over = draftBody.length > CRAIGSLIST_BODY_LIMIT;
+        countEl.textContent = `${fmt(draftBody.length)} / ${fmt(CRAIGSLIST_BODY_LIMIT)} characters (Craigslist's own reply-box estimate)${over ? " -- likely too long, trim before pasting" : ""}`;
+        countEl.classList.toggle("warn", over);
+      } else {
+        countEl.textContent = "";
+      }
+
       $(".draft-copy", draftBox).onclick = async () => {
+        // Craigslist's reply box is a message body with no subject field;
+        // an email needs both.
+        const toCopy = isCraigslist ? draftBody : `${draftSubject}\n\n${draftBody}`;
         try {
-          await navigator.clipboard.writeText(`${listing.draft_subject}\n\n${listing.draft_body}`);
+          await navigator.clipboard.writeText(toCopy);
           $(".draft-copy", draftBox).textContent = "copied!";
           setTimeout(() => { $(".draft-copy", draftBox).textContent = "copy draft"; }, 1500);
         } catch { /* clipboard unavailable -- the text is still selectable */ }
       };
+    }
+
+    const replyCl = $(".act-reply-cl", node);
+    if (isCraigslist && draftBody) {
+      replyCl.classList.remove("hidden");
+      replyCl.href = listing.url;
+    }
+
+    const replied = $(".act-replied", node);
+    if (draftBody) {
+      replied.classList.remove("hidden");
+      replied.classList.toggle("replied", Boolean(review.emailed));
+      replied.textContent = review.emailed ? "✓ replied (undo)" : "mark replied";
+      replied.onclick = () => save(listing.id, { emailed: review.emailed ? "" : new Date().toISOString() });
     }
 
     const map = $(".act-map", node);
