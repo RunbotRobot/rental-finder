@@ -27,7 +27,14 @@
 //                                               reply-box-sized message and
 //                                               leaves it for you to paste
 //                                               into Craigslist's own reply
-//                                               flow yourself.
+//                                               flow yourself. Grouped by
+//                                               verified address first (the
+//                                               same unit is often posted
+//                                               under several titles), so
+//                                               each entry also carries
+//                                               `same_address_ids`: every
+//                                               posting the one draft should
+//                                               be saved to.
 //
 //   Either token:
 //     POST /api/emailed         body: array of ids to mark emailed just now
@@ -111,15 +118,31 @@ async function handleApi(request, env, path) {
     const sendReady = (raw.listings || [])
       .filter((l) => l.outreach_result === "ready to send" && !state[l.id]?.emailed)
       .map((l) => ({ ...l, action: "send" }));
-    const draftReady = (raw.listings || [])
-      .filter(
-        (l) =>
-          l.source === "craigslist" &&
-          l.outreach_result === "no automatable contact (Craigslist has no real send address)" &&
-          !state[l.id]?.emailed &&
-          !state[l.id]?.draft_body
-      )
-      .map((l) => ({ ...l, action: "draft" }));
+
+    const draftEligible = (raw.listings || []).filter(
+      (l) =>
+        l.source === "craigslist" &&
+        l.outreach_result === "no automatable contact (Craigslist has no real send address)" &&
+        !state[l.id]?.emailed &&
+        !state[l.id]?.draft_body
+    );
+    // Large complexes commonly post the same unit under several different
+    // titles -- verified live (the same address showing up 6+ times isn't
+    // rare). Group by verified address so a check-in drafts ONE message per
+    // address, not one per posting: same_address_ids carries every id that
+    // draft should also be saved to (via repeated /api/agent/draft calls).
+    const byAddress = new Map();
+    for (const listing of draftEligible) {
+      const key = listing.location || listing.id;
+      if (!byAddress.has(key)) byAddress.set(key, []);
+      byAddress.get(key).push(listing);
+    }
+    const draftReady = [...byAddress.values()].map((group) => ({
+      ...group[0],
+      action: "draft",
+      same_address_ids: group.map((l) => l.id),
+    }));
+
     const profile = (await env.STATE.get("profile", "json")) || {};
     return json({ profile, craigslist_body_limit: CRAIGSLIST_BODY_LIMIT, candidates: [...sendReady, ...draftReady] });
   }

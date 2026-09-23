@@ -74,6 +74,28 @@ def test_craigslist_listing_never_auto_sends_even_with_perfect_data(monkeypatch)
     assert listing.draft_subject is not None
 
 
+def test_craigslist_listing_without_a_verified_address_is_not_offered_as_a_draft_candidate():
+    """Regression test: the contact-email check must never short-circuit
+    ahead of address/spam/buffer for Craigslist, or 'no automatable contact'
+    (which the Worker's /api/agent/candidates treats as "ready to draft")
+    would become the reason for EVERY Craigslist listing regardless of
+    whether it actually cleared anything else."""
+    listing = _good_rentcast_listing(source_id="cl-no-address", contact_email=None)
+    listing.source = "craigslist"
+    listing.location_precision = PRECISION_AREA
+    newly_emailed = process([listing], SETTINGS, COMPLETE_PROFILE, already_emailed=set())
+    assert listing.outreach_result == "no verified address"
+    assert newly_emailed == set()
+
+
+def test_craigslist_listing_that_is_spam_flagged_is_not_offered_as_a_draft_candidate():
+    listing = _good_rentcast_listing(source_id="cl-spam", contact_email=None)
+    listing.source = "craigslist"
+    listing.spam_score = 2
+    process([listing], SETTINGS, COMPLETE_PROFILE, already_emailed=set())
+    assert listing.outreach_result == "spam-flagged"
+
+
 def test_already_emailed_listing_is_skipped():
     listing = _good_rentcast_listing(source_id="rc2")
     newly_emailed = process([listing], SETTINGS, COMPLETE_PROFILE, already_emailed={"rc2"})

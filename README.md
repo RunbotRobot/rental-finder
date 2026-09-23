@@ -165,7 +165,11 @@ data), and handles each one of two ways:
   a message sized for Craigslist's reply box and saves it back to the site
   (same real-judgment drafting, no template) for you to send yourself —
   see **Craigslist outreach** below. It never touches Craigslist itself;
-  there's nothing here that could.
+  there's nothing here that could. Large complexes often post the same unit
+  under several different titles (verified live — one Federal Way building
+  had 6+ separate listings), so candidates are grouped by verified address
+  first: one draft per address, saved to every posting at that address, not
+  one draft per posting.
 
 An unattended, recurring version of the sending half (a session waking
 itself on a timer, indefinitely, to send real email with no one present)
