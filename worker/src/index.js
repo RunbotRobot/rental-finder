@@ -3,12 +3,18 @@
 //
 //   GET  /api/data            latest scan results (written by the GitHub Action)
 //   PUT  /api/data            store scan results
-//   GET  /api/state           review state for every listing {id: {status, note, address, updated}}
+//   GET  /api/state           review state for every listing {id: {status, note, address, emailed, updated}}
 //   PATCH /api/state/:id      merge fields into one listing's review state
 //   GET  /api/overrides       CSV of `source_id,address` for the Action to feed back into the scan
+//   GET  /api/emailed         JSON array of listing ids already emailed, for the Action's send gate
+//   POST /api/emailed         body: array of ids to mark emailed just now (the Action calls this after sending)
+//   GET  /api/profile         your applicant profile (name, disclosure text, etc. -- see README)
+//   PUT  /api/profile         save the applicant profile
 //
 // State is one KV value ("state") holding a JSON object. It's a few hundred
 // listings at most, so a single document is simpler than a key per listing.
+// The profile is a second, separate KV value ("profile") -- unrelated to
+// any one listing, so it doesn't belong in the state object.
 
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
 
@@ -78,7 +84,7 @@ async function handleApi(request, env, path) {
     const patch = await request.json();
     const state = await readState(env);
     const entry = { ...(state[id] || {}) };
-    for (const key of ["status", "note", "address"]) {
+    for (const key of ["status", "note", "address", "emailed"]) {
       if (key in patch) {
         const value = patch[key];
         if (value === null || value === "") delete entry[key];
@@ -101,6 +107,47 @@ async function handleApi(request, env, path) {
     return new Response(lines.join("\n") + "\n", {
       headers: { "content-type": "text/csv; charset=utf-8", "cache-control": "no-store" },
     });
+  }
+
+  if (path === "/api/emailed") {
+    if (request.method === "GET") {
+      const state = await readState(env);
+      const ids = Object.entries(state)
+        .filter(([, entry]) => entry.emailed)
+        .map(([id]) => id);
+      return json(ids);
+    }
+    if (request.method === "POST") {
+      // The Action calls this once after a run with every id it just sent
+      // to, so a later run's send gate treats them as already contacted.
+      const ids = await request.json();
+      if (!Array.isArray(ids) || !ids.every((id) => typeof id === "string" && id.length <= 64)) {
+        return json({ error: "expected an array of id strings" }, 400);
+      }
+      const state = await readState(env);
+      const now = new Date().toISOString();
+      for (const id of ids) {
+        state[id] = { ...(state[id] || {}), emailed: now, updated: now };
+      }
+      await env.STATE.put("state", JSON.stringify(state));
+      return json({ ok: true, marked: ids.length });
+    }
+  }
+
+  if (path === "/api/profile") {
+    if (request.method === "GET") {
+      return json((await env.STATE.get("profile", "json")) || {});
+    }
+    if (request.method === "PUT") {
+      const body = await request.json();
+      const allowed = ["name", "phone", "email", "move_in_date", "income_text", "employment_text", "disclosure_text"];
+      const profile = {};
+      for (const key of allowed) {
+        if (typeof body[key] === "string" && body[key].length <= 4000) profile[key] = body[key];
+      }
+      await env.STATE.put("profile", JSON.stringify(profile));
+      return json(profile);
+    }
   }
 
   return json({ error: "not found" }, 404);

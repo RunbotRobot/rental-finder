@@ -2,7 +2,7 @@ import csv
 
 from rental_finder.config import Settings
 from rental_finder.models import PRECISION_ADDRESS, PRECISION_AREA, Listing
-from rental_finder.report import rank_listings, summarize, write_csv
+from rental_finder.report import rank_listings, summarize, to_json, write_csv
 
 SETTINGS = Settings(buffer_tiers_ft=(500, 1000), facility_types=("school", "park"))
 
@@ -46,6 +46,35 @@ def test_csv_columns_and_labels(tmp_path):
     assert rows[0]["clears_1000ft"] == "no"
     assert rows[0]["nearest_school_ft"] == "750"
     assert rows[0]["nearest_park_ft"] == ">1000"
+
+
+def test_csv_includes_source_and_outreach_columns(tmp_path):
+    listing = _listing("x", nearest={"school": 750.0, "park": None})
+    listing.source = "rentcast"
+    listing.contact_email = "landlord@example.com"
+    listing.outreach_result = "sent"
+    out = tmp_path / "out.csv"
+    write_csv([listing], SETTINGS, out)
+    with out.open() as f:
+        row = next(csv.DictReader(f))
+    assert row["source"] == "rentcast"
+    assert row["contact_email"] == "landlord@example.com"
+    assert row["outreach_result"] == "sent"
+
+
+def test_json_includes_outreach_fields():
+    listing = _listing("x", nearest={"school": 750.0, "park": None})
+    listing.contact_email = "landlord@example.com"
+    listing.draft_subject = "Rental inquiry: 1 Main St"
+    listing.draft_body = "Hello..."
+    listing.outreach_result = "ready to send"
+    payload = to_json([listing], SETTINGS, "2026-09-23T00:00:00+00:00")
+    row = payload["listings"][0]
+    assert row["contact_email"] == "landlord@example.com"
+    assert row["draft_subject"] == "Rental inquiry: 1 Main St"
+    assert row["draft_body"] == "Hello..."
+    assert row["outreach_result"] == "ready to send"
+    assert row["source"] == "craigslist"
 
 
 def test_summary_counts_survivors_per_tier():

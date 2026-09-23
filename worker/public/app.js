@@ -4,8 +4,9 @@
   let token = "";
   try { token = localStorage.getItem(TOKEN_KEY) || ""; } catch { /* private mode etc. */ }
 
-  let data = null;   // latest scan payload
-  let state = {};    // {id: {status, note, address}}
+  let data = null;    // latest scan payload
+  let state = {};     // {id: {status, note, address, emailed}}
+  let profile = {};   // applicant profile, see applicant_profile.py
 
   const fmt = (n) => Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
   const tierLabel = (ft) => (ft === 1320 ? "¼ mi" : ft === 2640 ? "½ mi" : `${ft} ft`);
@@ -32,7 +33,7 @@
     if (!token) return showAuth();
     $("#status").textContent = "Loading…";
     try {
-      [data, state] = await Promise.all([api("/api/data"), api("/api/state")]);
+      [data, state, profile] = await Promise.all([api("/api/data"), api("/api/state"), api("/api/profile")]);
     } catch (err) {
       if (err.message === "unauthorized") {
         const typedLength = token.length;
@@ -54,7 +55,16 @@
     $("#filters").classList.remove("hidden");
     renderSummary();
     renderTierOptions();
+    renderCategoryOptions();
+    fillProfileForm();
     render();
+  }
+
+  function fillProfileForm() {
+    const form = $("#profile-form");
+    for (const [key, value] of Object.entries(profile)) {
+      if (form.elements[key]) form.elements[key].value = value;
+    }
   }
 
   function renderSummary() {
@@ -82,6 +92,22 @@
       opt.textContent = `clears ${tierLabel(tier)}`;
       sel.appendChild(opt);
     }
+  }
+
+  const CATEGORY_LABELS = { apa: "apartment", roo: "room" };
+
+  function renderCategoryOptions() {
+    const sel = $("#f-category");
+    const previous = sel.value;
+    while (sel.options.length > 1) sel.remove(1);
+    const categories = [...new Set(data.listings.map((l) => l.category).filter(Boolean))].sort();
+    for (const category of categories) {
+      const opt = document.createElement("option");
+      opt.value = category;
+      opt.textContent = CATEGORY_LABELS[category] || category;
+      sel.appendChild(opt);
+    }
+    if (categories.includes(previous)) sel.value = previous;
   }
 
   function passes(listing) {
@@ -121,7 +147,8 @@
     const badges = $(".badges", node);
     const badge = (text, cls = "") => { const b = document.createElement("span"); b.className = `badge ${cls}`; b.textContent = text; badges.appendChild(b); };
     if (listing.new) badge("new", "new");
-    badge(listing.category === "roo" ? "room" : listing.bedrooms != null ? `${listing.bedrooms === 0 ? "studio" : listing.bedrooms + " BR"}` : "apartment");
+    badge(listing.source === "rentcast" ? "RentCast" : "Craigslist");
+    badge(listing.category === "roo" ? "room" : listing.bedrooms != null ? `${listing.bedrooms === 0 ? "studio" : listing.bedrooms + " BR"}` : listing.category || "apartment");
     if (listing.precision === "address") badge("street address");
     else if (listing.precision === "area") badge("no address yet", "warn");
     else badge("no location", "warn");
@@ -149,7 +176,40 @@
 
     $(".flags", node).textContent = listing.spam_flags.length ? `⚠ ${listing.spam_flags.join(", ")}` : "";
     $(".desc", node).textContent = listing.description || "";
-    $(".dates", node).textContent = [listing.posted && `posted ${listing.posted}`, listing.first_seen && `first seen ${listing.first_seen}`].filter(Boolean).join(" · ");
+    const dateParts = [listing.posted && `posted ${listing.posted}`, listing.first_seen && `first seen ${listing.first_seen}`];
+    if (listing.contact_email) dateParts.push(`contact: ${listing.contact_email}`);
+    $(".dates", node).textContent = dateParts.filter(Boolean).join(" · ");
+
+    const outreach = $(".outreach", node);
+    outreach.className = "outreach";
+    if (review.emailed) {
+      outreach.textContent = `✓ emailed ${new Date(review.emailed).toLocaleDateString()}`;
+      outreach.classList.add("sent");
+    } else if (listing.outreach_result === "sent") {
+      outreach.textContent = "✓ emailed just now";
+      outreach.classList.add("sent");
+    } else if (listing.outreach_result === "ready to send") {
+      outreach.textContent = "ready to auto-send next run";
+      outreach.classList.add("ready");
+    } else if (listing.outreach_result) {
+      outreach.textContent = `not auto-sent: ${listing.outreach_result}`;
+    }
+
+    const draftBtn = $(".act-draft", node);
+    const draftBox = $(".draft", node);
+    if (listing.draft_body) {
+      draftBtn.classList.remove("hidden");
+      $(".draft-subject", draftBox).textContent = listing.draft_subject || "";
+      $(".draft-body", draftBox).textContent = listing.draft_body;
+      draftBtn.onclick = () => draftBox.classList.toggle("hidden");
+      $(".draft-copy", draftBox).onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(`${listing.draft_subject}\n\n${listing.draft_body}`);
+          $(".draft-copy", draftBox).textContent = "copied!";
+          setTimeout(() => { $(".draft-copy", draftBox).textContent = "copy draft"; }, 1500);
+        } catch { /* clipboard unavailable -- the text is still selectable */ }
+      };
+    }
 
     const map = $(".act-map", node);
     if (listing.lat != null && listing.lon != null) map.href = `https://www.openstreetmap.org/?mlat=${listing.lat}&mlon=${listing.lon}#map=17`;
@@ -189,6 +249,20 @@
     load();
   };
   $("#settings-btn").onclick = () => { $("#auth").classList.toggle("hidden"); };
+  $("#profile-btn").onclick = () => { $("#profile").classList.toggle("hidden"); };
+  $("#profile-close").onclick = () => { $("#profile").classList.add("hidden"); };
+  $("#profile-form").onsubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const payload = Object.fromEntries(new FormData(form).entries());
+    try {
+      profile = await api("/api/profile", { method: "PUT", body: JSON.stringify(payload) });
+      $("#profile-status").textContent = profile.disclosure_text
+        ? "Saved. Outreach emails can now be drafted." : "Saved, but no disclosure text yet -- nothing will be drafted or sent until it's filled in.";
+    } catch (err) {
+      $("#profile-status").textContent = `Couldn't save: ${err.message}`;
+    }
+  };
   for (const id of ["f-tier", "f-category", "f-status", "f-new", "f-clean"]) $(`#${id}`).onchange = render;
   $("#f-search").oninput = render;
 

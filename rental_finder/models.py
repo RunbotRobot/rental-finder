@@ -32,12 +32,12 @@ def primary_street(map_address: str | None) -> str | None:
 
 @dataclass
 class Listing:
-    source: str
+    source: str  # "craigslist" or "rentcast"
     source_id: str
     url: str
     title: str
     price: float | None
-    category: str  # craigslist category code: "apa" apartments, "roo" rooms
+    category: str  # craigslist category code ("apa"/"roo"), or RentCast's propertyType
     location_text: str | None  # whatever the listing shows: an address, or just "Shoreline"
 
     posted_at: str | None = None
@@ -73,6 +73,24 @@ class Listing:
     #   pass -- no matter what nearest_facility_ft says.
     nearest_facility_ft: dict[str, float | None] = field(default_factory=dict)
     facility_checked: dict[str, bool] = field(default_factory=dict)
+
+    # Contact info for outreach. Craigslist never populates this (see
+    # sources/craigslist.py -- there is no real, stable email to send to,
+    # only its own JS reply-relay). RentCast listings carry a real agent or
+    # office email straight from the provider.
+    contact_name: str | None = None
+    contact_email: str | None = None
+
+    # Filled in by email_draft.py once a listing is a real candidate.
+    draft_subject: str | None = None
+    draft_body: str | None = None
+
+    # Outcome of this run's outreach attempt for this listing, if any:
+    # None (not attempted), "sent", or a short reason it was held back
+    # ("no contact email", "profile incomplete", "already contacted", ...).
+    # This is report-only -- send.py and main.py decide and act; this field
+    # just carries the result into the CSV/JSON for you to see what happened.
+    outreach_result: str | None = None
 
     @property
     def best_address(self) -> str | None:

@@ -9,12 +9,13 @@ constraints at once:
    distances side by side, since there's often no single written rule to
    target.
 
-It produces a ranked CSV for you to review by hand, plus a short summary of
-how many candidates survive at each buffer distance. **It does not contact
-any landlord, submit any application, or make any compliance decision on
-its own.** Its job is to cut the pile of listings you'd otherwise have to
-rule out one at a time, and to hand you numbers instead of guesses for the
-conversation with your CCO.
+It pulls listings from Craigslist and (optionally) RentCast, produces a
+ranked CSV/site for you to review, and — only for listings that clear a
+deterministic, auditable set of checks and only with your own pre-written
+disclosure text — **can draft, or automatically send, an outreach email**.
+It still makes no compliance decision on its own, and it never decides
+*what* to disclose or *whether* to; see **Outreach and auto-send** below
+for exactly what "automatic" means here and where the hard stops are.
 
 ## Why several buffer distances instead of one
 
@@ -34,17 +35,24 @@ result is a starting point for that conversation, not an answer.
 ## What it does
 
 1. Fetches current Craigslist listings (apartments + rooms) around a postal
-   code, within your rent cap.
-2. Fetches each new listing's own page for the full description, post date,
-   bedroom count, and street address if the poster gave one (capped per run
-   and cached, so day-to-day runs only fetch what's new).
-3. Flags likely spam/scam posts — wire-transfer language, the same canned
-   description under several listings, a listing recycled from another
-   state, prices far below the market for its category. Flags are weighted
-   signals that sort the junk to the bottom; they never delete anything.
-4. Geocodes listings that have a **street address**, via the US Census
-   geocoder (with an OpenStreetMap fallback that's only accepted when it
-   resolves to a specific building). Listings that only give a
+   code, within your rent cap, plus (if `RENTCAST_API_KEY` is set) active
+   long-term rentals from [RentCast](https://www.rentcast.io/api), a paid
+   structured-data API — skipped entirely, no error, if no key is
+   configured.
+2. Fetches each new Craigslist listing's own page for the full description,
+   post date, bedroom count, and street address if the poster gave one
+   (capped per run and cached, so day-to-day runs only fetch what's new).
+   RentCast listings already come with a real address and coordinates from
+   the provider, so there's nothing to fetch.
+3. Flags likely spam/scam Craigslist posts — wire-transfer language, the
+   same canned description under several listings, a listing recycled from
+   another state, prices far below the market for its category. Flags are
+   weighted signals that sort the junk to the bottom; they never delete
+   anything. RentCast listings, from an authenticated structured provider,
+   always score 0 — the Craigslist-tuned heuristics don't apply to them.
+4. Geocodes Craigslist listings that have a **street address**, via the US
+   Census geocoder (with an OpenStreetMap fallback that's only accepted
+   when it resolves to a specific building). Listings that only give a
    neighborhood or city are *not* geocoded to a centroid and then measured
    from — they're reported as "unknown" until you get the address from
    the poster (see **Address overrides** below).
@@ -56,7 +64,11 @@ result is a starting point for that conversation, not an answer.
      state park sites, including Seattle's), measured to the park boundary
    - **childcare** — WA DCYF open data: licensed child care *centers* and
      school-age programs, ECEAP preschool sites, and Head Start sites
-7. Writes `candidates.csv`, ranked: no spam flags first, then by how many
+7. Drafts an outreach email for every listing once your applicant profile
+   is complete (see **Outreach and auto-send**), and — only for listings
+   that clear every automated check — either sends it or marks it ready to
+   send, depending on the `--send-emails` flag.
+8. Writes `candidates.csv`, ranked: no spam flags first, then by how many
    buffer tiers the listing clears, then cheapest first. Prints the
    per-tier survivor counts.
 
@@ -105,6 +117,80 @@ stops, libraries, community centers, pools, churches with youth programs,
 private playgrounds. If your CCO names a category, ask; some of these have
 public datasets that could be added.
 
+## Outreach and auto-send
+
+This tool can email a landlord for you. Read this whole section before
+turning it on — the design choices here were deliberate and matter.
+
+**What "automatic" actually means.** A scheduled job can't pause and ask a
+person anything — it either sends or it doesn't. So "auto-send" here is a
+fixed checklist, not judgment: an email goes out only when *every one* of
+these is true —
+
+- the listing came from **RentCast**, never Craigslist. Craigslist has no
+  real, stable contact address — only its own JS "reply" relay, which
+  usually requires phone verification and can't be scripted without
+  automating a live, logged-in browser session. Craigslist listings always
+  get a drafted email instead, for you to paste into Craigslist's own
+  reply box yourself — see the "view draft" / "copy draft" buttons on the
+  site.
+- it has a real contact email from the listing provider
+- it has a verified street address (never a geocoded guess)
+- it has zero spam flags
+- it clears every enabled facility type at `auto_send_buffer_ft` (default
+  1000 ft; independent of the tiers shown in the report)
+- it hasn't been emailed before (tracked on the site, so a rerun never
+  double-contacts anyone)
+- **your applicant profile is complete** — specifically, has your own
+  disclosure text (see below)
+
+Anything that fails even one of these gets the same drafted email, marked
+with the specific reason it wasn't sent, instead of a silent skip. Nothing
+sends at all unless the scan was run with `--send-emails`; a plain local
+run never does, regardless of what credentials are configured — that flag
+is only ever passed by the scheduled Action.
+
+**The disclosure paragraph is yours, not this tool's.** Fill in your
+profile once on the site (✎ profile). Every email — sent or manually
+copied — includes your disclosure text verbatim, in your own words. This
+tool will never draft, edit, or suggest that paragraph. Consider having it
+reviewed by a tenant/reentry legal aid organization before relying on it —
+e.g. King County's **Housing Justice Project** or **Civil Survival
+Project** — since what's wise to say and when can depend on the specific
+city.
+
+**Know the legal landscape before you decide what to say.** Seattle's Fair
+Chance Housing Ordinance (SMC 14.09) has a carve-out specifically for
+adult registered sex offenders: unlike other criminal history, a landlord
+there *can* screen the registry and *can* deny tenancy on that basis (with
+a "legitimate business reason," which is not a high bar). Since a 2023
+Ninth Circuit ruling, Seattle also no longer enforces its ban on landlords
+simply asking about criminal history at all. In short: there is no
+protected disclosure-timing window in Seattle for this specific situation.
+Whether unincorporated King County or other cities in the search radius
+(Kent, Tukwila, Federal Way, Renton, ...) have different rules is exactly
+the kind of city-by-city question worth a real legal-aid conversation, not
+a guess from this README or from any AI chatbot.
+
+**Setup**, all through the site and repo secrets, no code changes:
+
+- **RentCast** (optional, needed for any auto-send at all): create an
+  account at rentcast.io, generate an API key (free tier: ~50 calls/mo,
+  plenty for a periodic King County search), add it as the GitHub repo
+  secret `RENTCAST_API_KEY`.
+- **Gmail sending** (optional; without it, everything still drafts, just
+  never sends): the Gmail account needs 2-Step Verification turned on
+  (Google Account → Security), then generate an **App Password** (Google
+  Account → Security → App passwords — search "app passwords" if it's not
+  visible) scoped to Mail. Add repo secrets `GMAIL_ADDRESS` (the full
+  address) and `GMAIL_APP_PASSWORD` (the 16-character app password, not
+  your real password). Sends go through your real Gmail account, so
+  replies land in your normal inbox.
+- **Applicant profile**: open the site → ✎ profile → fill in name,
+  contact info, employment/income in your own words, and disclosure text.
+  Nothing drafts or sends until this is saved with disclosure text filled
+  in.
+
 ## Usage
 
 ```bash
@@ -112,6 +198,10 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python -m rental_finder.main --out candidates.csv --max-rent 1900 --postal 98188 --radius-miles 25 -v
 ```
+
+This never sends email regardless of configured credentials — add
+`--send-emails` explicitly to actually send (the scheduled Action does;
+a local run shouldn't, unless you mean to test a real send).
 
 The first run is slow: it fetches up to 150 listing pages (`--max-detail-fetches`)
 with a 3-second pause between each, then geocodes and distance-checks
@@ -166,8 +256,11 @@ run.
 Open the site on your phone, paste the token once (it's stored on the
 device, nowhere else), and add it to your home screen. The tiles at the
 top are the per-tier survivor counts. On each card: star, dismiss, a note,
-and an address field for when a poster gives you one — the next scan
-geocodes and distance-checks it.
+an address field for when a poster gives you one (the next scan geocodes
+and distance-checks it), and — once a draft exists — a "view draft" /
+"copy draft" button and a line showing whether it was auto-sent, is ready
+to be, or wasn't and why. The ✎ profile button holds your applicant
+profile (see **Outreach and auto-send**).
 
 If Craigslist blocks GitHub's runners, the Action's log will show HTTP 403
 on the search fetch; the fallback is to run `python -m rental_finder.main
@@ -177,14 +270,22 @@ on the search fetch; the fallback is to run `python -m rental_finder.main
 ## Limitations, read before relying on this
 
 - **Not legal advice, not a compliance guarantee.** Public facility data
-  can be incomplete or stale, and the family-home gap above is real. Confirm
-  every specific address with your CCO before treating it as viable.
+  can be incomplete or stale, and the family-home and co-op childcare gaps
+  above are real. Confirm every specific address with your CCO before
+  treating it as viable, and see **Outreach and auto-send** for the
+  disclosure/legal caveats around emailing landlords.
+- **An email is not a compliance check.** Auto-send only verifies the
+  things this tool can verify (distance, spam score, a real contact). It
+  does not know your CCO's actual buffer, and clearing every check here is
+  not the same as an address being approved.
 - **Craigslist's HTML changes.** Selectors live in
   `rental_finder/sources/craigslist.py`; the tool warns rather than failing
   silently if it finds zero results.
 - **Craigslist's own map pins are coarse** (verified live: often a
   neighborhood centroid, sometimes wrong), so they're used only to work out
   which county a listing is in, never for distances.
+- **RentCast has no public listing-page URL in its data**, so RentCast
+  cards link to a map search of the address instead of a real listing page.
 - **Rate limiting is deliberate.** `request_delay_seconds` and
   `max_detail_fetches` keep this looking like what it is — one person's
   periodic search. Don't lower them.

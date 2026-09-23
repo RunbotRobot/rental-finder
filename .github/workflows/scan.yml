@@ -27,16 +27,32 @@ jobs:
       - run: pip install -r requirements.txt
 
       # Addresses you've added to listings on the site come back as overrides.
-      - name: Fetch address overrides from the site
+      # The applicant profile and the already-emailed list come from the site
+      # too, so the send gate and email drafts always use what's on the site,
+      # not whatever was last committed here.
+      - name: Fetch overrides, profile, and already-emailed ids from the site
         env:
           WORKER_URL: ${{ secrets.WORKER_URL }}
           API_TOKEN: ${{ secrets.API_TOKEN }}
         run: |
           curl -sSf -H "Authorization: Bearer $API_TOKEN" "$WORKER_URL/api/overrides" -o address_overrides.csv
           echo "$(($(wc -l < address_overrides.csv) - 1)) overrides"
+          curl -sSf -H "Authorization: Bearer $API_TOKEN" "$WORKER_URL/api/profile" -o applicant_profile.json
+          curl -sSf -H "Authorization: Bearer $API_TOKEN" "$WORKER_URL/api/emailed" -o emailed.json
+          echo "$(python3 -c 'import json; print(len(json.load(open("emailed.json"))))') listings already emailed"
 
+      # --send-emails is the one flag that makes anything go out for real --
+      # it's set here, in the scheduled job, and nowhere else. A plain local
+      # run of this same command never sends, regardless of credentials.
       - name: Run the scan
-        run: python -m rental_finder.main --out candidates.csv --json data.json -v
+        env:
+          RENTCAST_API_KEY: ${{ secrets.RENTCAST_API_KEY }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: |
+          python -m rental_finder.main --out candidates.csv --json data.json \
+            --profile applicant_profile.json --emailed emailed.json --emailed-out emailed_this_run.json \
+            --send-emails -v
 
       - name: Publish results to the site
         env:
@@ -45,6 +61,18 @@ jobs:
         run: |
           curl -sSf -X PUT -H "Authorization: Bearer $API_TOKEN" -H "Content-Type: application/json" \
             --data-binary @data.json "$WORKER_URL/api/data"
+
+      # Mark anything just emailed so a future run (or a manual "Run
+      # workflow") never contacts the same landlord twice.
+      - name: Record what was just emailed
+        env:
+          WORKER_URL: ${{ secrets.WORKER_URL }}
+          API_TOKEN: ${{ secrets.API_TOKEN }}
+        run: |
+          if [ "$(cat emailed_this_run.json)" != "[]" ]; then
+            curl -sSf -X POST -H "Authorization: Bearer $API_TOKEN" -H "Content-Type: application/json" \
+              --data-binary @emailed_this_run.json "$WORKER_URL/api/emailed"
+          fi
 
       # The cache is what makes "new since last run" and the detail-page cap
       # work across runs, so it lives in the repo.

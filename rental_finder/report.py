@@ -51,11 +51,11 @@ def _tier_label(listing: Listing, tier: int, settings: Settings) -> str:
 
 def write_csv(listings: list[Listing], settings: Settings, out_path: str | Path) -> None:
     fieldnames = (
-        ["rank", "new", "first_seen", "posted", "category", "bedrooms", "price", "title", "location",
+        ["rank", "source", "new", "first_seen", "posted", "category", "bedrooms", "price", "title", "location",
          "county", "location_precision", "spam_score", "spam_flags"]
         + [f"clears_{tier}ft" for tier in settings.buffer_tiers_ft]
         + [f"nearest_{ftype}_ft" for ftype in settings.facility_types]
-        + ["url", "map_link", "description_snippet"]
+        + ["contact_email", "outreach_result", "url", "map_link", "description_snippet"]
     )
     with Path(out_path).open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -63,6 +63,7 @@ def write_csv(listings: list[Listing], settings: Settings, out_path: str | Path)
         for rank, listing in enumerate(rank_listings(listings, settings), start=1):
             row = {
                 "rank": rank,
+                "source": listing.source,
                 "new": "yes" if listing.is_new else "",
                 "first_seen": listing.first_seen or "",
                 "posted": (listing.posted_at or "")[:10],
@@ -75,6 +76,8 @@ def write_csv(listings: list[Listing], settings: Settings, out_path: str | Path)
                 "location_precision": listing.location_precision,
                 "spam_score": listing.spam_score,
                 "spam_flags": "; ".join(listing.spam_flags),
+                "contact_email": listing.contact_email or "",
+                "outreach_result": listing.outreach_result or "",
                 "url": listing.url,
                 "map_link": _map_link(listing),
                 "description_snippet": (listing.description or "")[:160],
@@ -105,6 +108,7 @@ def to_json(listings: list[Listing], settings: Settings, generated_at: str) -> d
         rows.append({
             "id": listing.source_id,
             "rank": rank,
+            "source": listing.source,
             "url": listing.url,
             "title": listing.title,
             "price": listing.price,
@@ -127,6 +131,10 @@ def to_json(listings: list[Listing], settings: Settings, generated_at: str) -> d
                 for ftype in settings.facility_types
             },
             "description": (listing.description or "")[:400],
+            "contact_email": listing.contact_email,
+            "draft_subject": listing.draft_subject,
+            "draft_body": listing.draft_body,
+            "outreach_result": listing.outreach_result,
         })
     return {
         "generated_at": generated_at,

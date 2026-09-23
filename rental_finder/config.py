@@ -48,6 +48,32 @@ class Settings:
     # after contacting them; these take priority over the listing's own text.
     overrides_path: str = "address_overrides.csv"
 
+    # RentCast (sources/rentcast.py): a paid structured-listings API, skipped
+    # entirely if no key is configured. Centered on the same SeaTac point as
+    # the Craigslist search (postal_code 98188) since RentCast searches by
+    # lat/lon + radius rather than postal code.
+    rentcast_api_key: str | None = None
+    rentcast_latitude: float = 47.4435
+    rentcast_longitude: float = -122.2960
+
+    # Outreach (email_draft.py, mailer.py, main.py's send gate). Disabled by
+    # default -- only an explicit --send-emails flag (used by the scheduled
+    # GitHub Action, never a plain local run) allows any email to actually
+    # go out, regardless of how many listings clear the gate below.
+    send_emails: bool = False
+    gmail_address: str | None = None
+    gmail_app_password: str | None = None
+    # A listing must clear every enabled facility type at this buffer to be
+    # auto-sendable; should be one of buffer_tiers_ft. Independent of the
+    # tiers shown in the report, which stay untouched by this setting.
+    auto_send_buffer_ft: int = 1000
+    # Local files the Action fetches from the Worker before each run: which
+    # listings you've already contacted (so a rerun never double-emails),
+    # and your applicant profile (name/contact/disclosure text for the
+    # email body -- see email_draft.py).
+    emailed_path: str = "emailed.json"
+    profile_path: str = "applicant_profile.json"
+
     # Identify yourself honestly to the services you're querying (Nominatim's
     # usage policy requires it). This worked fine live against Craigslist,
     # Census, and King County GIS.
