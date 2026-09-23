@@ -109,10 +109,16 @@ def fetch_listings(settings: Settings, session: requests.Session) -> tuple[bool,
     with_agent = sum(1 for item in items if (item.get("listingAgent") or {}).get("email"))
     with_office = sum(1 for item in items if (item.get("listingOffice") or {}).get("email"))
     with_contact = sum(1 for listing in listings if listing.contact_email)
+    # Not used for anything yet -- phone isn't captured onto Listing -- this
+    # is purely to inform whether an SMS-based outreach channel would even
+    # have data to work with before building anything for it.
+    with_agent_phone = sum(1 for item in items if (item.get("listingAgent") or {}).get("phone"))
+    with_office_phone = sum(1 for item in items if (item.get("listingOffice") or {}).get("phone"))
     logger.info(
         "RentCast: %d listings (%d with a listingAgent email, %d with a listingOffice email, "
-        "%d with a usable contact overall). A low count here isn't necessarily a bug -- "
-        "RentCast's own docs say these fields are omitted on some listings.",
-        len(listings), with_agent, with_office, with_contact,
+        "%d with a usable contact overall; %d with a listingAgent phone, %d with a listingOffice "
+        "phone). A low count here isn't necessarily a bug -- RentCast's own docs say these fields "
+        "are omitted on some listings.",
+        len(listings), with_agent, with_office, with_contact, with_agent_phone, with_office_phone,
     )
     return True, listings
