@@ -39,8 +39,16 @@ def _gate_reason(
         return "already contacted"
     if not profile.is_complete():
         return "applicant profile incomplete"
-    if not listing.contact_email:
-        return "no automatable contact (Craigslist has no real send address)" if listing.source == "craigslist" else "no contact email"
+    # Address/spam/buffer checks come before the contact-email check on
+    # purpose: Craigslist listings always fail contact-email (see
+    # sources/craigslist.py), so checking it first would make "no
+    # automatable contact" the reason for EVERY Craigslist listing --
+    # including ones with no address, spam flags, or too close a facility --
+    # rather than what it's supposed to mean: this listing cleared every
+    # other rule and contact is the only thing left. The Worker's
+    # /api/agent/candidates endpoint keys off that exact string to decide
+    # which Craigslist listings are worth a personal draft, so getting this
+    # order wrong there silently offers hundreds of unqualified listings.
     if listing.location_precision != PRECISION_ADDRESS:
         return "no verified address"
     if listing.spam_score != 0:
@@ -50,6 +58,8 @@ def _gate_reason(
         return "facility distance unverified"
     if clearance is False:
         return f"does not clear {settings.auto_send_buffer_ft} ft on every facility type"
+    if not listing.contact_email:
+        return "no automatable contact (Craigslist has no real send address)" if listing.source == "craigslist" else "no contact email"
     return None
 
 

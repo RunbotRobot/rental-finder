@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "17 */6 * * *"
   workflow_dispatch:
+    inputs:
+      force_rentcast:
+        description: "Fetch RentCast even if already fetched today (uses one of the ~20/month buffer calls beyond the daily one -- see README)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -32,9 +37,9 @@ jobs:
       # drafted at all, and it's used to fill the Craigslist manual-copy
       # draft on the site. The already-emailed list comes from the site
       # too, so a listing a Claude session already emailed (see README --
-      # RentCast outreach is drafted and sent by a Claude session on a
-      # recurring check-in, not by this workflow) is correctly reported as
-      # already contacted rather than ready to send.
+      # outreach is drafted and sent by a Claude session on request, not by
+      # this workflow) is correctly reported as already contacted rather
+      # than ready to send.
       - name: Fetch overrides, profile, and already-emailed ids from the site
         env:
           WORKER_URL: ${{ secrets.WORKER_URL }}
@@ -53,9 +58,15 @@ jobs:
       - name: Run the scan
         env:
           RENTCAST_API_KEY: ${{ secrets.RENTCAST_API_KEY }}
+          FORCE_RENTCAST: ${{ inputs.force_rentcast }}
         run: |
+          extra_args=()
+          if [ "$FORCE_RENTCAST" = "true" ]; then
+            extra_args+=(--force-rentcast)
+            echo "Forcing a RentCast fetch outside the daily quota gate (manual dispatch input)."
+          fi
           python -m rental_finder.main --out candidates.csv --json data.json \
-            --profile applicant_profile.json --emailed emailed.json -v
+            --profile applicant_profile.json --emailed emailed.json "${extra_args[@]}" -v
 
       - name: Publish results to the site
         env:

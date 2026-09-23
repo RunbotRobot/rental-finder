@@ -17,6 +17,15 @@
   listing is only ever marked "ready to send" (RentCast listings alone;
   Craigslist has no real, scriptable contact address) when it clears every
   rule; see `outreach.py`'s docstring.
+- `_gate_reason()`'s check ORDER matters, not just its content: the
+  contact-email check must stay LAST, after address/spam/buffer. It used to
+  run first, which meant "no automatable contact" -- the string
+  `/api/agent/candidates` treats as "cleared everything else, just needs a
+  personal Craigslist draft" -- became the reason for literally every
+  Craigslist listing, address or no address, spam-flagged or not (found
+  when a live check-in returned 607 "candidates," most with no verified
+  location at all). If you add a new eligibility rule, add it before the
+  contact-email check, never after.
 - Outreach *drafting and sending* is deliberately NOT done by
   `email_draft.py`'s template for the live flow — the owner found the
   templated output choppy (raw profile-field text slotted into fixed
@@ -31,14 +40,19 @@
     integration directly (no draft-then-approve step — the owner
     explicitly chose immediate sending).
   - `"draft"` (Craigslist, eligible except for having no automatable
-    contact): personally write a message body sized for Craigslist's reply
-    box (no subject line -- see `craigslist_body_limit` in the response,
-    currently 4000 characters; treat it as an estimate, not a hard fact)
-    and POST it to `/api/agent/draft` as `{id, subject: "", body}`. Never
-    send this one yourself and never call `/api/emailed` for it -- there's
-    no scriptable way to submit Craigslist's reply box, so only the owner,
-    clicking "mark replied" on the site after actually pasting it in, can
-    correctly say it went out.
+    contact): personally write ONE message body sized for Craigslist's
+    reply box (no subject line -- see `craigslist_body_limit` in the
+    response, currently 4000 characters; treat it as an estimate, not a
+    hard fact) per candidate, and POST it to `/api/agent/draft` as
+    `{id, subject: "", body}` once for EVERY id in that candidate's
+    `same_address_ids` (the Worker already grouped same-address postings --
+    large complexes commonly post one unit under several titles -- so this
+    is how the one draft reaches every posting instead of writing a
+    separate message per posting at the same address). Never send this one
+    yourself and never call `/api/emailed` for it -- there's no scriptable
+    way to submit Craigslist's reply box, so only the owner, clicking "mark
+    replied" on the site after actually pasting it in, can correctly say it
+    went out.
   **This runs only when the owner pings a session and asks for a
   check-in — not on a recurring schedule.** An unattended, self-rewaking
   version was tried and refused by the coding environment's own safety
