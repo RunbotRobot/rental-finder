@@ -1,15 +1,25 @@
-// Tiny API behind the site. Everything is gated by one shared token because
-// this is a private, personal search.
+// Tiny API behind the site, gated by one of two shared tokens.
 //
-//   GET  /api/data            latest scan results (written by the GitHub Action)
-//   PUT  /api/data            store scan results
-//   GET  /api/state           review state for every listing {id: {status, note, address, emailed, updated}}
-//   PATCH /api/state/:id      merge fields into one listing's review state
-//   GET  /api/overrides       CSV of `source_id,address` for the Action to feed back into the scan
-//   GET  /api/emailed         JSON array of listing ids already emailed, for the Action's send gate
-//   POST /api/emailed         body: array of ids to mark emailed just now (the Action calls this after sending)
-//   GET  /api/profile         your applicant profile (name, disclosure text, etc. -- see README)
-//   PUT  /api/profile         save the applicant profile
+//   API_TOKEN (full access -- the site itself uses this):
+//     GET  /api/data            latest scan results (written by the GitHub Action)
+//     PUT  /api/data            store scan results
+//     GET  /api/state           review state for every listing {id: {status, note, address, emailed, updated}}
+//     PATCH /api/state/:id      merge fields into one listing's review state
+//     GET  /api/overrides       CSV of `source_id,address` for the Action to feed back into the scan
+//     GET  /api/emailed         JSON array of listing ids already emailed, for the Action's send gate
+//     GET  /api/profile         read the applicant profile
+//     PUT  /api/profile         save the applicant profile
+//
+//   AGENT_TOKEN (narrow, read-mostly -- for the Claude session that drafts
+//   and sends outreach email; deliberately can't touch review state, the
+//   full profile-editing endpoint, or the raw scan data, so holding it in a
+//   chat session is a much smaller exposure than the full token would be):
+//     GET  /api/agent/candidates   listings ready for outreach, plus the
+//                                  profile (read-only, bundled in so the
+//                                  agent never needs a second call)
+//
+//   Either token:
+//     POST /api/emailed         body: array of ids to mark emailed just now
 //
 // State is one KV value ("state") holding a JSON object. It's a few hundred
 // listings at most, so a single document is simpler than a key per listing.
@@ -29,10 +39,16 @@ function timingSafeEqual(a, b) {
   return diff === 0;
 }
 
-function authorized(request, env) {
+// "full" | "agent" | null. Never both -- if a deployment ever set the two
+// secrets to the same value, full access is what's granted, which is the
+// safe direction for that misconfiguration to fail in.
+function tokenScope(request, env) {
   const header = request.headers.get("authorization") || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : "";
-  return env.API_TOKEN && token && timingSafeEqual(token, env.API_TOKEN);
+  if (!token) return null;
+  if (env.API_TOKEN && timingSafeEqual(token, env.API_TOKEN)) return "full";
+  if (env.AGENT_TOKEN && timingSafeEqual(token, env.AGENT_TOKEN)) return "agent";
+  return null;
 }
 
 async function readState(env) {
@@ -57,7 +73,27 @@ async function handleApi(request, env, path) {
     });
   }
 
-  if (!authorized(request, env)) return json({ error: "unauthorized" }, 401);
+  const scope = tokenScope(request, env);
+  if (!scope) return json({ error: "unauthorized" }, 401);
+
+  if (path === "/api/agent/candidates" && request.method === "GET") {
+    const raw = await env.STATE.get("data", "json");
+    if (!raw) return json({ error: "no scan results yet" }, 404);
+    const state = await readState(env);
+    const candidates = (raw.listings || []).filter(
+      (l) => l.outreach_result === "ready to send" && !state[l.id]?.emailed
+    );
+    const profile = (await env.STATE.get("profile", "json")) || {};
+    return json({ profile, candidates });
+  }
+
+  if (scope !== "full") {
+    // Everything below here is full-token-only except /api/emailed POST,
+    // handled inside its own block further down.
+    if (!(path === "/api/emailed" && request.method === "POST")) {
+      return json({ error: "unauthorized" }, 401);
+    }
+  }
 
   if (path === "/api/data") {
     if (request.method === "GET") {

@@ -122,10 +122,13 @@ public datasets that could be added.
 This tool can email a landlord for you. Read this whole section before
 turning it on — the design choices here were deliberate and matter.
 
-**What "automatic" actually means.** A scheduled job can't pause and ask a
-person anything — it either sends or it doesn't. So "auto-send" here is a
-fixed checklist, not judgment: an email goes out only when *every one* of
-these is true —
+**Eligibility is a fixed checklist; drafting and sending are not.** Code
+can't exercise judgment about whether an email reads naturally, so this
+project splits the two: a deterministic, auditable gate (`outreach.py`)
+decides *which* listings are safe to contact automatically, and a Claude
+session — woken on a recurring check-in, not a line of this codebase —
+personally writes and sends the email for each one. A listing is marked
+**"ready to send"** only when *every one* of these is true —
 
 - the listing came from **RentCast**, never Craigslist. Craigslist has no
   real, stable contact address — only its own JS "reply" relay, which
@@ -144,20 +147,38 @@ these is true —
 - **your applicant profile is complete** — specifically, has your own
   disclosure text (see below)
 
-Anything that fails even one of these gets the same drafted email, marked
-with the specific reason it wasn't sent, instead of a silent skip. Nothing
-sends at all unless the scan was run with `--send-emails`; a plain local
-run never does, regardless of what credentials are configured — that flag
-is only ever passed by the scheduled Action.
+Anything that fails even one of these gets a drafted email anyway, marked
+with the specific reason it isn't gate-eligible, instead of a silent skip.
 
-**The disclosure paragraph is yours, not this tool's.** Fill in your
-profile once on the site (✎ profile). Every email — sent or manually
-copied — includes your disclosure text verbatim, in your own words. This
-tool will never draft, edit, or suggest that paragraph. Consider having it
-reviewed by a tenant/reentry legal aid organization before relying on it —
-e.g. King County's **Housing Justice Project** or **Civil Survival
-Project** — since what's wise to say and when can depend on the specific
-city.
+**Who actually sends it.** A Claude Code session reads eligible listings
+through a narrow, read-mostly `AGENT_TOKEN` (see Setup below — deliberately
+*not* the same token the site uses, so if it were ever exposed it can't
+touch your review state, your profile, or the raw scan data, only read
+eligible listings and mark one as contacted), writes each email itself —
+real per-listing phrasing, not a template, dropping irrelevant profile
+fields rather than mechanically inserting them — and sends it through the
+connected Gmail account. **This is intentionally session-bound**: it only
+runs while that Claude session is active, with no fixed schedule guarantee
+the way the GitHub Action has. If the session ends, outreach simply pauses
+— eligible listings stay queued and nothing is lost, but nothing sends
+either until a session resumes checking. This trade-off (occasionally
+paused, vs. always-on but template-written) was a deliberate choice over
+having the Action itself call an LLM API to draft and send unattended.
+
+The Gmail SMTP path (`mailer.py`, the `--send-emails` flag) still exists
+in the code but is no longer used by the live flow — it's kept for local
+testing of that mechanism only. The scheduled Action never sends email; it
+only computes and publishes which listings are eligible.
+
+**The disclosure paragraph is yours, not this tool's — and not the
+drafting session's either.** Fill in your profile once on the site (✎
+profile). Every email — sent by a Claude session or manually copied for
+Craigslist — includes your disclosure text verbatim, in your own words.
+No part of this project, human-templated or agent-drafted, will rewrite,
+edit, or suggest that paragraph. Consider having it reviewed by a
+tenant/reentry legal aid organization before relying on it — e.g. King
+County's **Housing Justice Project** or **Civil Survival Project** — since
+what's wise to say and when can depend on the specific city.
 
 **Know the legal landscape before you decide what to say.** Seattle's Fair
 Chance Housing Ordinance (SMC 14.09) has a carve-out specifically for
@@ -187,14 +208,18 @@ a guess from this README or from any AI chatbot.
   still shows the previous fetch's RentCast listings on the site rather
   than dropping them for the rest of the day. Force an extra fetch the
   same day with `--force-rentcast` if you're deliberately testing.
-- **Gmail sending** (optional; without it, everything still drafts, just
-  never sends): the Gmail account needs 2-Step Verification turned on
-  (Google Account → Security), then generate an **App Password** (Google
-  Account → Security → App passwords — search "app passwords" if it's not
-  visible) scoped to Mail. Add repo secrets `GMAIL_ADDRESS` (the full
-  address) and `GMAIL_APP_PASSWORD` (the 16-character app password, not
-  your real password). Sends go through your real Gmail account, so
-  replies land in your normal inbox.
+- **Agent access** (needed for a Claude session to draft/send at all): in
+  the Cloudflare dashboard, add a second Worker secret `AGENT_TOKEN` — a
+  different long random string from `API_TOKEN`, not shared with GitHub.
+  A Claude Code session doing outreach check-ins holds this token for the
+  life of that session, since it needs to call `/api/agent/candidates`
+  and `/api/emailed` repeatedly; that's the reason it's a separate, narrow
+  credential rather than the site's full-access one.
+- **Gmail sending**: no setup needed for the live flow — a Claude session
+  sends through its already-connected Gmail integration. The
+  `GMAIL_ADDRESS` / `GMAIL_APP_PASSWORD` secrets and the App Password flow
+  are only relevant if you want to locally test `mailer.py`'s SMTP path
+  (`--send-emails`) directly; skip them otherwise.
 - **Applicant profile**: open the site → ✎ profile → fill in name,
   contact info, employment/income in your own words, and disclosure text.
   Nothing drafts or sends until this is saved with disclosure text filled
