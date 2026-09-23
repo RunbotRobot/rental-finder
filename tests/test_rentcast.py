@@ -1,3 +1,7 @@
+from unittest.mock import patch
+
+import requests
+
 from rental_finder.config import Settings
 from rental_finder.models import PRECISION_ADDRESS
 from rental_finder.sources.rentcast import _to_listing, fetch_listings
@@ -55,4 +59,24 @@ def test_missing_required_fields_is_skipped():
 
 def test_fetch_skipped_without_api_key():
     settings = Settings(rentcast_api_key=None)
-    assert fetch_listings(settings, session=None) == []
+    ok, listings = fetch_listings(settings, session=None)
+    assert ok is True  # nothing to retry -- not a failure
+    assert listings == []
+
+
+def test_fetch_reports_failure_distinctly_from_zero_results():
+    settings = Settings(rentcast_api_key="bad-key")
+    with patch("requests.get", side_effect=requests.RequestException("boom")):
+        ok, listings = fetch_listings(settings, session=None)
+    assert ok is False  # so a daily-quota gate knows not to count this as "done for today"
+    assert listings == []
+
+
+def test_fetch_reports_success_with_zero_results():
+    settings = Settings(rentcast_api_key="a-key")
+    with patch("requests.get") as mock_get:
+        mock_get.return_value.raise_for_status.return_value = None
+        mock_get.return_value.json.return_value = []
+        ok, listings = fetch_listings(settings, session=None)
+    assert ok is True
+    assert listings == []

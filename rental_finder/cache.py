@@ -24,6 +24,10 @@ logger = logging.getLogger(__name__)
 CACHE_VERSION = 1
 MAX_AGE_DAYS = 60
 
+# Reserved key for cross-run bookkeeping that isn't a listing (no Craigslist
+# or RentCast id starts with "_"). Currently just the RentCast quota gate.
+_META_KEY = "_meta"
+
 _CACHED_FIELDS = (
     "posted_at",
     "bedrooms",
@@ -39,6 +43,17 @@ _CACHED_FIELDS = (
     "county",
     "nearest_facility_ft",
     "facility_checked",
+    # Not needed by restore() (the listing object already has these, freshly
+    # fetched) but needed to fully reconstruct a listing that wasn't
+    # re-fetched this run at all -- see all_source_listings().
+    "source",
+    "url",
+    "title",
+    "price",
+    "category",
+    "location_text",
+    "contact_name",
+    "contact_email",
 )
 
 
@@ -66,6 +81,28 @@ class Cache:
         listing.is_new = False
         return True
 
+    def all_source_listings(self, source: str) -> list[Listing]:
+        """Reconstruct full Listing objects for every cached entry from this
+        source. Used when a run skips fetching that source entirely (e.g.
+        RentCast's once-a-day quota gate) but the site should still show
+        those listings rather than have them vanish until the next fetch."""
+        listings = []
+        for source_id, entry in self.entries.items():
+            if source_id == _META_KEY or entry.get("source") != source:
+                continue
+            listing = Listing(
+                source=entry["source"],
+                source_id=source_id,
+                url=entry.get("url", ""),
+                title=entry.get("title", ""),
+                price=entry.get("price"),
+                category=entry.get("category", ""),
+                location_text=entry.get("location_text"),
+            )
+            self.restore(listing)
+            listings.append(listing)
+        return listings
+
     def geocoded_from(self, listing: Listing) -> str | None:
         entry = self.entries.get(listing.source_id)
         return entry.get("geocoded_from") if entry else None
@@ -80,7 +117,19 @@ class Cache:
 
     def prune(self, today: date) -> None:
         cutoff = (today - timedelta(days=MAX_AGE_DAYS)).isoformat()
-        self.entries = {k: v for k, v in self.entries.items() if v.get("last_seen", "") >= cutoff}
+        self.entries = {
+            k: v for k, v in self.entries.items() if k == _META_KEY or v.get("last_seen", "") >= cutoff
+        }
+
+    def should_fetch_rentcast(self, today: date) -> bool:
+        """RentCast is a paid, quota-limited API queried once per run; this
+        run may be one of several the same day (the Action runs every 6
+        hours). True at most once per calendar day, so a free-tier budget
+        sized for "once a day" isn't quietly burned by run frequency."""
+        return self.entries.get(_META_KEY, {}).get("rentcast_fetched_on") != today.isoformat()
+
+    def mark_rentcast_fetched(self, today: date) -> None:
+        self.entries.setdefault(_META_KEY, {})["rentcast_fetched_on"] = today.isoformat()
 
     def save(self) -> None:
         payload = {"version": CACHE_VERSION, "listings": self.entries}

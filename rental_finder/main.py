@@ -106,19 +106,35 @@ def run(
     limit: int = 0,
     json_path: str | None = None,
     emailed_out_path: str | None = None,
+    force_rentcast: bool = False,
 ) -> None:
     session = requests.Session()
     session.headers["User-Agent"] = settings.user_agent
     today = date.today()
+    cache = Cache(settings.cache_path)
 
     listings = craigslist.fetch_listings(settings, session)
-    listings += rentcast.fetch_listings(settings, session)
+    if settings.rentcast_api_key:
+        if force_rentcast or cache.should_fetch_rentcast(today):
+            ok, rentcast_listings = rentcast.fetch_listings(settings, session)
+            listings += rentcast_listings
+            if ok:
+                cache.mark_rentcast_fetched(today)
+            else:
+                logger.warning("RentCast fetch failed -- not counting today's quota slot as used; will retry next run")
+        else:
+            stale = cache.all_source_listings("rentcast")
+            logger.info(
+                "Skipping RentCast fetch this run (quota gate, already fetched today) -- "
+                "reusing %d previously-fetched RentCast listing(s)",
+                len(stale),
+            )
+            listings += stale
     listings = [l for l in listings if l.price is not None and l.price <= settings.max_rent]
     logger.info("%d listings within budget", len(listings))
     if limit:
         listings = listings[:limit]
 
-    cache = Cache(settings.cache_path)
     for listing in listings:
         cache.restore(listing)
 
@@ -193,6 +209,12 @@ def main() -> None:
         "even with Gmail credentials configured -- this is the one flag a plain local run should never pass.",
     )
     parser.add_argument("--auto-send-buffer-ft", type=int, default=DEFAULT_SETTINGS.auto_send_buffer_ft)
+    parser.add_argument(
+        "--force-rentcast",
+        action="store_true",
+        help="Fetch from RentCast even if already fetched today. RentCast is on a paid, "
+        "quota-limited free tier sized for once a day; only override this for deliberate testing.",
+    )
     parser.add_argument("--limit", type=int, default=0, help="Only process the first N listings (for a quick test run)")
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
@@ -215,7 +237,14 @@ def main() -> None:
         gmail_address=os.environ.get("GMAIL_ADDRESS") or None,
         gmail_app_password=os.environ.get("GMAIL_APP_PASSWORD") or None,
     )
-    run(settings, args.out, limit=args.limit, json_path=args.json, emailed_out_path=args.emailed_out)
+    run(
+        settings,
+        args.out,
+        limit=args.limit,
+        json_path=args.json,
+        emailed_out_path=args.emailed_out,
+        force_rentcast=args.force_rentcast,
+    )
 
 
 if __name__ == "__main__":
