@@ -11,7 +11,10 @@
 <body>
 <header class="top">
   <h1>Rental Finder</h1>
-  <button id="settings-btn" class="ghost" aria-label="Settings">⚙</button>
+  <div class="header-actions">
+    <button id="profile-btn" class="ghost" aria-label="Applicant profile">✎ profile</button>
+    <button id="settings-btn" class="ghost" aria-label="Settings">⚙</button>
+  </div>
 </header>
 
 <section id="auth" class="panel hidden">
@@ -20,6 +23,30 @@
     <input id="token" type="password" autocomplete="off" placeholder="access token" required>
     <button type="submit">Save</button>
   </form>
+</section>
+
+<section id="profile" class="panel hidden">
+  <h2>Applicant profile</h2>
+  <p class="meta">
+    Used to draft outreach emails. Nothing sends without <strong>your own</strong>
+    disclosure text below, in your own words &mdash; this tool never writes or
+    edits that paragraph. Consider having it reviewed by a tenant/reentry legal
+    aid organization first (e.g. Housing Justice Project, Civil Survival Project).
+  </p>
+  <form id="profile-form">
+    <label>Name<input name="name" required></label>
+    <label>Phone<input name="phone" type="tel"></label>
+    <label>Email (shown in signature)<input name="email" type="email"></label>
+    <label>Target move-in date<input name="move_in_date" placeholder="e.g. October 1"></label>
+    <label>Employment, in your own words<textarea name="employment_text" rows="2"></textarea></label>
+    <label>Income, in your own words<textarea name="income_text" rows="2"></textarea></label>
+    <label>Disclosure, in your own words <strong>(required to send anything)</strong><textarea name="disclosure_text" rows="5" required></textarea></label>
+    <div class="edit-buttons">
+      <button type="submit">Save profile</button>
+      <button type="button" id="profile-close" class="ghost">Close</button>
+    </div>
+  </form>
+  <p class="meta" id="profile-status"></p>
 </section>
 
 <section id="summary" class="panel hidden">
@@ -32,9 +59,7 @@
     <option value="">any distance</option>
   </select>
   <select id="f-category" aria-label="Category">
-    <option value="">apartments + rooms</option>
-    <option value="apa">apartments</option>
-    <option value="roo">rooms</option>
+    <option value="">every category</option>
   </select>
   <select id="f-status" aria-label="Review status">
     <option value="active">not dismissed</option>
@@ -63,10 +88,12 @@
     <p class="flags"></p>
     <p class="desc"></p>
     <p class="dates"></p>
+    <p class="outreach"></p>
     <div class="actions">
       <button class="act-star">☆ star</button>
       <button class="act-dismiss">dismiss</button>
       <button class="act-edit">note / address</button>
+      <button class="act-draft hidden">view draft</button>
       <a class="act-map" target="_blank" rel="noopener">map</a>
       <a class="act-ccc" href="https://www.findchildcarewa.org/" target="_blank" rel="noopener">child care check</a>
     </div>
@@ -75,6 +102,11 @@
       <textarea class="edit-note" rows="2" placeholder="notes"></textarea>
       <div class="edit-buttons"><button type="submit">save</button><button type="button" class="edit-cancel ghost">cancel</button></div>
     </form>
+    <div class="draft hidden">
+      <p class="draft-subject"></p>
+      <pre class="draft-body"></pre>
+      <button type="button" class="draft-copy">copy draft</button>
+    </div>
     <p class="note"></p>
   </article>
 </template>

@@ -9,6 +9,14 @@ key in the report. Heavier weights go to signals that are nearly always
 scams when present (wire-transfer language, the same canned description
 posted under several different listings); lighter ones to things that are
 merely suspicious on their own.
+
+Scoped to source == "craigslist" only. These heuristics were tuned against
+open-text classified-ad scam patterns; a structured, authenticated provider
+like RentCast has no equivalent free-text scam surface, and its
+"duplicate-title"/"duplicate-description" checks would misfire on
+legitimately syndicated listings (the same property posted with identical
+copy across multiple MLS-fed sites is normal there, not spam). Non-Craigslist
+listings always get spam_score == 0.
 """
 
 from __future__ import annotations
@@ -82,13 +90,18 @@ def _price_floor_by_category(listings: list[Listing]) -> dict[str, float]:
 
 def flag_listings(listings: list[Listing]) -> None:
     """Sets spam_flags / spam_score on every listing in place."""
-    floors = _price_floor_by_category(listings)
-    title_counts = Counter(_normalize(l.title) for l in listings)
+    craigslist_listings = [l for l in listings if l.source == "craigslist"]
+    for listing in listings:
+        if listing.source != "craigslist":
+            listing.spam_flags, listing.spam_score = [], 0
+
+    floors = _price_floor_by_category(craigslist_listings)
+    title_counts = Counter(_normalize(l.title) for l in craigslist_listings)
     description_counts = Counter(
-        _normalize(l.description)[:150] for l in listings if l.description and len(l.description) >= 60
+        _normalize(l.description)[:150] for l in craigslist_listings if l.description and len(l.description) >= 60
     )
 
-    for listing in listings:
+    for listing in craigslist_listings:
         flags: list[str] = []
         text = " ".join(filter(None, [listing.title, listing.description]))
 

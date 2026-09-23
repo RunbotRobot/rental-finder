@@ -71,3 +71,18 @@ def test_clean_listing_has_no_flags():
     listings = _market("apa", 1400)
     flag_listings(listings)
     assert all(l.spam_flags == [] for l in listings)
+
+
+def test_non_craigslist_sources_are_never_flagged():
+    rc = _listing(
+        source_id="rc1",
+        title="Apartment at 8500 20th Ave NE",
+        description="Kindly wire transfer your deposit via Western Union",
+        price=1.0,
+        source="rentcast",
+    )
+    # identical title/description repeated -- would trip duplicate checks on Craigslist
+    rc2 = _listing(source_id="rc2", title=rc.title, description=rc.description, price=1.0, source="rentcast")
+    flag_listings([rc, rc2])
+    assert rc.spam_flags == [] and rc.spam_score == 0
+    assert rc2.spam_flags == [] and rc2.spam_score == 0

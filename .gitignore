@@ -10,3 +10,6 @@ worker/package.json
 worker/package-lock.json
 data.json
 worker/.dev.vars
+applicant_profile.json
+emailed.json
+emailed_this_run.json

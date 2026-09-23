@@ -2,10 +2,10 @@
 
     python -m rental_finder.main --out candidates.csv -v
 
-Pipeline: fetch search results -> drop over-budget -> restore cache ->
-apply address overrides -> fetch detail pages (capped) -> spam flags ->
-geocode -> drop out-of-county -> distance checks -> save cache -> CSV +
-summary.
+Pipeline: fetch search results (Craigslist + RentCast) -> drop over-budget
+-> restore cache -> apply address overrides -> fetch detail pages (capped)
+-> spam flags -> geocode/locate -> drop out-of-county -> distance checks ->
+draft + (maybe) send outreach emails -> save cache -> CSV + JSON + summary.
 """
 
 from __future__ import annotations
@@ -19,16 +19,29 @@ from pathlib import Path
 
 import requests
 
-from . import compliance
+import os
+
+from . import compliance, outreach
+from .applicant_profile import load_profile
 from .cache import Cache
 from .config import DEFAULT_SETTINGS, Settings
 from .geocode import county_for_point, geocode_address, has_street_number, is_plausible
 from .models import PRECISION_ADDRESS, PRECISION_AREA, PRECISION_NONE, Listing
 from .report import summarize, to_json, write_csv
-from .sources import craigslist
+from .sources import craigslist, rentcast
 from .spam_filter import flag_listings
 
 logger = logging.getLogger(__name__)
+
+
+def _same_county(county: str | None, expected: str) -> bool:
+    """Lenient on purpose: RentCast's county field format isn't documented
+    with an example value, so this doesn't assume it matches the Census
+    geocoder's "King County" exactly -- "King", "KING", "King Co." all pass."""
+    if not county:
+        return True  # unknown -- keep it rather than risk dropping a real match
+    bare_expected = expected.replace(" County", "").strip().lower()
+    return bare_expected in county.lower()
 
 
 def load_overrides(path: str | Path) -> dict[str, str]:
@@ -41,6 +54,17 @@ def load_overrides(path: str | Path) -> dict[str, str]:
             for row in csv.DictReader(f)
             if row.get("source_id") and row.get("address")
         }
+
+
+def load_emailed_ids(path: str | Path) -> set[str]:
+    path = Path(path)
+    if not path.exists():
+        return set()
+    try:
+        return set(json.loads(path.read_text(encoding="utf-8")))
+    except (OSError, ValueError) as exc:
+        logger.warning("Ignoring unreadable emailed-ids file %s: %s", path, exc)
+        return set()
 
 
 def locate(listing: Listing, cache: Cache, settings: Settings, session: requests.Session) -> str | None:
@@ -76,12 +100,19 @@ def locate(listing: Listing, cache: Cache, settings: Settings, session: requests
     return None
 
 
-def run(settings: Settings, out_path: str, limit: int = 0, json_path: str | None = None) -> None:
+def run(
+    settings: Settings,
+    out_path: str,
+    limit: int = 0,
+    json_path: str | None = None,
+    emailed_out_path: str | None = None,
+) -> None:
     session = requests.Session()
     session.headers["User-Agent"] = settings.user_agent
     today = date.today()
 
     listings = craigslist.fetch_listings(settings, session)
+    listings += rentcast.fetch_listings(settings, session)
     listings = [l for l in listings if l.price is not None and l.price <= settings.max_rent]
     logger.info("%d listings within budget", len(listings))
     if limit:
@@ -109,15 +140,24 @@ def run(settings: Settings, out_path: str, limit: int = 0, json_path: str | None
 
     geocoded_from: dict[str, str | None] = {}
     for listing in listings:
-        geocoded_from[listing.source_id] = locate(listing, cache, settings, session)
+        # RentCast already supplies real coordinates -- nothing to geocode.
+        geocoded_from[listing.source_id] = None if listing.latitude is not None else locate(listing, cache, settings, session)
 
-    in_county = [l for l in listings if not l.county or l.county == settings.county]
+    in_county = [l for l in listings if _same_county(l.county, settings.county)]
     for listing in listings:
-        if listing.county and listing.county != settings.county:
+        if not _same_county(listing.county, settings.county):
             logger.info("Dropping %s (%s): %s", listing.county, listing.best_address or "no location", listing.url)
     logger.info("%d listings in %s (dropped %d confirmed elsewhere)", len(in_county), settings.county, len(listings) - len(in_county))
 
     compliance.annotate_distances(in_county, settings, session)
+
+    profile = load_profile(settings.profile_path)
+    already_emailed = load_emailed_ids(settings.emailed_path)
+    newly_emailed = outreach.process(in_county, settings, profile, already_emailed)
+    if newly_emailed:
+        logger.info("Sent %d new outreach email(s)", len(newly_emailed))
+    if emailed_out_path:
+        Path(emailed_out_path).write_text(json.dumps(sorted(newly_emailed)), encoding="utf-8")
 
     for listing in listings:
         cache.store(listing, geocoded_from[listing.source_id], today)
@@ -143,6 +183,16 @@ def main() -> None:
     parser.add_argument("--no-details", action="store_true", help="Skip fetching listing pages this run")
     parser.add_argument("--cache", default=DEFAULT_SETTINGS.cache_path)
     parser.add_argument("--overrides", default=DEFAULT_SETTINGS.overrides_path)
+    parser.add_argument("--profile", default=DEFAULT_SETTINGS.profile_path)
+    parser.add_argument("--emailed", default=DEFAULT_SETTINGS.emailed_path, help="Path to the list of already-emailed listing ids")
+    parser.add_argument("--emailed-out", default=None, help="Write newly-emailed listing ids here, for the caller to persist")
+    parser.add_argument(
+        "--send-emails",
+        action="store_true",
+        help="Actually send outreach emails for listings that clear the gate. Off by default, "
+        "even with Gmail credentials configured -- this is the one flag a plain local run should never pass.",
+    )
+    parser.add_argument("--auto-send-buffer-ft", type=int, default=DEFAULT_SETTINGS.auto_send_buffer_ft)
     parser.add_argument("--limit", type=int, default=0, help="Only process the first N listings (for a quick test run)")
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
@@ -157,8 +207,15 @@ def main() -> None:
         fetch_details=not args.no_details,
         cache_path=args.cache,
         overrides_path=args.overrides,
+        profile_path=args.profile,
+        emailed_path=args.emailed,
+        send_emails=args.send_emails,
+        auto_send_buffer_ft=args.auto_send_buffer_ft,
+        rentcast_api_key=os.environ.get("RENTCAST_API_KEY") or None,
+        gmail_address=os.environ.get("GMAIL_ADDRESS") or None,
+        gmail_app_password=os.environ.get("GMAIL_APP_PASSWORD") or None,
     )
-    run(settings, args.out, limit=args.limit, json_path=args.json)
+    run(settings, args.out, limit=args.limit, json_path=args.json, emailed_out_path=args.emailed_out)
 
 
 if __name__ == "__main__":
