@@ -175,9 +175,18 @@ a guess from this README or from any AI chatbot.
 **Setup**, all through the site and repo secrets, no code changes:
 
 - **RentCast** (optional, needed for any auto-send at all): create an
-  account at rentcast.io, generate an API key (free tier: ~50 calls/mo,
-  plenty for a periodic King County search), add it as the GitHub repo
-  secret `RENTCAST_API_KEY`.
+  account at rentcast.io, generate an API key, add it as the GitHub repo
+  secret `RENTCAST_API_KEY`. One search call returns up to 500 listings
+  with full contact info already included — no per-listing follow-up
+  calls — so the free tier (~50 calls/mo) comfortably covers **one King
+  County search a day**. The scheduled Action runs every 6 hours, which
+  would burn the free tier 2–3x over if it called RentCast on every run,
+  so it doesn't: `cache.py` gates RentCast to once per calendar day
+  regardless of how often the Action fires (Craigslist, which has no
+  quota, still runs on the full schedule). A run that skips the fetch
+  still shows the previous fetch's RentCast listings on the site rather
+  than dropping them for the rest of the day. Force an extra fetch the
+  same day with `--force-rentcast` if you're deliberately testing.
 - **Gmail sending** (optional; without it, everything still drafts, just
   never sends): the Gmail account needs 2-Step Verification turned on
   (Google Account → Security), then generate an **App Password** (Google

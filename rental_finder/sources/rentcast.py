@@ -76,9 +76,13 @@ def _to_listing(item: dict) -> Listing | None:
     return listing
 
 
-def fetch_listings(settings: Settings, session: requests.Session) -> list[Listing]:
+def fetch_listings(settings: Settings, session: requests.Session) -> tuple[bool, list[Listing]]:
+    """(ok, listings). ok is False on a request failure (bad key, network,
+    timeout) so a caller enforcing a daily quota doesn't mistake a failed
+    attempt for a successful "no listings today" and skip retrying until
+    tomorrow. No API key configured is reported as ok (nothing to retry)."""
     if not settings.rentcast_api_key:
-        return []
+        return True, []
 
     params = {
         "latitude": settings.rentcast_latitude,
@@ -94,7 +98,7 @@ def fetch_listings(settings: Settings, session: requests.Session) -> list[Listin
         items = resp.json()
     except (requests.RequestException, ValueError) as exc:
         logger.warning("RentCast fetch failed: %s", exc)
-        return []
+        return False, []
 
     listings = []
     for item in items:
@@ -102,4 +106,4 @@ def fetch_listings(settings: Settings, session: requests.Session) -> list[Listin
         if listing is not None:
             listings.append(listing)
     logger.info("RentCast: %d listings", len(listings))
-    return listings
+    return True, listings
