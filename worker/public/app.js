@@ -252,7 +252,7 @@
       replied.classList.remove("hidden");
       replied.classList.toggle("replied", Boolean(review.emailed));
       replied.textContent = review.emailed ? "✓ replied (undo)" : "mark replied";
-      replied.onclick = () => save(listing.id, { emailed: review.emailed ? "" : new Date().toISOString() });
+      replied.onclick = () => save(listing.id, { emailed: review.emailed ? "" : new Date().toISOString() }, replied);
     }
 
     const map = $(".act-map", node);
@@ -261,28 +261,39 @@
 
     const star = $(".act-star", node);
     star.textContent = review.status === "starred" ? "★ starred" : "☆ star";
-    star.onclick = () => save(listing.id, { status: review.status === "starred" ? "" : "starred" });
+    star.onclick = () => save(listing.id, { status: review.status === "starred" ? "" : "starred" }, star);
     const dismiss = $(".act-dismiss", node);
     dismiss.textContent = review.status === "dismissed" ? "restore" : "dismiss";
-    dismiss.onclick = () => save(listing.id, { status: review.status === "dismissed" ? "" : "dismissed" });
+    dismiss.onclick = () => save(listing.id, { status: review.status === "dismissed" ? "" : "dismissed" }, dismiss);
 
     const form = $(".edit", node);
     $(".edit-address", form).value = review.address || "";
     $(".edit-note", form).value = review.note || "";
     $(".act-edit", node).onclick = () => form.classList.toggle("hidden");
     $(".edit-cancel", form).onclick = () => form.classList.add("hidden");
-    form.onsubmit = (e) => { e.preventDefault(); save(listing.id, { address: $(".edit-address", form).value.trim(), note: $(".edit-note", form).value.trim() }); };
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      save(listing.id, { address: $(".edit-address", form).value.trim(), note: $(".edit-note", form).value.trim() }, $("button[type=submit]", form));
+    };
     $(".note", node).textContent = review.note || "";
     return node;
   }
 
-  async function save(id, patch) {
+  async function save(id, patch, button) {
+    // Disabling immediately, before the request even starts, is the fix for
+    // a real reported bug: with no visible feedback during the round trip,
+    // a dismiss (which makes the card disappear once it lands, under the
+    // site's default "not dismissed" filter) looked like it hadn't
+    // registered, so a second tap landed on whatever card had shifted up
+    // into that same spot once the first one actually went through.
+    if (button) button.disabled = true;
     try {
       const entry = await api(`/api/state/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
       if (Object.keys(entry).length) state[id] = entry; else delete state[id];
       render();
     } catch (err) {
       $("#status").textContent = `Couldn't save: ${err.message}`;
+      if (button) button.disabled = false;
     }
   }
 

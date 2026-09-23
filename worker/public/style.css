@@ -62,6 +62,7 @@ h2 a:hover { text-decoration: underline; }
 .check { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; font-size: 15px; }
 button { font: inherit; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 8px 12px; min-height: 40px; }
 button.ghost { background: transparent; }
+button:disabled { opacity: .5; }
 form { display: flex; gap: 8px; }
 form input { flex: 1; }
 
