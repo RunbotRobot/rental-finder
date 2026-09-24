@@ -7619,8 +7619,16 @@
    "bedrooms": 1,
    "description": "Room for Rent Please see description below and contact me with any questions. Available October 1st Large Bedroom ONLY for rent in lower level of house, close to parks/trail, shopping and freeway. Details: *Approx. 281 sqft (17ft x 16ft) *SINGLE occupancy bedroom, no overnight guest please *Private entry *Shared bathroom/kitchenette w/ 1 other responsible working MALE *Washer/dryer on site *ALL UTILITIES included with complimentary xfinity high speed internet *Party, drugs and smoke-free home *Minimum 6 month lease, month-to-month afterwards *Furnishing available *$995 rent/month Move-in costs: *$500 refundable deposit *$37 nonrefundable background check/application fee *$995 First month + $995 last months rent (payment plan negotiable) *Sorry, no pets, party, drugs or indoor smoking",
    "map_address": null,
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "house",
+    "no private bath",
+    "laundry in bldg",
+    "street parking",
+    "no smoking"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.5614,
    "pin_lon": -122.1552,
    "pin_accuracy": 22,
@@ -8805,8 +8813,18 @@
    "bedrooms": null,
    "description": "The Address 1. It's at the TOP, right under the price and description. 2. If you're viewing this on a tiny device, then it's ALSO at the very BOTTOM, right under the map. Otherwise, it's in the top-right corner, also right under the map. All Stars Only Wholesome, graceful, respectful, courteous, considerate, and honorable prospects ONLY. * You smile - because you are grateful for every moment of life. * You cause others to smile - because sunshine and happiness surrounds you. * You light up a room \u2013 because you are a shining gem. * You clean \u2013 because you are clean. * You softly close doors and drawers \u2013 because you are graceful. * You push chairs back under a table \u2013 because you have etiquette. You're are not required to socialize with anyone, but people should look forward toward your friendly presence - even if you don't directly interact with them. Just be a bundle of joy. The No's No Drugs. No Drug Users. (including marijuana) No Smoking. No Smokers. No Pets/Animals The Basics Approximate Room Dimensions: 11 x 10 Private Entrance Private Bathroom Private mini-fridge Assigned parking on property; 1 vehicle maximum Security --Electronic deadbolt on bedroom Door; as well as front and back --Security cameras 0.3 miles north of Kirkland Owner occupied Single occupancy only The Move In Details $575.00 security deposit Move in amount schedule can be seen @ sleepyproperties[DOT]com/Simonds/rooms/room2/September sleepyproperties[DOT]com/Simonds/rooms/room2/October NOTE: You must conform the URLs by replacing [DOT] with \".\" The Utilities Flat fee of $100 per month and include: * Internet: 1Gbps to DOCSIS 3.1 modem, WiFi7 Capable Router * Comcast cable with \"Ultimate TV\" plan plus HBO, Showtime, Disney, Hulu, and Streampix * Sewer & Whole-House Filtered Water * Gas, Electricity & Garbage More Info? See: sleepyproperties[DOT]com/Simonds sleepyproperties[DOT]com/simonds/rules sleepyproperties[DOT]com/Simonds/rooms/room2 NOTE: You must conform the URLs by replacing [DOT] with \".\"",
    "map_address": "15127 Simonds Rd NE",
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "house",
+    "private bath",
+    "w/d in unit",
+    "furnished",
+    "off-street parking",
+    "no smoking",
+    "air conditioning"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.738326,
    "pin_lon": -122.222836,
    "pin_accuracy": 7,
@@ -9056,8 +9074,18 @@
    "bedrooms": 1,
    "description": "I\u2019m renting a room with shared bathroom in my expansive 3 level home. It\u2019s total square footage is 4300 sq ft so it\u2019s a lot better living than on Capitol Hill or SLU! My home is an eight years old and in South Beacon Hill! The room unfurnished is $1,099 or furnished is $1,149. I also have a big room for $1,175/$1225. Before I go on I'd like to point out I unfortunately will not be considering for best cohesion: *smoking *drug use *dogs (cat possible) The house has a jacuzzi hot tub covered under a gazebo, BBQ, gym with quality equipment, beautiful kitchen with every gadget and gizmo, mesh gigabit WiFi, free parking, amongst other things. The whole home is automated and has some awesome capabilities. There is a large outdoor deck with outdoor dining and living areas and a beautiful landscaped yard. Our neighbors have the largest property I'm aware of in Seattle. They have a horse ranch with numerous horses. There are no wild parties in this house. You are certainly welcome to have an occasional guest over. I\u2019m a hard working gay male and very polite and respectful of others and others property and live on the top level of the 3 story home. This room is on the bottom level of the home which has its own entrance, kitchen, laundry and bathroom shared with a total of 3 people which would include you. The space is shared with two other mid 20s-30s wonderful roommates, who both work hard and when home we all expect our fellow prospect to be respectful, quiet, super clean like we are! Historically we have had awesome trans, lesbian, gay, straight roommates so just be awesome! This is for a year lease, single occupancy. There is a $800 refundable deposit required for move in. An additional months rent is also required towards the deposit. Rent does NOT include utilities. I require an additional $175 to be applied to utilities. Note the actual amount may average a little higher once a bill is calculated a couple times a year depending on the heating/cooling needs. Please message me with a little about yourself and a date and time you are able to come in and see the place.",
    "map_address": "Bond St S near Beacon Ave S",
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "house",
+    "no private bath",
+    "w/d in unit",
+    "furnished",
+    "off-street parking",
+    "no smoking",
+    "air conditioning"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.5137,
    "pin_lon": -122.2735,
    "pin_accuracy": 99,
@@ -10204,8 +10232,17 @@
    "bedrooms": 1,
    "description": "Master bedroom with private bathroom and private entrance -available in a shared home. Located in an established neighborhood - one-half mile from Marymoor Park and two different rail stations- one-half mile from Highway #520. Room Details:  This offers a spacious bedroom with a private bathroom and private entrance. The room has a lot of natural light and offers a deck.  The home has HVAC units with separate controls for air conditioning and heat in this room.  This is a very quiet, friendly home with respectful roommates in their 30's--all of whom are in the tech industry. Home Features: High speed internet HVAC system with individual room controls There is a shared kitchen and living area Shared freezer in garage In-house washer/dryer Free parking plus garage space for storage, etc. Well-kept large backyard - feel free to garden or just enjoy the quiet neighborhood. Quiet, respectful household Secure, safe area to live Location and neighborhood: Redmond, WA - close to tech campuses, trails, and transit One-half mile to bus stop and light rail stations One-half mile from Highway #520 There is a flat monthly rate for utilities + shared supplies Walkable/bikeable neighborhood Great for working professionals or college students. This is a quiet household and is not suitable for those who like to entertain or host parties.  Available now. In your inquiry, please provide a phone number and the best times to reach you. We can then reach out to go over your questions so you can figure out if this might be a good fit for you.  We need to visit with you before setting up an appointment to see the space. Thanks for your understanding.",
    "map_address": null,
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "house",
+    "private bath",
+    "laundry in bldg",
+    "street parking",
+    "no smoking",
+    "air conditioning"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.6718,
    "pin_lon": -122.1232,
    "pin_accuracy": 22,
@@ -10381,8 +10418,16 @@
    "bedrooms": null,
    "description": "Looking for a quiet place to park your RV, motorhome, travel trailer, fifth wheel, tiny home on wheels, camper van, or sprinter van? We have private RV pads available on a peaceful wooded property. Text-call 206five69. 8487 PROPERTY FEATURES: \u2022 Water included \u2022 Sewer included \u2022 Garbage included \u2022 50-amp electrical hookup available \u2022 Private and secluded setting \u2022 Large trees and natural surroundings \u2022 Easy access for RVs and trailers \u2022 Quiet area with plenty of space \u2022 Long-term tenants preferred APPROVED UNITS: \u2022 Class A Motorhomes \u2022 Class B Camper Vans \u2022 Class C Motorhomes \u2022 Fifth Wheels \u2022 Travel Trailers \u2022 Toy Haulers \u2022 Tiny Homes on Wheels \u2022 Sprinter Vans \u2022 Schoolie Conversions \u2022 Park Model RVs (subject to approval) RENTAL TERMS: \u2022 $1,000 per month \u2022 $200 security deposit \u2022 Water, sewer, and garbage included \u2022 Electricity metered separately \u2022 6-month minimum lease preferred \u2022 Maximum 2 vehicles and 1 trailer per site TO APPLY: Please send: \u2022 Photos of your RV, trailer, or tiny home \u2022 Number of occupants \u2022 Pet information \u2022 Desired move-in date \u2022 Phone number for contact Looking for clean, respectful tenants who enjoy a peaceful country setting. Call or Text Dan Available Now KEYWORDS: RV pad, RV lot, RV space, RV parking, RV site, full hookup RV, RV hookup, RV rental, camper space, motorhome parking, fifth wheel parking, travel trailer space, toy hauler parking, tiny home space, tiny house parking, park model RV, camper van parking, sprinter van parking, long-term RV parking, monthly RV rental, full hookups, sewer hookup, water hookup, 50 amp service, private RV lot, wooded property, country living, off-grid lifestyle, RV living, full-time RV, snowbird parking, trailer space, mobile RV space, Washington RV rental, Kitsap County, Mason County, Port Orchard, Belfair, Gig Harbor, Bremerton, Shelton, Hoodsport.",
    "map_address": "google map \ue913",
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "private room",
+    "cats are ok - purrr",
+    "apartment",
+    "private bath",
+    "dogs are ok - wooof",
+    "no laundry on site",
+    "street parking"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.51435,
    "pin_lon": -122.651711,
    "pin_accuracy": 5,
@@ -11247,8 +11292,16 @@
    "bedrooms": 1,
    "description": "$1,200 / 2br - 1500ft2 - Half a House, Private Bath/Entrance, Office Space, Easy Commute, Trees (Shoreline / very close to North Seattle) * Share 1950's era house with one other person (me) * Rent is $1200 plus utilities * Move in cost is first, last, and a deposit of $600 * Available October 1, possibly sooner * Month by month lease * Private full bathroom, private entrance, private office space * Entire 19 foot living room to yourself, I don't use it * Mostly unfurnished, I have a few optional things. * Hardwood floors * Double pane windows (quiet) * Gas stove * Modern washer/dryer * Off street parking * Large, covered back porch * Trees galore * Bookworms, introverts, and creative types welcome ! ** No Smoking, inside or out ** No Pets (sorry) ** Single occupancy only ** Covid/ airborne virus precautions needed ** Willingness to help dig up blackberries a plus If you like trees you'll love this place. It's a quick hop to I-5 and Aurora, an easy commute to Seattle or Lynnwood. It's a 1950's single story rambler - I live on one side, you would have the other. We would share kitchen and laundry, that's about it. I don't use the porch much, you could basically take it over. In the kitchen we would have totally separate counters / working areas. I'm not a vegetarian, but I'd rather not share the house with somebody who fries lots of meat; There's no outside window in the kitchen so ventilation is not ideal. I'm light on my feet and don't slam doors. Shoes off indoors please. I'm a very busy, independent person, but I like to talk sometimes. Absolutely no smoking, including vaping, incense, intense use of fragrances, or anything else that might be an air quality issue. Due to health concerns (I'm healthy and want to stay that way), I'm talking with people by phone before showing the house. Please respond with a phone number and the best times to call.",
    "map_address": "google map \ue913",
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "house",
+    "private bath",
+    "laundry on site",
+    "off-street parking",
+    "no smoking"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.750218,
    "pin_lon": -122.338428,
    "pin_accuracy": 5,
@@ -12172,8 +12225,16 @@
    "bedrooms": 3,
    "description": "HOUSEMATE WANTED \u2022 WEST SEATTLE Morgan Junction \u2022 $1,900/month \u2022 Utilities Included Housemate wanted to share a comfortable 3-bedroom, 2-story home in Morgan Junction with one other female. Your private space is a large, unfurnished daylight basement with a private full bathroom and extra-large closet. Shared amenities include: *Kitchen & guest room *Wood-burning fireplace *Patio & great outdoor space *Water/sewer/garbage, gas, electric & internet included Two sweet cats already live in the home, so no additional pets, please. \ud83d\udc3e $1,900/month \u2022 $1,900 deposit Available October 1 \u2022 Rental references required Looking for a clean, responsible, considerate housemate who enjoys their privacy while respecting a shared home. Interested? Tell me a little about yourself, your typical schedule, and what you're looking for in a home.",
    "map_address": null,
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "house",
+    "private bath",
+    "w/d in unit",
+    "carport",
+    "no smoking"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.5398,
    "pin_lon": -122.3878,
    "pin_accuracy": 22,
@@ -13669,8 +13730,22 @@
    "bedrooms": 1,
    "description": "Roomy, furnished mother-in-law suite in a beautiful lakeside location, approximately a 15-minute drive to downtown Bellevue and 10 minutes to downtown Renton. Several walking trails are just a 2-minute walk away. Private entrance on the first floor leads to the unit, which is on the second floor and includes the following: Spacious bedroom (furnished) Large entertainment room with seat and projector (see third image) Spacious balcony across entire unit Private bathroom Kitchenette with portable induction stovetop, toaster oven, refrigerator, air fryer, and microwave Mini garage gym with treadmill, squat rack, free weights and bench Laundry is located in the main house and can be scheduled with the homeowner on a regular basis. One dog may be considered for a small fee, subject to property requirements. Rent, including all utilities and Internet, is $650 a month. Strong preference for a 6-month initial lease, with option to renew. If interested, reply masonlilia11(AtGmailcom) with your name, whether you have any pets, your preferred move-in date, and any questions you have about the unit. Please also provide your preferred method of contact so we can arrange a conversation and viewing.",
    "map_address": "N 30th Street",
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "cats are ok - purrr",
+    "apartment",
+    "private bath",
+    "dogs are ok - wooof",
+    "w/d in unit",
+    "furnished",
+    "attached garage",
+    "no smoking",
+    "wheelchair accessible",
+    "air conditioning",
+    "ev charging"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.518221,
    "pin_lon": -122.209633,
    "pin_accuracy": 20,
@@ -13809,8 +13884,17 @@
    "bedrooms": 1,
    "description": "Roomy, furnished mother-in-law suite in a beautiful lakeside location, approximately a 15-minute drive to downtown Bellevue and 10 minutes to downtown Renton. Several walking trails are just a 2-minute walk away. Private entrance on the first floor leads to the unit, which is on the second floor and includes the following: Spacious bedroom (furnished) Large entertainment room with seat and projector (see third image) Spacious balcony across entire unit Private bathroom Kitchenette with portable induction stovetop, toaster oven, refrigerator, air fryer, and microwave Mini garage gym with treadmill, squat rack, free weights and bench Laundry is located in the main house and can be scheduled with the homeowner on a regular basis. One dog may be considered for a small fee, subject to property requirements. Rent, including all utilities and Internet, is $1900 a month. Strong preference for a 6-month initial lease, with option to renew. If interested, reply with your name, whether you have any pets, your preferred move-in date, and any questions you have about the unit. Please also provide your preferred method of contact so we can arrange a conversation and viewing.",
    "map_address": "n 30th st near burnett ave n",
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "in-law",
+    "private bath",
+    "dogs are ok - wooof",
+    "laundry on site",
+    "furnished",
+    "street parking"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.520112,
    "pin_lon": -122.209877,
    "pin_accuracy": 5,
@@ -14202,8 +14286,19 @@
    "bedrooms": 2,
    "description": "Room for rent Oct 1 in Lower Queen Anne apartment with private office/studio This unique daylight basement is a spacious hidden gem - located close to major transit lines, grocery stores, gyms, coffeehouses, banks, SIFF cinema, restaurants, Elliot Bay Trail, and several parks.  Highly walkable area from Seattle Center to Pike Place Rent - $1400/mo (includes all utilities) Security Deposit - $0 Move in costs - 1st & last months rent Lease Term - Negotiable!  3-24 months or month-to month Pets - I have 2 cats, additional pets are negotiable.  (There are no pet deposits/fees/rent) Accessibility - flight of stairs down to apartment, no elevator.  Steps within apartment up to bathroom and kitchen You will have a private bedroom and also a private office/studio space.  Perfect for artists or WFH people. I get along best with cooks, creatives & collectors but have lived peacefully with all types of folks  - as long as we treat each other and our guests with respect",
    "map_address": "2nd ave w near Roy",
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "cats are ok - purrr",
+    "apartment",
+    "no private bath",
+    "dogs are ok - wooof",
+    "laundry in bldg",
+    "street parking",
+    "no smoking",
+    "ev charging"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.626016,
    "pin_lon": -122.359799,
    "pin_accuracy": 5,
@@ -14258,8 +14353,16 @@
    "bedrooms": 1,
    "description": "We have an open room in the house we rent in downtown Fremont, near the troll, half a block from bus lines downtown.  This would be a self contained studio apartment if it were not that the bathroom is in the adjoining basement room.  Therefore, you will have as much privacy as you like, with the option to share the rest of the shared living space and larger kitchen upstairs. The open room is L-shaped, on the bottom floor with hardwood floors and tons of light from several large windows. It's big enough for a bed as well as a sitting area or whatever you can come up with. There are French doors which open up to your own small brick patio. Also in the room is a kitchenette with a small fridge, sink, microwave and air frier/toaster. In addition to the central heating, the room has two wall mounted heaters.  A newly remodeled private 3/4 bathroom with a shower is off the adjoining basement, accessed via a short hallway. On the main floor are a spacious kitchen/dining room and living room which are shared. We live on the top floor with our twins, who are 12 years old. We're a couple in our late 40's. Mom stays at home and homeschools the kids most of the time and Dad works somewhat normal hours m-f. We get up early every morning (the twins see to that) and head to bed early-ish most nights. Some mornings or evenings we try to squeeze in some yoga in the living room. We love to cook and are omnivores (though a previous housemate was a vegetarian.) There is a large yard if you like to spend time outside.  In the summer, we try to eat outside as often as possible or have the occasional grilled dinner. The rent of $1500 includes all utilities and internet.  First and last to be paid upon move-in. There is no smoking or vaping allowed in the house and we cannot accommodate any pets. The room is open and available now. Please feel free to ask questions and we look forward to meeting you!",
    "map_address": null,
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "house",
+    "private bath",
+    "w/d in unit",
+    "street parking",
+    "no smoking"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.6733,
    "pin_lon": -122.3426,
    "pin_accuracy": 22,
@@ -14715,8 +14818,18 @@
    "bedrooms": 1,
    "description": "Single female seeking housemate. Private space: master bedroom with private bath, separate entrance and private deck. Shared space: kitchen, dining and living rooms, library, orchard and veggie garden. Conveniently located mid-island, on peaceful forested ten acres. Please respond to the posting for further details.",
    "map_address": "google map \ue913",
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "house",
+    "private bath",
+    "laundry on site",
+    "furnished",
+    "off-street parking",
+    "no smoking",
+    "air conditioning"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.403546,
    "pin_lon": -122.466764,
    "pin_accuracy": 5,
@@ -15126,8 +15239,16 @@
    "bedrooms": 1,
    "description": "Month by month lease available. text show contact info or email me to make an appt. Private room with a lock. free street parking within the block. 2 minutes walk to bus stop without street noise.  5 minutes walk to a plaza for grocery, UPS, laundry, bar, dental, vision clinic, acupuncture and massage, barbershop, lots of food options, public storage and even AMC cinema with Signature Recliner seat to relax and enjoy your movie. You almost don\u2019t need a car to live here. 1. About the room: for rent is a room in a first floor unit with one shared bathroom and a kitchenette. suit for light cooking. We do have a microwave and an induction stove and a large fridge in garage. engineered hardwood and laminate floors super clean bright house with lots of windows. free parking on streets My place is only one minute walk to the bus stop but still very quiet. You'll love my place because of the coziness and the location. What I love the most about my place is it is a block from my favorite AMC theater, where you will love to kick back and enjoy the show from a luxurious AMC Signature Recliner after having a meal at IHOP or a Mandarin restaurant. 10 minutes walking distance to NSCC (North Seattle Community College), this is a quiet neighborhood but there are a few places within walking distance: At the intersection of Aurora and N 101st, there is a laundromat, UPS, Bar and Grill, Supersaver grocery store and a Coffeehouse and an AMC theater (This is my favorite theater. You will love to kick back and enjoy the show from a luxurious AMC Signature Recliner). There is an IHOP and \"drive in\" burger place-- as well as many small businesses and other restaurants in the area of 99 and 101st Street. To the east, the neighborhood is more commercial and urban. To the west, it is much more quiet and suburban. The E Line metro bus runs express to downtown. We are also close to one of the most popular parks in Seattle - Green Lake. 4. how to rent it: To rent this room, you need to pay: first month of rent and one month of security deposit. plenty of parking space off the street. Looking For Mature, Very Clean, Quiet; Considerate Person to Share with Roommates.We do a background check. 6. How to contact the landlord: please email me or text show contact info for details and viewing. and introduce yourself when you call or email. I prefer you call me first and then email me to follow up. due to internet rental scams, if you email me without a phone number, please do not bother as I will not respond. let me know when you plan to move in and how long you plan to stay. Prices And Availability Are Subject To Change. SORRY NO PETS NO SMOKING, no candles, nothing flammable please.",
    "map_address": "101st Street near Linden Ave",
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "private room",
+    "house",
+    "no private bath",
+    "laundry in bldg",
+    "furnished",
+    "street parking",
+    "no smoking"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.7377,
    "pin_lon": -122.3431,
    "pin_accuracy": 22,
@@ -35933,7 +36054,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1229 Golf Drive S, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-21",
    "last_seen": "2026-09-24"
   },
@@ -55903,8 +56024,16 @@
    "bedrooms": 1,
    "description": "Flexible lease text show contact info or email me to make an appt. Private room with a lock. free street parking within the block. 2 minutes walk to bus stop without street noise.  5 minutes walk to a plaza for grocery, UPS, laundry, bar, dental, vision clinic, acupuncture and massage, barbershop, lots of food options, public storage and even AMC cinema with Signature Recliner seat to relax and enjoy your movie. You almost don\u2019t need a car to live here. 1. About the room: for rent is a room in a first floor unit with one shared bathroom and a kitchenette. suit for light cooking. We do have a microwave and an induction stove and a large fridge in garage. engineered hardwood and laminate floors super clean bright house with lots of windows. free parking on streets My place is only one minute walk to the bus stop but still very quiet. You'll love my place because of the coziness and the location. What I love the most about my place is it is a block from my favorite AMC theater, where you will love to kick back and enjoy the show from a luxurious AMC Signature Recliner after having a meal at IHOP or a Mandarin restaurant. 10 minutes walking distance to NSCC (North Seattle Community College), this is a quiet neighborhood but there are a few places within walking distance: At the intersection of Aurora and N 101st, there is a laundromat, UPS, Bar and Grill, Supersaver grocery store and a Coffeehouse and an AMC theater (This is my favorite theater. You will love to kick back and enjoy the show from a luxurious AMC Signature Recliner). There is an IHOP and \"drive in\" burger place-- as well as many small businesses and other restaurants in the area of 99 and 101st Street. To the east, the neighborhood is more commercial and urban. To the west, it is much more quiet and suburban. The E Line metro bus runs express to downtown. We are also close to one of the most popular parks in Seattle - Green Lake. 4. how to rent it: To rent this room, you need to pay: first month of rent and one month of security deposit. plenty of parking space off the street. Looking For Mature, Very Clean, Quiet; Considerate Person to Share with Roommates.We do a background check. 6. How to contact the landlord: please email me or text show contact info for details and viewing. and introduce yourself when you call or email. I prefer you call me first and then email me to follow up. due to internet rental scams, if you email me without a phone number, please do not bother as I will not respond. let me know when you plan to move in and how long you plan to stay. Prices And Availability Are Subject To Change. SORRY NO PETS NO SMOKING, no candles, nothing flammable please.",
    "map_address": "101st Street near Linden Ave",
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "private room",
+    "house",
+    "no private bath",
+    "laundry in bldg",
+    "furnished",
+    "street parking",
+    "no smoking"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.7377,
    "pin_lon": -122.3431,
    "pin_accuracy": 22,
@@ -62427,8 +62556,17 @@
    "bedrooms": null,
    "description": "Two private rooms available on October 1st. University District/Green Lake area, 10 minute bus ride to UW. Room #1 for female tenant: newly built unit, rent is $950 including utilities. Internet is optional and available for $10/mo. Lease is term is 6 months, 9 months or a year. This room is located in newly built ADU and shares beautiful bathroom and kitchen with one long term female tenant. Very private and quiet until, furnished with bed, and dresser - no extra charge. Room #2 is located in the main household: rent is $830 including utilities. Flexible lease terms. Internet is optional and available for $10/mo. Room is furnished with bed and dresser. Here is the break down of move in costs: background check fee $40 pair directly to the screening company. Deposit is $185 if you pay 1st + last month rent when you move in or $535 if you just pay 1st. Deposit includes non refundable $95 cleaning fee. Main house is fully furnished. Our main floor kitchen has granite counter tops and wood cabinets with plenty of kitchen stuff for everyone to use. Additional kitchenettes available for convenience. This is coed, mature household with professionals and grad students. Free cleaning supplies and trash bags are regularly provided for roommates to use. Great location!!! Our house is close to both: University of Washington and Green Lake. - 7 minute walk to Green lake - Just a short bus ride to UW (bus stop is within 2 minute walk). Numerous bus lines include #26 and many more. - Easy freeway access - Restaurants and shopping - Backyard with private large deck - Grocery stores near by (Safeway and Whole Foods) - Street Parking (couple of driveway parking sports available for first come first serve use) - Washer and dryer (coin opp) - Quiet, welcoming, clean and well organized household ***Lease term is flexible: mo-to-mo, long term or short term is available. Please call show contact info if you are interested in viewing!",
    "map_address": "5th Ave. NE near NE 60th Street",
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "private room",
+    "cats are ok - purrr",
+    "house",
+    "no private bath",
+    "laundry on site",
+    "furnished",
+    "street parking",
+    "no smoking"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.673032,
    "pin_lon": -122.323258,
    "pin_accuracy": 5,
@@ -62518,8 +62656,17 @@
    "bedrooms": 2,
    "description": "We are seeking a respectful, responsible, and clean tenant who values a peaceful, organized, smoke-free home. Ideal applicant is a working professional (or professionals) who communicates well, pays rent on time, and treats the property with care. No smoking. No pets except professionally trained ESAs. The Space: Private, spacious 2 bed / 1 bath upstairs unit in a shared split-level home. Main bedroom comes with a walk-in closet. The daylight basement is separately occupied. Recently remodeled with: Gourmet kitchen, Modern bathroom with double sink , New paint throughout, Beautiful updated flooring, Updated lighting fixtures, Heating & air conditioning throughout the house Kitchen includes: French door refrigerator with water & ice, Flat-top range with convection/air fryer oven, Dishwasher, Luxury sink with spray faucet Outdoor and Storage/Security Features: Large private deck, Off-street parking, Locking mailbox, Ring camera security, Locking shed with windows and workbench, Garage storage space for tools, Yard service included (gardening space available if you enjoy it) Fireplaces are currently non-working. Future upgrade plans include converting to electric and updating aesthetics. Shared Areas: Front entrance, Garage, Laundry (new Samsung washer and dryer in garage), Driveway Scheduled laundry days for convenience. Property Care & Maintenance: Air ducts professionally deep-cleaned (Feb 17), Home tested for mold, Regular preventive pest control (termites, carpenter ants, fire ants, wasps, etc.) Utilities to be aware of are: PSE, water, sewer, garbage, recycling, yard waste, and high-speed Comcast internet. Also provided paid regular lawn care, pest control, and HVAC maintenance (including air purification). We consistently maintain and improve the home inside and out to provide the best value possible. Easy access to Hwy 410 / 167 / 512. Approximately 15 minutes to Sumner and downtown Puyallup. Friendly neighborhood where neighbors look out for one another. Security deposit required. Background and income verification requested.",
    "map_address": null,
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "house",
+    "private bath",
+    "laundry in bldg",
+    "attached garage",
+    "no smoking",
+    "air conditioning"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.1424,
    "pin_lon": -122.2652,
    "pin_accuracy": 22,
@@ -68995,8 +69142,17 @@
    "bedrooms": null,
    "description": "Room For Rent In Beautiful House In Green Lake With Yard (Green Lake, Seattle) This listing is for one large bedroom for rent in a beautiful house located in the Green Lake neighborhood (Seattle). The room can be furnished with a bed frame, mattress, and chair, if desired. The room is currently available for rent. There are three bedrooms and a bathroom located on the top level of the house, and on the main level of the house, where the kitchen, living room, dining room, and laundry room are located, there are two bedrooms and a bathroom. The living area has been shared with girls and guys over the years - often young adults and professionals. Note: a tenant occupies the basement unit of the house, which is rented separately and has its own entrance. The house location is within walking distance to Green Lake, coffee shops (Retreat, Starbucks, Chocolati, and others), grocery stores, restaurants, and the link light rail Roosevelt station. PCC and Whole Foods are located nearby and there are buses that run conveniently to downtown Seattle, UW, and elsewhere. The Roosevelt transit station is located off of NE 65th Street, a short walk away. Parking is free on the street near the house. The communal area of the house is furnished (i.e. living room, kitchen, dining room). Please message/email me to confirm that you are interested in viewing the house. Thank you! Information: One bedroom for rent in a five bedroom, two bathroom house Living room Large dining area Full kitchen with stainless steel appliances and dishwasher Laundry room - washer and dryer No pets Rent is $950/month First and last month rent due upon signing lease and $400 damage deposit Utilities are $70 per month which includes water, sewer, gas, electricity, internet, and garbage/recycling Option for 9 month or 1 year lease",
    "map_address": "4th Ave NE near NE 63rd st",
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "house",
+    "no private bath",
+    "w/d in unit",
+    "furnished",
+    "street parking",
+    "no smoking"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.674399,
    "pin_lon": -122.324517,
    "pin_accuracy": 5,
@@ -69191,8 +69347,17 @@
    "bedrooms": 1,
    "description": "Looking for a peaceful, private, and comfortable place to call home? This spacious furnished bedroom with a private attached bathroom is available immediately in a newer, quiet cul-de-sac community in Kirkland (98034). \u2728 Room Features * Spacious furnished bedroom with a King-size bed * Private attached bathroom with double sinks * Large custom walk-in closet * Study desk and chair included * Plenty of natural light * Full privacy and peaceful surroundings * Shared access to a modern kitchen * Dedicated refrigerator space for food storage * Ample street parking * Available immediately \ud83c\udf33 Prime Location One of the neighborhood\u2019s hidden gems is a beautiful newer trail that connects directly to The Village at Totem Lake, approximately 1.5 miles away. Enjoy a scenic walk, run, or bike ride to one of Kirkland\u2019s most vibrant destinations. \ud83c\udfac Experience the Totem Lake Lifestyle Just minutes from The Village at Totem Lake, featuring upscale shopping, a Cinemark theater, fitness studios, restaurants, caf\u00e9s, and everyday conveniences. \ud83c\udf7d\ufe0f Popular Nearby Restaurants * The Guest House * Stack 571 Burger & Whiskey Bar * Silverlake Ramen * Wild Wasabi Signature * Deru Market * Shake Shack * Bok a Bok Fried Chicken * Numerous additional dining options within minutes \u2615 Coffee & Caf\u00e9 Favorites Starbucks, Urban Coffee Lounge, Kitanda Espresso & A\u00e7a\u00ed, 203\u00b0F Coffee Co., Alta Healthy Caf\u00e9, and Stopwatch Espresso. \ud83c\udf32 Parks & Outdoor Recreation Nearby parks include Totem Lake Park, McAuliffe Park, Mark Twain Park, and 132nd Square Park, offering plenty of opportunities for walking, jogging, and outdoor relaxation. \ud83d\ude97 Ideal for Professionals * Easy access to I-405 * Close to Microsoft, Google, Amazon, EvergreenHealth, and other major employers * Minutes from Downtown Kirkland and Downtown Bellevue * Convenient access to shopping, restaurants, and public transportation \ud83d\udcb0 Rental Details * Rent: $1,250/month (ALL utilities included) * Security Deposit: $1,250 * Application/Background Check Fee: $50 * Automatic rent payment setup required * Single occupancy * No pets * No smoking This is an excellent opportunity for a working professional seeking a quiet, clean, and private living space in one of Kirkland\u2019s most desirable neighborhoods. \ud83d\udce7 If interested, please email with a brief introduction about yourself, your employment, and desired move-in date.",
    "map_address": null,
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "private room",
+    "house",
+    "private bath",
+    "w/d in unit",
+    "furnished",
+    "off-street parking",
+    "no smoking",
+    "air conditioning"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.7188,
    "pin_lon": -122.1966,
    "pin_accuracy": 22,
@@ -79840,8 +80005,19 @@
    "bedrooms": 1,
    "description": "A spacious and bright studio apartment featuring warm hardwood floors, an overhead ceiling fan light fixture, and large windows with blinds and drapery that let in abundant natural light. Bright studio layout equipped with hardwood flooring, high ceilings, and a ceiling fan fixture Exclusive private bathroom allocated strictly for your personal daily routine Functional floor plan exceptionally well-tailored for a career professional, student, or single parent with a child Pet-welcoming environment open to responsible cat and dog owners Routine upkeep and high cleanliness standards maintained across private living and bath quarters Prompt daily pet supervision and immediate waste sanitation strictly enforced at all times Fully smoke-free interior environment with strict adherence to nightly peaceful hours To schedule a private viewing or request further details, please reply with a direct message outlining your daily work or study schedule, target move-in timeline, and details regarding any pets or family members relocating with you.",
    "map_address": "Latona Ave NE near NE 62nd St",
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "cats are ok - purrr",
+    "apartment",
+    "private bath",
+    "dogs are ok - wooof",
+    "w/d in unit",
+    "furnished",
+    "street parking",
+    "no smoking"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.67342,
    "pin_lon": -122.325438,
    "pin_accuracy": 15,
@@ -110932,7 +111108,7 @@
    "location_text": "Enumclaw",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "750 Watson Street North, Enumclaw",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -110967,7 +111143,7 @@
    "location_text": "Bremerton",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1901 WINFIELD AVE, Bremerton",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111037,7 +111213,7 @@
    "location_text": "Lakewood",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "3502 92nd st s, Lakewood",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111179,7 +111355,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111212,7 +111388,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111256,7 +111432,7 @@
    "location_text": "Seattle U",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1315 East Jefferson, Seattle U",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111289,7 +111465,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111332,7 +111508,7 @@
    "location_text": "Tukwila",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "3700 Southcenter Blvd, Tukwila",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111367,7 +111543,7 @@
    "location_text": "Bremerton",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1124 Callahan dr, Bremerton",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111411,7 +111587,7 @@
    "location_text": "Enumclaw",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "320 Chinook Avenue, Enumclaw",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111444,7 +111620,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111480,7 +111656,7 @@
    "location_text": "Lakewood",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "8920 Gravelly Lake Dr SW, Lakewood",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111513,7 +111689,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111548,7 +111724,7 @@
    "location_text": "Bremerton",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1124 Callahan dr, Bremerton",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111581,7 +111757,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111614,7 +111790,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111658,7 +111834,7 @@
    "location_text": "25102 62nd Avenue South, Kent, WA",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "25102 62nd Avenue South, Kent, WA",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111702,7 +111878,7 @@
    "location_text": "25102 62nd Avenue South, Kent, WA",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "25102 62nd Avenue South, Kent, WA",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111738,7 +111914,7 @@
    "location_text": "snohomish county",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "8123 236th St. SW, snohomish county",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111782,7 +111958,7 @@
    "location_text": "Auburn",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "2 E Main St, Auburn",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111826,7 +112002,7 @@
    "location_text": "Tukwila - Southcenter",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "229 Andover Park E, Tukwila - Southcenter",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111930,7 +112106,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111963,7 +112139,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -111998,7 +112174,7 @@
    "location_text": "Bremerton",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1124 Callahan dr, Bremerton",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112031,7 +112207,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112075,7 +112251,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1414 E Yesler Way, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112114,7 +112290,7 @@
    "location_text": "Frederickson",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "17412 44th Avenue East, Frederickson",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112158,7 +112334,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1414 E Yesler Way, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112237,7 +112413,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1414 E Yesler Way, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112273,7 +112449,7 @@
    "location_text": "22906 76th Ave W, Edmonds, WA",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "22906 76th Ave W, Edmonds, WA",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112317,7 +112493,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1414 E Yesler Way, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112361,7 +112537,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1414 E Yesler Way, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112405,7 +112581,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1414 E Yesler Way, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112488,7 +112664,7 @@
    "location_text": "Pacific",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "345 Pacific Avenue North, Pacific",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112533,7 +112709,7 @@
    "location_text": "West Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "4433 42nd Ave, West Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112577,7 +112753,7 @@
    "location_text": "Auburn",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "2 E Main St, Auburn",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112649,7 +112825,7 @@
    "location_text": "Lakewood",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "8311 83rd ST SW, Lakewood",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112695,7 +112871,7 @@
    "location_text": "Kirkland",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "12700 116th Ave NE, Kirkland",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112741,7 +112917,7 @@
    "location_text": "West Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "4417 42nd Ave, West Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112849,7 +113025,7 @@
    "location_text": "Lakewood",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "3502 92nd st s, Lakewood",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112924,7 +113100,7 @@
    "location_text": "Tacoma South",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1811 S 76th Street, Tacoma South",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -112963,7 +113139,7 @@
    "location_text": "Tacoma South",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1811 S 76th Street, Tacoma South",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113006,7 +113182,7 @@
    "location_text": "Kent",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "9803 S 248th St, Kent",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113039,7 +113215,7 @@
    "location_text": "6022 78th St Ct W, Lakewood, WA",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6022 78th St Ct W, Lakewood, WA",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113083,7 +113259,7 @@
    "location_text": "Tukwila - Southcenter",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "229 Andover Park E, Tukwila - Southcenter",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113129,7 +113305,7 @@
    "location_text": "13510 SE 272nd St, Kent, WA",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "13510 SE 272nd St, Kent, WA",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113173,7 +113349,7 @@
    "location_text": "Tukwila - Southcenter",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "229 Andover Park E, Tukwila - Southcenter",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113209,7 +113385,7 @@
    "location_text": "Bremerton",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "4520 Bay Vista Boulevard, Bremerton",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113279,7 +113455,7 @@
    "location_text": "Lakewood",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "8311 83rd ST SW, Lakewood",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113359,7 +113535,7 @@
    "location_text": "Capitol Hill",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1420 E MADISON ST, Capitol Hill",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113401,7 +113577,7 @@
    "location_text": "First Hill",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "814 Columbia St, First Hill",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113445,7 +113621,7 @@
    "location_text": "Ballard",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6100 17th Ave NW, Ballard",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113487,7 +113663,7 @@
    "location_text": "First Hill",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "814 Columbia St, First Hill",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113530,7 +113706,7 @@
    "location_text": "First Hill",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "814 Columbia St, First Hill",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113609,7 +113785,7 @@
    "location_text": "Capitol Hill",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1522 E Olive Way, Capitol Hill",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113652,7 +113828,7 @@
    "location_text": "Capitol Hill",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "404 E Howell St, Capitol Hill",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113695,7 +113871,7 @@
    "location_text": "Capitol Hill",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "404 E Howell St, Capitol Hill",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113738,7 +113914,7 @@
    "location_text": "Capitol Hill",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "404 E Howell St, Capitol Hill",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113782,7 +113958,7 @@
    "location_text": "28620 Pacific Hwy S, Federal Way, WA",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "28620 Pacific Hwy S, Federal Way, WA",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113825,7 +114001,7 @@
    "location_text": "Auburn",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "32115 105TH PL SE, Auburn",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113869,7 +114045,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "301 14th Ave E, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113913,7 +114089,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "201 NE 40th St., Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -113956,7 +114132,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "201 NE 40th St., Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114000,7 +114176,7 @@
    "location_text": "Ballard",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "5814 22nd AVe NW, Ballard",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114043,7 +114219,7 @@
    "location_text": "University District / U-District",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "5234 University Way NE, University District / U-District",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114087,7 +114263,7 @@
    "location_text": "Ballard",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "2226 Nw 58th St, Ballard",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114155,7 +114331,7 @@
    "location_text": "tacoma / pierce",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1710 Valley Ave E, tacoma / pierce",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114198,7 +114374,7 @@
    "location_text": "Auburn",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "32115 105TH PL SE, Auburn",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114303,7 +114479,7 @@
    "location_text": "tacoma / pierce",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "7621 36th St Ct W #1, tacoma / pierce",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114347,7 +114523,7 @@
    "location_text": "Magnolia",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "2517 Thorndyke Ave W, Magnolia",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114383,7 +114559,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "5701 Orchard St West, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114419,7 +114595,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "5701 Orchard St West, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114463,7 +114639,7 @@
    "location_text": "2510 Western Avenue, Suite 100, Seattle, WA",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "2510 Western Avenue, Suite 100, Seattle, WA",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114506,7 +114682,7 @@
    "location_text": "Auburn",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "32115 105TH PL SE, Auburn",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114551,7 +114727,7 @@
    "location_text": "Bitter Lake",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "916 N 143rd St, Bitter Lake",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114586,7 +114762,7 @@
    "location_text": "tacoma / pierce",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "10214 Lakeview Ave SW, tacoma / pierce",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114619,7 +114795,7 @@
    "location_text": "North End Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "3015 N. Pearl Street, North End Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114697,7 +114873,7 @@
    "location_text": "Auburn",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "32115 105TH PL SE, Auburn",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114741,7 +114917,7 @@
    "location_text": "Capitol Hill",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1511 Boylston Ave, Capitol Hill",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114820,7 +114996,7 @@
    "location_text": "Seattle - 10 Minute Drive to Museum of History & Indust",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1106 Pike St, Seattle - 10 Minute Drive to Museum of History & Indust",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114924,7 +115100,7 @@
    "location_text": "Fife",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6926 5th St E, Fife",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -114995,7 +115171,7 @@
    "location_text": "Fife",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6926 5th St E, Fife",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115032,7 +115208,7 @@
    "location_text": "Port Orchard",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1410 Wendell Ave SE, Port Orchard",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115067,7 +115243,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "2910 N 7th Street #21, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115103,7 +115279,7 @@
    "location_text": "3232 Pine Road Northeast, Bremerton, WA",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "3232 Pine Road Northeast, Bremerton, WA",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115173,7 +115349,7 @@
    "location_text": "9860 Bushlac Lane Northwest, Silverdale, WA",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "9860 Bushlac Lane Northwest, Silverdale, WA",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115216,7 +115392,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1 #633 17th Avenue -  #6, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115260,7 +115436,7 @@
    "location_text": "25102 62nd Avenue South, Kent, WA",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "25102 62nd Avenue South, Kent, WA",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115296,7 +115472,7 @@
    "location_text": "East Bremerton",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "2700 Maple Street, East Bremerton",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115340,7 +115516,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "12511 69th Ave S, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115385,7 +115561,7 @@
    "location_text": "Covington",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "26902 169th Place Southeast, Covington",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115431,7 +115607,7 @@
    "location_text": "Kirkland",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "12700 116th Ave NE, Kirkland",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115475,7 +115651,7 @@
    "location_text": "Renton - Renton Diamond Plaza",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "330 Vuemont Pl NE, Renton - Renton Diamond Plaza",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115520,7 +115696,7 @@
    "location_text": "AUBURN -",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1420 17th St. S.E.  #411, AUBURN -",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115565,7 +115741,7 @@
    "location_text": "Covington",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "26902 169th Place Southeast, Covington",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115607,7 +115783,7 @@
    "location_text": "Seattle - Seattle Pinball Museum",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "506 Maynard Ave S, Seattle - Seattle Pinball Museum",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115642,7 +115818,7 @@
    "location_text": "Lakewood",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "3502 92nd st s, Lakewood",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115688,7 +115864,7 @@
    "location_text": "Kirkland",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "12700 116th Ave NE, Kirkland",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115732,7 +115908,7 @@
    "location_text": "Kent",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "4620 South 254th Place, Kent, WA 98032, Kent",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115775,7 +115951,7 @@
    "location_text": "Seattle - Burke Museum of Natural History and Culture",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "5612 Roosevelt Way NE - A4, Seattle - Burke Museum of Natural History and Culture",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115821,7 +115997,7 @@
    "location_text": "Kirkland",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "12700 116th Ave NE, Kirkland",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115856,7 +116032,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "4023 S Lawrence Street, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115891,7 +116067,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "4023 S Lawrence Street, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115936,7 +116112,7 @@
    "location_text": "Seatac",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "15311 33rd Ave S, Seatac",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -115980,7 +116156,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6900 South 125th Street, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -116024,7 +116200,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6900 South 125th Street, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -116069,7 +116245,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "417 8th Ave S, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -116114,7 +116290,7 @@
    "location_text": "Redmond",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "7805 170th Pl NE, Redmond",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -116160,7 +116336,7 @@
    "location_text": "Kirkland",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "12410 NE Totem Lake Way, Kirkland",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -116204,7 +116380,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "13280 Linden Ave N, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -116250,7 +116426,7 @@
    "location_text": "Kirkland",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "12410 NE Totem Lake Way, Kirkland",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -116294,7 +116470,7 @@
    "location_text": "Tukwila - Southcenter",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "229 Andover Park E, Tukwila - Southcenter",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -116338,7 +116514,7 @@
    "location_text": "Tukwila - Southcenter",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "229 Andover Park E, Tukwila - Southcenter",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -116382,7 +116558,7 @@
    "location_text": "Renton - Sunset Plaza",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1100 Sunset Blvd NE, Renton - Sunset Plaza",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -116425,7 +116601,7 @@
    "location_text": "Auburn",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1741 22nd Street NE, Auburn",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -116469,7 +116645,7 @@
    "location_text": "Redmond",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "16255 NE 87th Street, Redmond",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -116513,7 +116689,7 @@
    "location_text": "Renton - Renton Village",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "412 Monroe Ave NE, Renton - Renton Village",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -116557,7 +116733,7 @@
    "location_text": "Redmond",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "16255 NE 87th Street, Redmond",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -116603,7 +116779,7 @@
    "location_text": "Seattle - ADA accessible units, ask for details!",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "12548 Lake City Way NE, Seattle - ADA accessible units, ask for details!",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
@@ -116649,7 +116825,7 @@
    "location_text": "Seattle - ADA accessible units, ask for details!",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "12548 Lake City Way NE, Seattle - ADA accessible units, ask for details!",
+   "geocoded_from": null,
    "first_seen": "2026-09-24",
    "last_seen": "2026-09-24"
   },
