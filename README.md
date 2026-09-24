@@ -58,9 +58,9 @@ result is a starting point for that conversation, not an answer.
    being self-contained (an explicit signal like "ADU," "private entrance,"
    or "studio" always keeps it, even with an ordinary "private bath"
    attribute or a whole-house-sounding description — neither of those
-   alone means self-contained). See `room_share_filter.py`. A listing not
-   yet detail-fetched is kept until a future run actually reads it, rather
-   than guessed at from the title alone.
+   alone means self-contained). See `room_share_filter.py`. A listing with
+   no description or attributes at all yet is kept until a future run
+   actually reads it, rather than guessed at from the title alone.
 5. Drops age-restricted housing — 55+, 62+, "senior living," "independent
    living," "active adult community," and similar phrasing in the title or
    description, from either source. Only ever excludes on an explicit
