@@ -441,7 +441,7 @@ async function handleApi(request, env, path) {
       if (entry.address || entry.contact_email) {
         lines.push(
           [
-            id,
+            csvCell(id),
             csvCell(entry.address || ""),
             csvCell(entry.contact_name || ""),
             csvCell(entry.contact_email || ""),
