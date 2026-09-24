@@ -174,6 +174,15 @@ personally writes and sends the email for each one. A listing is marked
 Anything that fails even one of these gets a drafted email anyway, marked
 with the specific reason it isn't gate-eligible, instead of a silent skip.
 
+**Right now, no RentCast listing has a usable contact at all.** As of the
+most recent fetch (500 listings, checked live), 0 had a listing-agent or
+listing-office email, and 0 had a phone number either — RentCast's own
+docs say these fields are sometimes omitted, and this dataset just
+doesn't have them. That also rules out an SMS-based alternative to email
+for now, since there's no phone number to text either. `rentcast.py` logs
+both counts on every real fetch, so this is easy to re-check if RentCast's
+data ever improves.
+
 **Who actually sends it, and when.** This runs when you ask for it, not on
 a schedule. Message a Claude Code session in this repo (any time — there's
 no fixed cadence) something like "check for outreach candidates." It reads

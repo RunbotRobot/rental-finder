@@ -81,6 +81,21 @@
   listing is only ever marked "ready to send" (RentCast listings alone;
   Craigslist has no real, scriptable contact address) when it clears every
   rule; see `outreach.py`'s docstring.
+- As of the most recent real RentCast fetch (500 listings, checked live):
+  0 had a listingAgent or listingOffice email, AND 0 had a listingAgent or
+  listingOffice phone number either -- not just email being spottier than
+  phone, but neither field present on any listing at all. This means no
+  RentCast listing can currently reach "ready to send" (contact_email is
+  one of the gate's rules), and an SMS-based outreach channel -- raised
+  once as an alternative to email, since phone numbers seemed like they
+  might be more reliably present -- has nothing to work with either. This
+  is RentCast's data, not a bug here: their own docs say these fields are
+  sometimes omitted, and `rentcast.py` already logs both counts on every
+  real fetch (`with_agent_phone`/`with_office_phone`) specifically to
+  monitor whether that ever changes. Phone isn't captured onto the
+  `Listing` model since there's nothing yet to do with it. If a future
+  fetch shows non-zero phone counts, that's worth revisiting; don't assume
+  it's still zero without checking a recent log.
 - `_gate_reason()`'s check ORDER matters, not just its content: the
   contact-email check must stay LAST, after address/spam/buffer. It used to
   run first, which meant "no automatable contact" -- the string
