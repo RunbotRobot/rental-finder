@@ -35,6 +35,16 @@
 //                                               `same_address_ids`: every
 //                                               posting the one draft should
 //                                               be saved to.
+//     GET  /api/data               read-only: the full raw scan results,
+//                                  same as the site sees. For debugging --
+//                                  the agent endpoints above already
+//                                  summarize what a check-in needs; this is
+//                                  for looking something up directly
+//                                  instead of working around not having it.
+//     GET  /api/state              read-only: review state for every
+//                                  listing (status/note/address/emailed).
+//                                  Same reasoning -- read access only, no
+//                                  PATCH; can't touch your review state.
 //
 //   Either token:
 //     POST /api/emailed         body: array of ids to mark emailed just now
@@ -168,9 +178,16 @@ async function handleApi(request, env, path) {
   }
 
   if (scope !== "full") {
-    // Everything below here is full-token-only except /api/emailed POST and
-    // /api/agent/draft POST, each handled inside its own block above/below.
-    if (!(path === "/api/emailed" && request.method === "POST")) {
+    // Everything below here is full-token-only except: /api/emailed POST
+    // and /api/agent/draft POST (handled in their own blocks above/below),
+    // and GET on /api/data / /api/state -- read-only visibility into the
+    // same things the agent endpoints already summarize, useful for
+    // debugging without needing a second, more powerful credential. Still
+    // no PUT/PATCH here for the agent token: it can look, not change.
+    const agentReadable =
+      (path === "/api/data" && request.method === "GET") ||
+      (path === "/api/state" && request.method === "GET");
+    if (!agentReadable && !(path === "/api/emailed" && request.method === "POST")) {
       return json({ error: "unauthorized" }, 401);
     }
   }
