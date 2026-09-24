@@ -278,3 +278,53 @@
   owner-requested reason, not casually). Don't widen its access further
   without an equally specific reason — the whole point is that a session
   holding it for outreach check-ins has a small blast radius if exposed.
+- **Root cause of a real "recorded contacts never take effect" incident,
+  found and fixed in a later check-in**: `GET /api/overrides` built each
+  CSV row as `[id, csvCell(address), csvCell(contact_name),
+  csvCell(contact_email), csvCell(contact_source)].join(",")` -- every
+  column EXCEPT `id` went through `csvCell()`'s comma/quote escaping.
+  RentCast ids are address-derived slugs that legitimately contain commas
+  (e.g. `"4736-18th-Ave-Ne-Apt-C,-Seattle,-WA-98105"`), so an unescaped
+  comma in the id corrupted the row's column boundaries and
+  `load_contact_overrides()` silently misparsed every RentCast row --
+  confirmed live: 20 contacts recorded and verified present in
+  `/api/state`, two full scan cycles each fetching a non-empty overrides
+  CSV ("23 overrides" in the Action's own log), and still zero listings
+  ever reached "ready to send" until this was fixed (wrap `id` in
+  `csvCell(id)` too). If a future check-in ever sees recorded contacts
+  not taking effect despite `/api/state` and the fetched CSV both looking
+  right, this is the first thing to re-check for regression.
+- **`senior_housing_filter.py` has a confirmed live gap**: it only matches
+  explicit phrases like "senior living/community/apartments", "55+", or
+  "independent living" in a listing's own title+description. Two real,
+  currently-live buildings slipped through it during a check-in and had
+  to be caught by hand and excluded from outreach: **Highlands West
+  Apartments** (18520 8th Ave NW, Shoreline -- confirmed 55-and-better via
+  a live fetch of liveathighlandswest.com) had ONE posting whose title
+  said bare "senior" with no qualifying word after it (doesn't match the
+  regex, which requires "senior" immediately followed by
+  living/community/communities/housing/apartments?/residence), and a
+  SECOND posting for the exact same building that didn't mention "senior"
+  or any age language anywhere at all -- only the address itself gives it
+  away, which the filter has no way to check since it never looks up a
+  building name/address against known senior communities, only the
+  listing's own text. Also caught the same way: **Covington Place**
+  (26902 169th Pl SE, Covington), a Village Concepts 55+ community, whose
+  RentCast listing text likewise carried no qualifying phrase. Both were
+  excluded from outreach by hand rather than by fixing the filter, since
+  tightening the regex (e.g. matching bare "senior") risks new false
+  positives and the address-lookup approach is a bigger change -- flagged
+  for the owner to decide, not changed unilaterally. If you hit another
+  one, check it here before assuming it's a one-off.
+- Also caught by hand during that same check-in, same "read the listing
+  before trusting the category" habit as the price-comparison note above:
+  a RentCast "Single Family" listing at "325 5th Ave S, Unit GARAGE1,
+  Kirkland" priced at $495/month with 0 bedrooms (almost certainly a
+  literal parking/storage garage, not a residence), and a RentCast "Condo"
+  at "17713 15th Ave NE, Ste 101, Shoreline" ($1195/month, bedrooms null,
+  "Ste" = Suite, reads like a commercial/office unit). Both excluded from
+  outreach and flagged rather than researched/contacted -- this is the
+  same failure mode as the parking-garage-unit and uncaught-senior-
+  community listings from the original 19-address batch, RentCast data
+  quality rather than a bug here, and worth a quick category/unit-label
+  sanity check on every candidate before researching or drafting for it.
