@@ -41,6 +41,23 @@
   more detail fetch (see the room_attrs backfill comment there) rather than
   leave them unclassifiable forever. Don't remove that backfill without
   another way to fix already-cached listings.
+  Explicit roommate/shared-space language (`_STRONG_SHARED_RE`: "roommate,"
+  "housemate," "shared bath/kitchen/space/common," "share the/my/our
+  bath/kitchen/common," "share my/the/our studio/apartment/house/room/
+  place," "other tenant(s)") is checked FIRST, before the self-contained
+  check AND before the "nothing to judge yet" gate -- it overrides
+  everything, even from the title alone with no description yet. Three real
+  listings were missed without this: "Roommate Wanted to Share Studio
+  Apartment" (the bare word "studio" kept it self-contained); a room
+  described as having "its own entrance, kitchen, laundry and bathroom"
+  that in the same paragraph says that bathroom is "shared with a total of
+  3 people" and calls them "roommates" (the own-entrance/own-kitchen
+  signals kept it); and "Large Room for Rent" describing a "Shared
+  bathroom/kitchenette w/ 1 other" ("kitchenette" alone said nothing about
+  whether it was private, so it's been removed from the self-contained list
+  entirely -- don't add it back). If you touch this filter again, keep the
+  strong-shared check ahead of the self-contained check, and ahead of the
+  gate too.
 - The owner is 39 -- doesn't qualify for 55+/62+ senior housing.
   `senior_housing_filter.py`'s `is_age_restricted()` drops it from BOTH
   sources (RentCast's aggregated listings can include senior communities

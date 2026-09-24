@@ -20,21 +20,31 @@ room" + "private bath," a whole-house-sounding description, and NO
 self-contained language of any kind -- that's a room, not an ADU, and
 should be excluded).
 
-Genuinely nothing to go on yet (no description at all) is the one case
-this doesn't judge: kept until a future run actually reads it -- the same
-"don't drop what you haven't verified" instinct as the county filter, but
-for "haven't looked" rather than "looked and it's unclear." That gate
-checks `description`, not `details_fetched`: main.py's room_attrs
-backfill resets `details_fetched` to False on plenty of listings that
-already have a perfectly good description from before room_attrs existed
-(a real one missed this exact way -- a Shoreline "furnished bedrooms for
-rent" listing whose description said "Shared spaces: kitchen, 2
-bathrooms..." outright, sitting unclassified for days because its
-`details_fetched` was False while its backfill was still queued).
-Checking `details_fetched` would treat that stale-but-still-accurate
-description as "nothing to judge from yet," which is wrong -- the
-description doesn't stop being true just because we want fresher
-room_attrs too.
+Explicit roommate/shared-space language ALWAYS wins over a self-contained
+signal, checked first, even from the title alone (no need to wait for a
+description to be sure "roommate" means what it means). Two real listings
+were missed without this: one titled "Roommate Wanted to Share Studio
+Apartment" -- the bare word "studio" would otherwise have kept it; another
+describing a room with "its own entrance, kitchen, laundry and bathroom"
+that in the very same paragraph says that bathroom is "shared with a total
+of 3 people" and later calls them "roommates" -- a self-contained-sounding
+room description doesn't mean much once the poster says outright you'd be
+sharing the home with roommates. Also why "kitchenette" was dropped from
+the self-contained list entirely: a third real listing described a
+"Shared bathroom/kitchenette" -- the word alone says nothing about whether
+it's private.
+
+Genuinely nothing to go on yet (no title match, no description, no
+room_attrs) is the one case this doesn't judge: kept until a future run
+actually reads it -- the same "don't drop what you haven't verified"
+instinct as the county filter, but for "haven't looked" rather than
+"looked and it's unclear." That gate checks `description`/`room_attrs`,
+not `details_fetched`: main.py's room_attrs backfill resets
+`details_fetched` to False on plenty of listings that already have a
+perfectly good description from before room_attrs existed, and checking
+`details_fetched` would treat that stale-but-still-accurate description as
+"nothing to judge from yet," which is wrong -- the description doesn't
+stop being true just because we want fresher room_attrs too.
 
 Only ever applies to source == "craigslist", category == "roo" -- RentCast
 has no room-share equivalent, and Craigslist's "apa" (apartments/housing)
@@ -47,6 +57,20 @@ import re
 
 from .models import Listing
 
+_STRONG_SHARED_RE = re.compile(
+    "|".join(
+        [
+            r"room\s?mate",
+            r"house\s?mate",
+            r"shared (?:bath|bathroom|kitchen|space|common)",
+            r"share (?:the |our |my )?(?:bath|bathroom|kitchen|common)",
+            r"share (?:my|the|our) (?:studio|apartment|house|room|place)",
+            r"other tenants?",
+        ]
+    ),
+    re.IGNORECASE,
+)
+
 _SELF_CONTAINED_RE = re.compile(
     "|".join(
         [
@@ -57,7 +81,6 @@ _SELF_CONTAINED_RE = re.compile(
             r"accessory dwelling",
             r"(?:private|separate|own) entrance",
             r"(?:own|private) kitchen",
-            r"kitchenette",
             r"\bstudio\b",
             r"\bdetached\b",
             r"guest\s?house",
@@ -74,21 +97,26 @@ _SELF_CONTAINED_RE = re.compile(
 
 
 def is_occupied_shared_room(listing: Listing) -> bool:
-    """True for a Craigslist "rooms & shares" listing with a description or
-    room_attrs that don't say it's self-contained -- an occupied shared
-    room, by default, since that's what the category means. False for
-    every other category, for a "roo" listing with neither a description
-    nor room_attrs (nothing to judge from yet -- checked via those fields,
-    not `details_fetched`; see the module docstring for why), or one with
-    an explicit self-contained signal."""
+    """True for a Craigslist "rooms & shares" listing with explicit
+    roommate/shared-space language (checked first, wins over everything
+    else), or one with a description/room_attrs that don't say it's
+    self-contained -- an occupied shared room, by default, since that's
+    what the category means. False for every other category, for a "roo"
+    listing with nothing to judge from yet (checked via title plus
+    description/room_attrs, not `details_fetched`; see the module
+    docstring for why), or one with only an explicit self-contained
+    signal and no roommate language."""
     if listing.source != "craigslist" or listing.category != "roo":
-        return False
-    if not listing.description and not listing.room_attrs:
         return False
 
     text = " ".join(filter(None, [listing.title, listing.description]))
-    attrs_text = " ".join(listing.room_attrs)
 
+    if _STRONG_SHARED_RE.search(text):
+        return True
+    if not listing.description and not listing.room_attrs:
+        return False
+
+    attrs_text = " ".join(listing.room_attrs)
     if _SELF_CONTAINED_RE.search(text) or "in-law" in attrs_text or "in law" in attrs_text:
         return False
     return True

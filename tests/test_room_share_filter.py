@@ -116,3 +116,47 @@ def test_detached_guest_house_is_kept():
 def test_in_law_housing_type_attr_is_kept():
     listing = _listing(room_attrs=["private room", "in-law", "no private bath"])
     assert is_occupied_shared_room(listing) is False
+
+
+def test_roommate_in_title_overrides_studio_even_with_no_description_yet():
+    """Regression test for a real, live listing this missed: "Roommate
+    Wanted to Share Studio Apartment" -- the bare word "studio" would
+    otherwise have kept it as self-contained. Roommate language in the
+    title alone is decisive; no need to wait for a description."""
+    listing = _listing(
+        title="Roommate Wanted to Share Studio Apartment - $800",
+        details_fetched=False,
+    )
+    assert is_occupied_shared_room(listing) is True
+
+
+def test_own_entrance_and_kitchen_do_not_override_explicit_roommate_language():
+    """Regression test for a real, live listing this missed: a room
+    described as having "its own entrance, kitchen, laundry and bathroom"
+    that in the same breath says that bathroom is shared with 3 people and
+    calls them "roommates." A self-contained-sounding room description
+    doesn't mean much once the poster says outright you'd have roommates."""
+    listing = _listing(
+        title="Room in Peaceful Big Home with Jacuzzi and Gym",
+        description=(
+            "This room is on the bottom level of the home which has its own entrance, "
+            "kitchen, laundry and bathroom shared with a total of 3 people. The space "
+            "is shared with two other mid 20s-30s wonderful roommates."
+        ),
+    )
+    assert is_occupied_shared_room(listing) is True
+
+
+def test_kitchenette_alone_no_longer_implies_self_contained():
+    """Regression test for a real, live listing this missed: "Shared
+    bathroom/kitchenette w/ 1 other" -- "kitchenette" said nothing about
+    whether it was private, and the listing explicitly says it's shared."""
+    listing = _listing(
+        title="Large Room for Rent",
+        description=(
+            "Large Bedroom ONLY for rent in lower level of house. Private entry. "
+            "Shared bathroom/kitchenette w/ 1 other responsible working person."
+        ),
+        room_attrs=["private room", "house", "no private bath"],
+    )
+    assert is_occupied_shared_room(listing) is True
