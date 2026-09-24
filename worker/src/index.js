@@ -121,6 +121,21 @@
 
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
 
+// A listing id, wherever one is validated (a URL path segment above, or a
+// JSON body field in the agent endpoints below). Craigslist's ids are
+// opaque alphanumeric tokens, but RentCast's are address-derived slugs that
+// legitimately contain commas (e.g. "12846-Se-40th-Ln,-Apt-8,-Bellevue,-WA-
+// 98006") -- discovered live when the very first attempt to record a
+// contact override for a RentCast listing 400'd, and confirmed to ALSO
+// break the site's own star/dismiss/note/address-edit buttons for every
+// RentCast listing via PATCH /api/state/:id, since that path segment used
+// the same too-narrow character class. Comma/period/underscore covers every
+// character actually seen in a real id; deliberately still an allowlist,
+// not "anything," and long enough (100) for the longest real address seen
+// (52) with real headroom.
+const LISTING_ID_CHARS = "A-Za-z0-9,._-";
+const LISTING_ID_RE = new RegExp(`^[${LISTING_ID_CHARS}]{1,100}$`);
+
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: JSON_HEADERS });
 }
@@ -271,7 +286,7 @@ async function handleApi(request, env, path) {
 
   if (path === "/api/agent/draft" && request.method === "POST") {
     const body = await request.json();
-    const idMatch = typeof body.id === "string" && body.id.match(/^[A-Za-z0-9_-]{1,64}$/);
+    const idMatch = typeof body.id === "string" && body.id.match(LISTING_ID_RE);
     if (!idMatch || typeof body.subject !== "string" || typeof body.body !== "string") {
       return json({ error: "expected {id, subject, body}" }, 400);
     }
@@ -291,7 +306,7 @@ async function handleApi(request, env, path) {
 
   if (path === "/api/agent/contact" && request.method === "POST") {
     const body = await request.json();
-    const idMatch = typeof body.id === "string" && body.id.match(/^[A-Za-z0-9_-]{1,64}$/);
+    const idMatch = typeof body.id === "string" && body.id.match(LISTING_ID_RE);
     const email = typeof body.contact_email === "string" ? body.contact_email.trim() : "";
     const source = typeof body.contact_source === "string" ? body.contact_source.trim() : "";
     if (!idMatch || !email.includes("@") || email.length > 200 || !source || source.length > 500) {
@@ -345,7 +360,7 @@ async function handleApi(request, env, path) {
     return json(await readState(env));
   }
 
-  const stateMatch = path.match(/^\/api\/state\/([A-Za-z0-9_-]{1,64})$/);
+  const stateMatch = path.match(new RegExp(`^/api/state/([${LISTING_ID_CHARS}]{1,100})$`));
   if (stateMatch && request.method === "PATCH") {
     const id = stateMatch[1];
     const patch = await request.json();
@@ -398,7 +413,7 @@ async function handleApi(request, env, path) {
       // The Action calls this once after a run with every id it just sent
       // to, so a later run's send gate treats them as already contacted.
       const ids = await request.json();
-      if (!Array.isArray(ids) || !ids.every((id) => typeof id === "string" && id.length <= 64)) {
+      if (!Array.isArray(ids) || !ids.every((id) => typeof id === "string" && id.length <= 100)) {
         return json({ error: "expected an array of id strings" }, 400);
       }
       const state = await readState(env);
