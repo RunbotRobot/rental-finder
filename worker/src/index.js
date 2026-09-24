@@ -5,7 +5,11 @@
 //     PUT  /api/data            store scan results
 //     GET  /api/state           review state for every listing {id: {status, note, address, emailed, updated}}
 //     PATCH /api/state/:id      merge fields into one listing's review state
-//     GET  /api/overrides       CSV of `source_id,address` for the Action to feed back into the scan
+//     GET  /api/overrides       CSV of `source_id,address,contact_name,contact_email,contact_source`
+//                               for the Action to feed back into the scan --
+//                               contact_* columns come from POST
+//                               /api/agent/contact below, for a RentCast
+//                               listing RentCast itself gave no contact for.
 //     GET  /api/emailed         JSON array of listing ids already emailed, for the Action's send gate
 //     GET  /api/profile         read the applicant profile
 //     PUT  /api/profile         save the applicant profile
@@ -16,25 +20,44 @@
 //   chat session is a much smaller exposure than the full token would be):
 //     GET  /api/agent/candidates   listings ready for outreach, plus the
 //                                  profile (read-only, bundled in so the
-//                                  agent never needs a second call). Two
+//                                  agent never needs a second call). Three
 //                                  kinds, told apart by each entry's
 //                                  `action` field:
-//                                    "send"  -- RentCast, gate-eligible; the
-//                                               agent drafts AND sends.
-//                                    "draft" -- Craigslist, eligible except
-//                                               for having no automatable
-//                                               contact; the agent drafts a
-//                                               reply-box-sized message and
-//                                               leaves it for you to paste
-//                                               into Craigslist's own reply
-//                                               flow yourself. Grouped by
-//                                               verified address first (the
-//                                               same unit is often posted
-//                                               under several titles), so
-//                                               each entry also carries
-//                                               `same_address_ids`: every
-//                                               posting the one draft should
-//                                               be saved to.
+//                                    "send"     -- RentCast, gate-eligible
+//                                                  (has a contact_email, from
+//                                                  RentCast or a prior
+//                                                  research override); the
+//                                                  agent drafts AND sends.
+//                                    "draft"    -- Craigslist, eligible except
+//                                                  for having no automatable
+//                                                  contact; the agent drafts a
+//                                                  reply-box-sized message and
+//                                                  leaves it for you to paste
+//                                                  into Craigslist's own reply
+//                                                  flow yourself. Grouped by
+//                                                  verified address first (the
+//                                                  same unit is often posted
+//                                                  under several titles), so
+//                                                  each entry also carries
+//                                                  `same_address_ids`: every
+//                                                  posting the one draft should
+//                                                  be saved to.
+//                                    "research" -- RentCast, eligible except
+//                                                  for having no contact_email
+//                                                  at all (RentCast gave none).
+//                                                  The agent researches a real
+//                                                  contact itself and, if
+//                                                  found with enough
+//                                                  confidence, POSTs it to
+//                                                  /api/agent/contact -- see
+//                                                  README's "Outreach and
+//                                                  auto-send" for the exact
+//                                                  confidence bar and the next
+//                                                  steps (a scan run has to
+//                                                  pick the override up before
+//                                                  it becomes "send"-eligible;
+//                                                  this endpoint only records
+//                                                  the finding).
 //     GET  /api/data               read-only: the full raw scan results,
 //                                  same as the site sees. For debugging --
 //                                  the agent endpoints above already
@@ -56,6 +79,21 @@
 //                               stay full-token-only (or the site's own
 //                               buttons) so this narrow token can't touch
 //                               your review state.
+//     POST /api/agent/contact   body: {id, contact_name?, contact_email,
+//                               contact_source}. Records a personally-
+//                               researched contact for a "research"-kind
+//                               candidate above -- contact_source is
+//                               required (a citation of how/where it was
+//                               found; never a bare confidence score) so
+//                               every write is auditable. Can only write
+//                               contact_name/contact_email/contact_source --
+//                               same narrow-field pattern as
+//                               /api/agent/draft, and for the same reason.
+//                               Doesn't touch outreach_result or make
+//                               anything "ready to send" by itself -- that
+//                               still only happens once a scan run applies
+//                               it as a contact override (see /api/overrides
+//                               above and main.py's load_contact_overrides).
 //
 // State is one KV value ("state") holding a JSON object. It's a few hundred
 // listings at most, so a single document is simpler than a key per listing.
@@ -153,8 +191,31 @@ async function handleApi(request, env, path) {
       same_address_ids: group.map((l) => l.id),
     }));
 
+    // RentCast, otherwise gate-eligible, but RentCast itself gave no
+    // contact_email at all -- "no contact email" is outreach.py's exact
+    // _gate_reason() string for that case (never for Craigslist, which
+    // always fails on the different "no automatable contact ..." reason
+    // above). A prior /api/agent/contact write for this id doesn't remove it
+    // from this list by itself -- it only takes effect once a scan run picks
+    // the override up and outreach_result flips to "ready to send" -- so
+    // skip an id we already wrote a contact for this run to avoid re-
+    // researching it before that scan has happened.
+    const researchNeeded = (raw.listings || [])
+      .filter(
+        (l) =>
+          l.source === "rentcast" &&
+          l.outreach_result === "no contact email" &&
+          !state[l.id]?.emailed &&
+          !state[l.id]?.contact_email
+      )
+      .map((l) => ({ ...l, action: "research" }));
+
     const profile = (await env.STATE.get("profile", "json")) || {};
-    return json({ profile, craigslist_body_limit: CRAIGSLIST_BODY_LIMIT, candidates: [...sendReady, ...draftReady] });
+    return json({
+      profile,
+      craigslist_body_limit: CRAIGSLIST_BODY_LIMIT,
+      candidates: [...sendReady, ...draftReady, ...researchNeeded],
+    });
   }
 
   if (path === "/api/agent/draft" && request.method === "POST") {
@@ -172,6 +233,28 @@ async function handleApi(request, env, path) {
     entry.draft_body = body.body;
     entry.drafted_at = new Date().toISOString();
     entry.updated = entry.drafted_at;
+    state[body.id] = entry;
+    await env.STATE.put("state", JSON.stringify(state));
+    return json({ ok: true });
+  }
+
+  if (path === "/api/agent/contact" && request.method === "POST") {
+    const body = await request.json();
+    const idMatch = typeof body.id === "string" && body.id.match(/^[A-Za-z0-9_-]{1,64}$/);
+    const email = typeof body.contact_email === "string" ? body.contact_email.trim() : "";
+    const source = typeof body.contact_source === "string" ? body.contact_source.trim() : "";
+    if (!idMatch || !email.includes("@") || email.length > 200 || !source || source.length > 500) {
+      return json({ error: "expected {id, contact_name?, contact_email, contact_source} -- contact_source is required" }, 400);
+    }
+    if (body.contact_name !== undefined && (typeof body.contact_name !== "string" || body.contact_name.length > 200)) {
+      return json({ error: "contact_name must be a string under 200 characters" }, 400);
+    }
+    const state = await readState(env);
+    const entry = { ...(state[body.id] || {}) };
+    if (typeof body.contact_name === "string" && body.contact_name.trim()) entry.contact_name = body.contact_name.trim();
+    entry.contact_email = email;
+    entry.contact_source = source;
+    entry.updated = new Date().toISOString();
     state[body.id] = entry;
     await env.STATE.put("state", JSON.stringify(state));
     return json({ ok: true });
@@ -233,9 +316,19 @@ async function handleApi(request, env, path) {
 
   if (path === "/api/overrides" && request.method === "GET") {
     const state = await readState(env);
-    const lines = ["source_id,address"];
+    const lines = ["source_id,address,contact_name,contact_email,contact_source"];
     for (const [id, entry] of Object.entries(state)) {
-      if (entry.address) lines.push(`${id},${csvCell(entry.address)}`);
+      if (entry.address || entry.contact_email) {
+        lines.push(
+          [
+            id,
+            csvCell(entry.address || ""),
+            csvCell(entry.contact_name || ""),
+            csvCell(entry.contact_email || ""),
+            csvCell(entry.contact_source || ""),
+          ].join(",")
+        );
+      }
     }
     return new Response(lines.join("\n") + "\n", {
       headers: { "content-type": "text/csv; charset=utf-8", "cache-control": "no-store" },

@@ -74,6 +74,25 @@ def test_craigslist_listing_never_auto_sends_even_with_perfect_data(monkeypatch)
     assert listing.draft_subject is not None
 
 
+def test_craigslist_listing_with_a_contact_email_still_never_auto_sends(monkeypatch):
+    """Regression guard for a gap introduced by supporting contact overrides
+    for RentCast (main.py's load_contact_overrides): before that, Craigslist
+    always failed the contact_email check simply because craigslist.py never
+    set it -- an assumption, not an enforced rule. This proves the source
+    check in _gate_reason() makes it a hard rule instead: even a Craigslist
+    listing that somehow does have a contact_email (e.g. a manually-entered
+    one) must never become gate-eligible, since there's still no scriptable
+    way to actually send to it."""
+    calls = []
+    monkeypatch.setattr("rental_finder.outreach.send_email", lambda *a, **k: calls.append(a) or (True, "sent"))
+    listing = _good_rentcast_listing(source_id="cl-with-contact", contact_email="found@example.com")
+    listing.source = "craigslist"
+    newly_emailed = process([listing], SETTINGS, COMPLETE_PROFILE, already_emailed=set())
+    assert listing.outreach_result == "no automatable contact (Craigslist has no real send address)"
+    assert newly_emailed == set()
+    assert calls == []
+
+
 def test_craigslist_listing_without_a_verified_address_is_not_offered_as_a_draft_candidate():
     """Regression test: the contact-email check must never short-circuit
     ahead of address/spam/buffer for Craigslist, or 'no automatable contact'

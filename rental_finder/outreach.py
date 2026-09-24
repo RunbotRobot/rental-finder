@@ -58,8 +58,21 @@ def _gate_reason(
         return "facility distance unverified"
     if clearance is False:
         return f"does not clear {settings.auto_send_buffer_ft} ft on every facility type"
+    # Explicit and unconditional, checked before the generic contact_email
+    # check below: Craigslist must never become gate-eligible, regardless of
+    # what contact_email holds. This used to be true only because
+    # sources/craigslist.py never set contact_email -- an assumption, not an
+    # enforced rule. Once contact overrides exist (see
+    # main.py's load_contact_overrides, for a RentCast listing RentCast
+    # itself gave no contact for), that assumption stops being automatically
+    # true: nothing here technically prevents a Craigslist listing's
+    # contact_email from being set too (e.g. a manually-entered contact found
+    # in a posting's own text). Craigslist still has no scriptable way to
+    # actually send to it, so this stays a hard rule, not a data check.
+    if listing.source == "craigslist":
+        return "no automatable contact (Craigslist has no real send address)"
     if not listing.contact_email:
-        return "no automatable contact (Craigslist has no real send address)" if listing.source == "craigslist" else "no contact email"
+        return "no contact email"
     return None
 
 

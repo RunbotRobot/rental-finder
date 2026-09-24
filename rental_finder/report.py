@@ -55,7 +55,7 @@ def write_csv(listings: list[Listing], settings: Settings, out_path: str | Path)
          "county", "location_precision", "spam_score", "spam_flags"]
         + [f"clears_{tier}ft" for tier in settings.buffer_tiers_ft]
         + [f"nearest_{ftype}_ft" for ftype in settings.facility_types]
-        + ["contact_email", "outreach_result", "url", "map_link", "description_snippet"]
+        + ["contact_email", "contact_source", "outreach_result", "url", "map_link", "description_snippet"]
     )
     with Path(out_path).open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -77,6 +77,7 @@ def write_csv(listings: list[Listing], settings: Settings, out_path: str | Path)
                 "spam_score": listing.spam_score,
                 "spam_flags": "; ".join(listing.spam_flags),
                 "contact_email": listing.contact_email or "",
+                "contact_source": listing.contact_source or "",
                 "outreach_result": listing.outreach_result or "",
                 "url": listing.url,
                 "map_link": _map_link(listing),
@@ -131,7 +132,9 @@ def to_json(listings: list[Listing], settings: Settings, generated_at: str) -> d
                 for ftype in settings.facility_types
             },
             "description": (listing.description or "")[:400],
+            "contact_name": listing.contact_name,
             "contact_email": listing.contact_email,
+            "contact_source": listing.contact_source,
             "draft_subject": listing.draft_subject,
             "draft_body": listing.draft_body,
             "outreach_result": listing.outreach_result,
