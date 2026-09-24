@@ -58,18 +58,21 @@ def _gate_reason(
         return "facility distance unverified"
     if clearance is False:
         return f"does not clear {settings.auto_send_buffer_ft} ft on every facility type"
-    # Explicit and unconditional, checked before the generic contact_email
-    # check below: Craigslist must never become gate-eligible, regardless of
-    # what contact_email holds. This used to be true only because
-    # sources/craigslist.py never set contact_email -- an assumption, not an
-    # enforced rule. Once contact overrides exist (see
-    # main.py's load_contact_overrides, for a RentCast listing RentCast
-    # itself gave no contact for), that assumption stops being automatically
-    # true: nothing here technically prevents a Craigslist listing's
-    # contact_email from being set too (e.g. a manually-entered contact found
-    # in a posting's own text). Craigslist still has no scriptable way to
-    # actually send to it, so this stays a hard rule, not a data check.
-    if listing.source == "craigslist":
+    # Checked before the generic contact_email check below: a Craigslist
+    # listing needs a VERIFIED contact (contact_source set -- i.e. a real
+    # citation from a contact override, recorded via POST /api/agent/contact
+    # after a check-in either found a direct email the poster gave in their
+    # own listing text, or researched the property/company the same way as
+    # for a RentCast listing -- see main.py's load_contact_overrides), never
+    # just any contact_email. sources/craigslist.py itself never sets
+    # contact_email at all -- Craigslist's own reply widget is a JS relay,
+    # not a real address -- so the only way this field is ever non-empty for
+    # a Craigslist listing is a verified override in the first place. This
+    # check still matters: it means a hypothetical future bug that sets
+    # contact_email on a Craigslist listing through some OTHER path (a
+    # caching mistake, a copy-paste error) can't silently make it
+    # gate-eligible without a cited contact_source to back it up.
+    if listing.source == "craigslist" and not listing.contact_source:
         return "no automatable contact (Craigslist has no real send address)"
     if not listing.contact_email:
         return "no contact email"
