@@ -5,7 +5,8 @@
 Pipeline: fetch search results (Craigslist + RentCast) -> drop over-budget
 -> restore cache -> apply address overrides -> fetch detail pages (capped)
 -> spam flags -> drop occupied shared rooms (keeping mother-in-law
-suites/ADUs/studios) -> geocode/locate -> drop out-of-county -> distance
+suites/ADUs/studios) -> drop age-restricted (55+/62+) listings ->
+geocode/locate -> drop out-of-county -> drop too-far-south -> distance
 checks -> draft + (maybe) send outreach emails -> save cache -> CSV + JSON
 + summary.
 """
@@ -31,6 +32,7 @@ from .geocode import county_for_point, geocode_address, has_street_number, is_pl
 from .models import PRECISION_ADDRESS, PRECISION_AREA, PRECISION_NONE, Listing
 from .report import summarize, to_json, write_csv
 from .room_share_filter import is_occupied_shared_room
+from .senior_housing_filter import is_age_restricted
 from .sources import craigslist, rentcast
 from .spam_filter import flag_listings
 
@@ -191,6 +193,11 @@ def run(
             len(shared_room_ids),
         )
 
+    senior_ids = {l.source_id for l in listings if is_age_restricted(l)}
+    if senior_ids:
+        listings = [l for l in listings if l.source_id not in senior_ids]
+        logger.info("Dropping %d age-restricted (55+/62+/senior) listing(s)", len(senior_ids))
+
     geocoded_from: dict[str, str | None] = {}
     for listing in listings:
         # RentCast already supplies real coordinates -- nothing to geocode.
@@ -201,6 +208,15 @@ def run(
         if not _same_county(listing.county, settings.county):
             logger.info("Dropping %s (%s): %s", listing.county, listing.best_address or "no location", listing.url)
     logger.info("%d listings in %s (dropped %d confirmed elsewhere)", len(in_county), settings.county, len(listings) - len(in_county))
+
+    # South of Kent's southern edge is further than the owner wants to go
+    # (Enumclaw got through before this existed). latitude is None only at
+    # PRECISION_NONE -- kept rather than dropped, since there's nothing to
+    # measure yet, same as an unknown county above.
+    too_far_south_ids = {l.source_id for l in in_county if l.latitude is not None and l.latitude < settings.min_latitude}
+    if too_far_south_ids:
+        in_county = [l for l in in_county if l.source_id not in too_far_south_ids]
+        logger.info("Dropping %d listing(s) south of latitude %.2f", len(too_far_south_ids), settings.min_latitude)
 
     compliance.annotate_distances(in_county, settings, session)
 

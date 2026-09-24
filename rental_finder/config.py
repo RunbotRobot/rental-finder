@@ -20,6 +20,16 @@ class Settings:
     postal_code: str = "98188"
     search_radius_miles: int = 25
     county: str = "King County"
+    # South of this, drop it -- Kent's southern edge. Chosen deliberately
+    # over a looser "Auburn's fine, just not further" line: Auburn (~47.31,
+    # further south than Kent) already got an outreach draft before this
+    # boundary existed, but the owner picked the strict Kent/Des Moines
+    # line anyway, which means Auburn is out going forward too. Applied to
+    # listing.latitude, which is set at AREA precision (the CL map pin) as
+    # well as ADDRESS precision -- only PRECISION_NONE listings (no
+    # latitude at all) skip this check, kept rather than dropped since
+    # there's nothing to measure yet.
+    min_latitude: float = 47.35
 
     # Affordability
     max_rent: float = 1900.0

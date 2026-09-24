@@ -33,6 +33,24 @@
   one more detail fetch (see the room_attrs backfill comment there) rather
   than leave them unclassifiable forever. Don't remove that backfill
   without another way to fix already-cached listings.
+- The owner is 39 -- doesn't qualify for 55+/62+ senior housing.
+  `senior_housing_filter.py`'s `is_age_restricted()` drops it from BOTH
+  sources (RentCast's aggregated listings can include senior communities
+  same as Craigslist's), unconditionally, off whatever text is available
+  (title alone if not yet detail-fetched) -- unlike the room-share filter,
+  there's no "haven't looked yet, keep it" carve-out here, since an age
+  restriction is something posters advertise up front, not something that
+  needs a detail page to discover.
+- `settings.min_latitude` (`config.py`, currently 47.35 -- Kent's southern
+  edge) drops anything further south, applied to `listing.latitude` after
+  geocoding (kept, not dropped, when there's no latitude at all -- nothing
+  to measure). The owner named Kent/Des Moines as the boundary but had
+  already gotten an outreach draft for an Auburn listing (~47.31, further
+  south than Kent) without objecting to it; asked directly, the owner
+  picked the strict Kent/Des Moines line anyway, which means Auburn is
+  excluded too going forward. Don't loosen this back toward "keep Auburn"
+  without the owner asking for it back -- that was the explicitly declined
+  option, not an oversight.
 - Outreach *eligibility* (`outreach.py`) is gated by deterministic,
   auditable rules only — never a model's self-reported confidence. A
   listing is only ever marked "ready to send" (RentCast listings alone;

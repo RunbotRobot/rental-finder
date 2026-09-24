@@ -61,25 +61,33 @@ result is a starting point for that conversation, not an answer.
    alone means self-contained). See `room_share_filter.py`. A listing not
    yet detail-fetched is kept until a future run actually reads it, rather
    than guessed at from the title alone.
-5. Geocodes Craigslist listings that have a **street address**, via the US
+5. Drops age-restricted housing — 55+, 62+, "senior living," "independent
+   living," "active adult community," and similar phrasing in the title or
+   description, from either source. Only ever excludes on an explicit
+   match; see `senior_housing_filter.py`.
+6. Geocodes Craigslist listings that have a **street address**, via the US
    Census geocoder (with an OpenStreetMap fallback that's only accepted
    when it resolves to a specific building). Listings that only give a
    neighborhood or city are *not* geocoded to a centroid and then measured
    from — they're reported as "unknown" until you get the address from
    the poster (see **Address overrides** below).
-6. Drops listings confirmed to be outside King County (the search radius
-   reaches into Pierce and Snohomish).
-7. Measures distance from each located listing to the nearest:
+7. Drops listings confirmed to be outside King County (the search radius
+   reaches into Pierce and Snohomish), and separately drops anything south
+   of Kent's southern edge (`min_latitude` in `config.py`) — far enough
+   south to also exclude Auburn, a deliberate choice over a looser
+   boundary. A listing with no coordinates at all is kept rather than
+   guessed at.
+8. Measures distance from each located listing to the nearest:
    - **school** — King County GIS "School Sites" (public **and** private)
    - **park** — King County GIS countywide parks layer (city, county, and
      state park sites, including Seattle's), measured to the park boundary
    - **childcare** — WA DCYF open data: licensed child care *centers* and
      school-age programs, ECEAP preschool sites, and Head Start sites
-8. Drafts an outreach email for every listing once your applicant profile
+9. Drafts an outreach email for every listing once your applicant profile
    is complete (see **Outreach and auto-send**), and — only for listings
    that clear every automated check — either sends it or marks it ready to
    send, depending on the `--send-emails` flag.
-9. Writes `candidates.csv`, ranked: no spam flags first, then by how many
+10. Writes `candidates.csv`, ranked: no spam flags first, then by how many
    buffer tiers the listing clears, then cheapest first. Prints the
    per-tier survivor counts.
 
