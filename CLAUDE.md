@@ -12,27 +12,35 @@
   cooperative preschools are exempt from DCYF licensing entirely (absent
   from Child Care Check too, not just this tool). Don't claim coverage for
   either anywhere.
-- `room_share_filter.py` drops Craigslist "rooms & shares" listings once
-  detail-fetched, UNLESS the listing itself has an explicit self-contained
-  signal (ADU, in-law, private entrance, studio, detached, ...) -- that's
-  the one thing that keeps it. A "roo" listing is an occupied shared room
-  BY DEFAULT once actually read; a "private bath" attribute or an
-  otherwise-neutral whole-house description are NOT self-contained
-  signals and do not save a listing on their own (a real listing missed
-  this exact way: "private room" + "private bath" + a neutral
-  description, no self-contained language anywhere -- still excluded now).
-  Not-yet-detail-fetched listings are the one case kept regardless (nothing
-  to judge yet). If you touch this, keep that default -- the owner asked
-  for this specifically to stop seeing occupied-room listings, and an
-  earlier, more conservative version of this file (default-keep, exclude
-  only on a strong signal like "no private bath") missed real room-for-rent
-  listings that had no strong negative signal, which is why the default
-  flipped. Also: a "roo" listing already marked `details_fetched` from
-  before `room_attrs` existed has an empty `room_attrs` indistinguishable
-  from "genuinely has no badges" -- `main.py`'s `run()` re-queues those for
-  one more detail fetch (see the room_attrs backfill comment there) rather
-  than leave them unclassifiable forever. Don't remove that backfill
-  without another way to fix already-cached listings.
+- `room_share_filter.py` drops Craigslist "rooms & shares" listings that
+  have a description or room_attrs, UNLESS the listing itself has an
+  explicit self-contained signal (ADU, in-law, private entrance, studio,
+  detached, ...) -- that's the one thing that keeps it. A "roo" listing is
+  an occupied shared room BY DEFAULT once there's something to read; a
+  "private bath" attribute or an otherwise-neutral whole-house description
+  are NOT self-contained signals and do not save a listing on their own (a
+  real listing missed this exact way: "private room" + "private bath" + a
+  neutral description, no self-contained language anywhere -- still
+  excluded now). A listing with NEITHER a description nor room_attrs is the
+  one case kept regardless (nothing to judge yet). If you touch this, keep
+  that default -- the owner asked for this specifically to stop seeing
+  occupied-room listings, and an earlier, more conservative version of this
+  file (default-keep, exclude only on a strong signal like "no private
+  bath") missed real room-for-rent listings that had no strong negative
+  signal, which is why the default flipped.
+  The "nothing to judge yet" gate checks `description`/`room_attrs`
+  directly, NOT `details_fetched` -- a second real listing was missed
+  because of exactly that distinction: main.py's room_attrs backfill resets
+  `details_fetched` to False on listings that already have a perfectly
+  good description from before room_attrs existed, and checking
+  `details_fetched` treated that stale-but-still-accurate description as
+  "nothing to judge from yet." Don't go back to gating on `details_fetched`.
+  Also: a "roo" listing already marked `details_fetched` from before
+  `room_attrs` existed has an empty `room_attrs` indistinguishable from
+  "genuinely has no badges" -- `main.py`'s `run()` re-queues those for one
+  more detail fetch (see the room_attrs backfill comment there) rather than
+  leave them unclassifiable forever. Don't remove that backfill without
+  another way to fix already-cached listings.
 - The owner is 39 -- doesn't qualify for 55+/62+ senior housing.
   `senior_housing_filter.py`'s `is_age_restricted()` drops it from BOTH
   sources (RentCast's aggregated listings can include senior communities

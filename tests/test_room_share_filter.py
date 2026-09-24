@@ -23,11 +23,34 @@ def test_non_room_category_is_never_excluded():
     assert is_occupied_shared_room(listing) is False
 
 
-def test_not_yet_detail_fetched_is_kept():
+def test_no_description_is_kept():
     """Nothing to judge from yet -- keep it until a future run actually
     reads the listing, rather than guess from the title alone."""
     listing = _listing(title="Room for rent", details_fetched=False)
     assert is_occupied_shared_room(listing) is False
+
+
+def test_stale_details_fetched_flag_does_not_block_a_real_description():
+    """Regression test for a real, live listing this missed: main.py's
+    room_attrs backfill resets details_fetched to False on listings that
+    already have a perfectly good description from before room_attrs
+    existed. Gating on details_fetched instead of description would have
+    treated this listing's explicit "Shared spaces: kitchen, 2
+    bathrooms..." as "nothing to judge from yet" and kept it, exactly what
+    happened live. The description doesn't stop being true just because
+    details_fetched was reset for an unrelated reason."""
+    listing = _listing(
+        title="Furnished bedrooms for rent in SHORELINE for $800 or $850",
+        description=(
+            "Rooms for rent in Shoreline includes utilities and internet. The avail. "
+            "bedrooms (furnished or unfurnished) rent $800 to $850/month/room/person, "
+            "72 sq ft or 99 sq ft room. Shared spaces: kitchen, 2 bathrooms, living "
+            "rooms upstairs and downstairs, deck and fenced yard."
+        ),
+        room_attrs=[],
+        details_fetched=False,
+    )
+    assert is_occupied_shared_room(listing) is True
 
 
 def test_plain_private_room_with_private_bath_and_no_other_signal_is_excluded():
