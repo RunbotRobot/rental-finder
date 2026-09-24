@@ -114,10 +114,23 @@
 //                               it as a contact override (see /api/overrides
 //                               above and main.py's load_contact_overrides).
 //
-// State is one KV value ("state") holding a JSON object. It's a few hundred
-// listings at most, so a single document is simpler than a key per listing.
-// The profile is a second, separate KV value ("profile") -- unrelated to
-// any one listing, so it doesn't belong in the state object.
+// Each listing's review state is its own KV key ("state:<id>"), not one
+// shared JSON blob -- found the hard way, live, during a real outreach
+// check-in: the original design held every listing's state in a single KV
+// value, read-modified-written as a whole on every change. That's safe for
+// one write at a time, but a check-in recording several contacts/drafts in
+// a row (twenty-odd POSTs within a couple of minutes) raced on that shared
+// key -- two requests reading the same snapshot, each writing back a
+// version missing the other's change -- and silently lost 6 of 20 contact
+// writes and 3 of 8 draft writes, despite every single request returning
+// 200. Splitting to a key per listing means two different listings' writes
+// never touch the same key, so that failure mode can't recur for the case
+// that actually happened; two writes to the very same listing at the very
+// same instant remain a narrower, accepted residual risk. See
+// migrateLegacyStateIfNeeded() for the one-time move off the old shared key
+// -- self-healing, runs at most once, safe to leave in indefinitely. The
+// profile is a separate, single KV value ("profile") -- unrelated to any
+// one listing, so it was never part of this problem.
 
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
 
@@ -159,8 +172,55 @@ function tokenScope(request, env) {
   return null;
 }
 
-async function readState(env) {
-  return (await env.STATE.get("state", "json")) || {};
+function stateKeyFor(id) {
+  return `state:${id}`;
+}
+
+async function readListingState(env, id) {
+  return (await env.STATE.get(stateKeyFor(id), "json")) || {};
+}
+
+// Deletes the key entirely once nothing but "updated" is left (mirrors the
+// old shared-blob code's "drop empty entries" behavior), otherwise writes
+// the entry to its own key -- never touches any other listing's key, which
+// is the whole point.
+async function writeListingState(env, id, entry) {
+  const meaningfulKeys = Object.keys(entry).filter((key) => key !== "updated");
+  if (meaningfulKeys.length === 0) {
+    await env.STATE.delete(stateKeyFor(id));
+  } else {
+    await env.STATE.put(stateKeyFor(id), JSON.stringify(entry));
+  }
+}
+
+// One-time, self-healing migration off the old single-blob "state" key (see
+// the module comment above for why). Runs lazily on any readAllState() call;
+// a no-op every time after the first, since it only acts when no "state:"
+// keys exist yet.
+async function migrateLegacyStateIfNeeded(env) {
+  const probe = await env.STATE.list({ prefix: "state:", limit: 1 });
+  if (probe.keys.length > 0) return;
+  const legacy = await env.STATE.get("state", "json");
+  if (!legacy) return;
+  for (const [id, entry] of Object.entries(legacy)) {
+    await env.STATE.put(stateKeyFor(id), JSON.stringify(entry));
+  }
+}
+
+async function readAllState(env) {
+  await migrateLegacyStateIfNeeded(env);
+  const result = {};
+  let cursor;
+  for (;;) {
+    const page = await env.STATE.list({ prefix: "state:", cursor });
+    for (const key of page.keys) {
+      const value = await env.STATE.get(key.name, "json");
+      if (value) result[key.name.slice("state:".length)] = value;
+    }
+    if (page.list_complete) break;
+    cursor = page.cursor;
+  }
+  return result;
 }
 
 function csvCell(value) {
@@ -196,7 +256,7 @@ async function handleApi(request, env, path) {
   if (path === "/api/agent/candidates" && request.method === "GET") {
     const raw = await env.STATE.get("data", "json");
     if (!raw) return json({ error: "no scan results yet" }, 404);
-    const state = await readState(env);
+    const state = await readAllState(env);
     const sendReady = (raw.listings || [])
       .filter((l) => l.outreach_result === "ready to send" && !state[l.id]?.emailed)
       .map((l) => ({ ...l, action: "send" }));
@@ -293,14 +353,12 @@ async function handleApi(request, env, path) {
     if (body.body.length > CRAIGSLIST_BODY_LIMIT) {
       return json({ error: `body exceeds the ${CRAIGSLIST_BODY_LIMIT}-character estimate for Craigslist's reply box` }, 400);
     }
-    const state = await readState(env);
-    const entry = { ...(state[body.id] || {}) };
+    const entry = await readListingState(env, body.id);
     entry.draft_subject = body.subject.slice(0, 200);
     entry.draft_body = body.body;
     entry.drafted_at = new Date().toISOString();
     entry.updated = entry.drafted_at;
-    state[body.id] = entry;
-    await env.STATE.put("state", JSON.stringify(state));
+    await writeListingState(env, body.id, entry);
     return json({ ok: true });
   }
 
@@ -315,14 +373,12 @@ async function handleApi(request, env, path) {
     if (body.contact_name !== undefined && (typeof body.contact_name !== "string" || body.contact_name.length > 200)) {
       return json({ error: "contact_name must be a string under 200 characters" }, 400);
     }
-    const state = await readState(env);
-    const entry = { ...(state[body.id] || {}) };
+    const entry = await readListingState(env, body.id);
     if (typeof body.contact_name === "string" && body.contact_name.trim()) entry.contact_name = body.contact_name.trim();
     entry.contact_email = email;
     entry.contact_source = source;
     entry.updated = new Date().toISOString();
-    state[body.id] = entry;
-    await env.STATE.put("state", JSON.stringify(state));
+    await writeListingState(env, body.id, entry);
     return json({ ok: true });
   }
 
@@ -357,15 +413,14 @@ async function handleApi(request, env, path) {
   }
 
   if (path === "/api/state" && request.method === "GET") {
-    return json(await readState(env));
+    return json(await readAllState(env));
   }
 
   const stateMatch = path.match(new RegExp(`^/api/state/([${LISTING_ID_CHARS}]{1,100})$`));
   if (stateMatch && request.method === "PATCH") {
     const id = stateMatch[1];
     const patch = await request.json();
-    const state = await readState(env);
-    const entry = { ...(state[id] || {}) };
+    const entry = await readListingState(env, id);
     for (const key of ["status", "note", "address", "emailed"]) {
       if (key in patch) {
         const value = patch[key];
@@ -374,14 +429,13 @@ async function handleApi(request, env, path) {
       }
     }
     entry.updated = new Date().toISOString();
-    if (Object.keys(entry).length === 1) delete state[id];
-    else state[id] = entry;
-    await env.STATE.put("state", JSON.stringify(state));
-    return json(state[id] || {});
+    await writeListingState(env, id, entry);
+    const meaningfulKeys = Object.keys(entry).filter((key) => key !== "updated");
+    return json(meaningfulKeys.length === 0 ? {} : entry);
   }
 
   if (path === "/api/overrides" && request.method === "GET") {
-    const state = await readState(env);
+    const state = await readAllState(env);
     const lines = ["source_id,address,contact_name,contact_email,contact_source"];
     for (const [id, entry] of Object.entries(state)) {
       if (entry.address || entry.contact_email) {
@@ -403,7 +457,7 @@ async function handleApi(request, env, path) {
 
   if (path === "/api/emailed") {
     if (request.method === "GET") {
-      const state = await readState(env);
+      const state = await readAllState(env);
       const ids = Object.entries(state)
         .filter(([, entry]) => entry.emailed)
         .map(([id]) => id);
@@ -416,12 +470,15 @@ async function handleApi(request, env, path) {
       if (!Array.isArray(ids) || !ids.every((id) => typeof id === "string" && id.length <= 100)) {
         return json({ error: "expected an array of id strings" }, 400);
       }
-      const state = await readState(env);
       const now = new Date().toISOString();
+      // Each id is its own key, so these writes never race each other even
+      // when the array covers many different listings at once.
       for (const id of ids) {
-        state[id] = { ...(state[id] || {}), emailed: now, updated: now };
+        const entry = await readListingState(env, id);
+        entry.emailed = now;
+        entry.updated = now;
+        await writeListingState(env, id, entry);
       }
-      await env.STATE.put("state", JSON.stringify(state));
       return json({ ok: true, marked: ids.length });
     }
   }
