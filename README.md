@@ -50,16 +50,17 @@ result is a starting point for that conversation, not an answer.
    weighted signals that sort the junk to the bottom; they never delete
    anything. RentCast listings, from an authenticated structured provider,
    always score 0 — the Craigslist-tuned heuristics don't apply to them.
-4. Drops Craigslist "rooms & shares" listings that are an actual private
-   bedroom in someone else's occupied home — Craigslist's own "no private
-   bath" attribute, or language like "roommate"/"shared kitchen" — while
-   keeping mother-in-law suites, ADUs, and studios that get posted in that
-   same category despite being self-contained. See `room_share_filter.py`;
-   like the spam flags, this is a signal-based judgment call, deliberately
-   biased toward keeping a listing when it's ambiguous (an explicit
-   self-contained signal like "ADU" or "private entrance" always wins over
-   an unclear or absent shared-housing signal) rather than risking a real
-   self-contained unit getting silently dropped.
+4. Drops Craigslist "rooms & shares" listings once actually read (detail
+   page fetched) and still an ordinary private bedroom in someone else's
+   occupied home — that's the category's default meaning, so it's excluded
+   unless the listing itself says otherwise — while keeping mother-in-law
+   suites, ADUs, and studios that get posted in that same category despite
+   being self-contained (an explicit signal like "ADU," "private entrance,"
+   or "studio" always keeps it, even with an ordinary "private bath"
+   attribute or a whole-house-sounding description — neither of those
+   alone means self-contained). See `room_share_filter.py`. A listing not
+   yet detail-fetched is kept until a future run actually reads it, rather
+   than guessed at from the title alone.
 5. Geocodes Craigslist listings that have a **street address**, via the US
    Census geocoder (with an OpenStreetMap fallback that's only accepted
    when it resolves to a specific building). Listings that only give a
