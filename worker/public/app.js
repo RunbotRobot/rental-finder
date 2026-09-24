@@ -183,7 +183,7 @@
     $(".flags", node).textContent = listing.spam_flags.length ? `⚠ ${listing.spam_flags.join(", ")}` : "";
     $(".desc", node).textContent = listing.description || "";
     const dateParts = [listing.posted && `posted ${listing.posted}`, listing.first_seen && `first seen ${listing.first_seen}`];
-    if (listing.contact_email) dateParts.push(`contact: ${listing.contact_email}`);
+    if (listing.contact_email) dateParts.push(`contact: ${listing.contact_email}${listing.contact_source ? " (via research)" : ""}`);
     $(".dates", node).textContent = dateParts.filter(Boolean).join(" · ");
 
     const outreach = $(".outreach", node);

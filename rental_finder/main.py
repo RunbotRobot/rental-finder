@@ -3,7 +3,9 @@
     python -m rental_finder.main --out candidates.csv -v
 
 Pipeline: fetch search results (Craigslist + RentCast) -> drop over-budget
--> restore cache -> apply address overrides -> fetch detail pages (capped)
+-> restore cache -> apply address overrides -> apply contact overrides
+(a verified/researched contact_email for a RentCast listing RentCast itself
+gave none for -- see load_contact_overrides) -> fetch detail pages (capped)
 -> spam flags -> drop occupied shared rooms (keeping mother-in-law
 suites/ADUs/studios) -> drop age-restricted (55+/62+) listings ->
 geocode/locate -> drop out-of-county -> drop too-far-south -> distance
@@ -59,6 +61,32 @@ def load_overrides(path: str | Path) -> dict[str, str]:
             for row in csv.DictReader(f)
             if row.get("source_id") and row.get("address")
         }
+
+
+def load_contact_overrides(path: str | Path) -> dict[str, tuple[str | None, str | None, str]]:
+    """(name, email, source) per source_id, from the same overrides CSV as
+    load_overrides -- the Worker's /api/overrides now also carries
+    contact_name/contact_email/contact_source columns (see worker/src/index.js),
+    written via POST /api/agent/contact during an outreach check-in when
+    RentCast itself gave no contact. contact_source is required (never
+    empty) so every manually-supplied contact carries a citation of how it
+    was found, same spirit as everything else this project refuses to trust
+    without a reason. A row missing contact_email or contact_source is
+    skipped entirely rather than applied half-populated."""
+    path = Path(path)
+    if not path.exists():
+        return {}
+    with path.open(newline="", encoding="utf-8") as f:
+        result: dict[str, tuple[str | None, str | None, str]] = {}
+        for row in csv.DictReader(f):
+            source_id = (row.get("source_id") or "").strip()
+            email = (row.get("contact_email") or "").strip()
+            source = (row.get("contact_source") or "").strip()
+            if not source_id or not email or not source:
+                continue
+            name = (row.get("contact_name") or "").strip() or None
+            result[source_id] = (name, email, source)
+        return result
 
 
 def load_emailed_ids(path: str | Path) -> set[str]:
@@ -172,6 +200,14 @@ def run(
     overrides = load_overrides(settings.overrides_path)
     for listing in listings:
         listing.override_address = overrides.get(listing.source_id)
+
+    contact_overrides = load_contact_overrides(settings.overrides_path)
+    for listing in listings:
+        override = contact_overrides.get(listing.source_id)
+        if override is not None:
+            listing.override_contact_name, listing.override_contact_email, listing.contact_source = override
+            listing.contact_name = listing.override_contact_name
+            listing.contact_email = listing.override_contact_email
 
     if settings.fetch_details:
         # room_attrs backfill first (see above), then listings that already

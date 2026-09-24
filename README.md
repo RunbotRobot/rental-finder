@@ -174,14 +174,13 @@ personally writes and sends the email for each one. A listing is marked
 Anything that fails even one of these gets a drafted email anyway, marked
 with the specific reason it isn't gate-eligible, instead of a silent skip.
 
-**Right now, no RentCast listing has a usable contact at all.** As of the
-most recent fetch (500 listings, checked live), 0 had a listing-agent or
-listing-office email, and 0 had a phone number either — RentCast's own
-docs say these fields are sometimes omitted, and this dataset just
-doesn't have them. That also rules out an SMS-based alternative to email
-for now, since there's no phone number to text either. `rentcast.py` logs
-both counts on every real fetch, so this is easy to re-check if RentCast's
-data ever improves.
+**RentCast itself has no usable contact for any current listing.** As of
+the most recent direct fetch (500 listings, checked live), 0 had a
+listing-agent or listing-office email, and 0 had a phone number either —
+RentCast's own docs say these fields are sometimes omitted, and this
+dataset just doesn't have them. `rentcast.py` logs both counts on every
+real fetch, so this is easy to re-check if RentCast's data ever improves.
+That's what the third check-in path below (**"research"**) exists for.
 
 **Who actually sends it, and when.** This runs when you ask for it, not on
 a schedule. Message a Claude Code session in this repo (any time — there's
@@ -189,7 +188,7 @@ no fixed cadence) something like "check for outreach candidates." It reads
 candidates through a narrow, read-mostly `AGENT_TOKEN` (see Setup below —
 deliberately *not* the same token the site uses, so if it were ever
 exposed it can't touch your review state, your profile, or the raw scan
-data), and handles each one of two ways:
+data), and handles each one of three ways:
 
 - **RentCast, gate-eligible** ("ready to send"): writes the email itself —
   real per-listing phrasing, not a template, dropping irrelevant profile
@@ -204,6 +203,41 @@ data), and handles each one of two ways:
   had 6+ separate listings), so candidates are grouped by verified address
   first: one draft per address, saved to every posting at that address, not
   one draft per posting.
+- **RentCast, eligible except RentCast itself gave no contact_email**
+  ("research"): the check-in session searches the web for a real contact
+  (property manager, landlord, leasing office) tied to that specific
+  address, the same personal-judgment standard as everything else here —
+  never guessing or pattern-matching an email/phone that isn't explicitly
+  stated on a real page tied to that address, and always citing the source.
+  Two confidence tiers decide what happens next, per your explicit call
+  (made after a real batch of 19 researched addresses came back with real
+  variance — 4 with no reliable contact at all, several confirmed only at
+  the building level rather than the specific unit, one source that had
+  already gone stale by the time it was double-checked, and two listings
+  that turned out to be miscategorized entirely — a parking-garage unit
+  priced as a "Single Family," and a 55+ senior community RentCast gave no
+  name or description for at all, so `senior_housing_filter.py` had
+  nothing to catch it with):
+  - **High or moderate confidence** (a contact clearly tied to the address,
+    even if only at the building level, or from a single source that could
+    be stale): the session records it via `POST /api/agent/contact`
+    (`{id, contact_name?, contact_email, contact_source}` — `contact_source`
+    is a required citation of how it was found, never a bare confidence
+    score) and triggers a fresh scan run. That run's `outreach.py` picks the
+    override up as a normal contact_email (see `main.py`'s
+    `load_contact_overrides`) and re-evaluates the SAME gate as any other
+    RentCast listing — nothing about the send decision itself is
+    special-cased for a researched contact. Once that run publishes, the
+    listing shows up as ordinary "ready to send" and gets emailed on the
+    next check-in step, exactly like a RentCast-provided contact would.
+  - **Not found, or you'd rather nothing auto-send from research at all**:
+    stays queued as a "research" candidate for a future check-in; nothing
+    is recorded or sent.
+  Before recording any contact, the session also does the same
+  internal-consistency read described below for Craigslist listings —
+  a listing whose category/description doesn't plausibly match what's at
+  that address (the garage-unit and senior-community cases above) gets
+  skipped and flagged to you rather than researched as if it were normal.
 
 An unattended, recurring version of the sending half (a session waking
 itself on a timer, indefinitely, to send real email with no one present)
@@ -293,7 +327,7 @@ a guess from this README or from any AI chatbot.
   different long random string from `API_TOKEN`, not shared with GitHub.
   A Claude Code session doing an outreach check-in holds this token for
   the life of that session, since it calls `/api/agent/candidates`,
-  `/api/agent/draft`, and `/api/emailed`; that's the reason it's a
+  `/api/agent/draft`, `/api/agent/contact`, and `/api/emailed`; that's the reason it's a
   separate, narrow credential rather than the site's full-access one --
   it still can't touch review state, the profile editor, or raw scan data.
 - **Gmail sending**: no setup needed for the live flow — a Claude session

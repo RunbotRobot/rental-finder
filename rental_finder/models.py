@@ -85,9 +85,29 @@ class Listing:
     # Contact info for outreach. Craigslist never populates this (see
     # sources/craigslist.py -- there is no real, stable email to send to,
     # only its own JS reply-relay). RentCast listings carry a real agent or
-    # office email straight from the provider.
+    # office email straight from the provider when RentCast has one -- as of
+    # this writing, RentCast has returned zero across every real fetch (see
+    # CLAUDE.md), so in practice these two fields are populated by
+    # override_contact_name/override_contact_email below instead, applied in
+    # main.py exactly like override_address (always wins when present).
     contact_name: str | None = None
     contact_email: str | None = None
+
+    # A verified manual/researched contact, from the same overrides CSV as
+    # override_address -- for when RentCast gave us none (see contact_source
+    # below). Applied in main.py the same way override_address is: always
+    # wins when present, onto contact_name/contact_email directly, so the
+    # rest of the pipeline (outreach.py's gate, email_draft.py, the site)
+    # never needs to know or care where a contact came from.
+    override_contact_name: str | None = None
+    override_contact_email: str | None = None
+
+    # Set only when contact_email came from override_contact_email rather
+    # than RentCast's own API -- a short note of how/where it was found (a
+    # citation, not a confidence score), so the site and a future check-in
+    # can tell a provider-verified contact apart from a personally-
+    # researched one. None for a RentCast-provided contact.
+    contact_source: str | None = None
 
     # Filled in by email_draft.py once a listing is a real candidate.
     draft_subject: str | None = None
