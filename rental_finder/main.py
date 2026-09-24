@@ -141,16 +141,36 @@ def run(
     for listing in listings:
         cache.restore(listing)
 
+    # room_share_filter.py needs Craigslist's structured room_attrs, which
+    # didn't exist before that feature shipped. A "roo" listing already
+    # marked details_fetched from before then has an empty room_attrs
+    # that's indistinguishable from "this listing genuinely has no
+    # attribute badges" (real ones always have a few) -- so re-queue those
+    # for one more detail fetch rather than leave them impossible to
+    # classify forever. Sorted after genuinely-new listings (see below) so
+    # this one-time backfill doesn't crowd out today's actual new arrivals.
+    needs_room_attrs_backfill = {
+        l.source_id
+        for l in listings
+        if l.source == "craigslist" and l.category == "roo" and l.details_fetched and not l.room_attrs
+    }
+    if needs_room_attrs_backfill:
+        logger.info("Re-queuing %d pre-existing room listing(s) to backfill room_attrs", len(needs_room_attrs_backfill))
+        for listing in listings:
+            if listing.source_id in needs_room_attrs_backfill:
+                listing.details_fetched = False
+
     overrides = load_overrides(settings.overrides_path)
     for listing in listings:
         listing.override_address = overrides.get(listing.source_id)
 
     if settings.fetch_details:
         # Listings that already show a street address are the actionable
-        # ones, so their detail pages (description, post date) come first.
+        # ones, so their detail pages (description, post date) come first;
+        # the room_attrs backfill above comes last within each group.
         todo = sorted(
             (l for l in listings if not l.details_fetched),
-            key=lambda l: 0 if has_street_number(l.location_text) else 1,
+            key=lambda l: (l.source_id in needs_room_attrs_backfill, 0 if has_street_number(l.location_text) else 1),
         )
         logger.info("Fetching detail pages for %d listings (cap %d)", len(todo), settings.max_detail_fetches)
         craigslist.fetch_details(todo, settings, session)

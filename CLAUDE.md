@@ -12,16 +12,27 @@
   cooperative preschools are exempt from DCYF licensing entirely (absent
   from Child Care Check too, not just this tool). Don't claim coverage for
   either anywhere.
-- `room_share_filter.py` drops Craigslist "rooms & shares" listings that
-  are an actual occupied shared room, while keeping mother-in-law
-  suites/ADUs/studios that get posted in that category anyway. Same
-  "uncertain means keep" bias as the county filter: only exclude on a real
-  signal (Craigslist's own "no private bath"/"shared room" attribute, or
-  explicit roommate/shared-kitchen language), and an explicit
-  self-contained signal always overrides an ambiguous or absent
-  shared-housing one. If you touch this, keep that asymmetry -- the owner
-  asked for this specifically to stop seeing occupied-room listings, not to
-  risk losing a real self-contained option to an over-eager keyword match.
+- `room_share_filter.py` drops Craigslist "rooms & shares" listings once
+  detail-fetched, UNLESS the listing itself has an explicit self-contained
+  signal (ADU, in-law, private entrance, studio, detached, ...) -- that's
+  the one thing that keeps it. A "roo" listing is an occupied shared room
+  BY DEFAULT once actually read; a "private bath" attribute or an
+  otherwise-neutral whole-house description are NOT self-contained
+  signals and do not save a listing on their own (a real listing missed
+  this exact way: "private room" + "private bath" + a neutral
+  description, no self-contained language anywhere -- still excluded now).
+  Not-yet-detail-fetched listings are the one case kept regardless (nothing
+  to judge yet). If you touch this, keep that default -- the owner asked
+  for this specifically to stop seeing occupied-room listings, and an
+  earlier, more conservative version of this file (default-keep, exclude
+  only on a strong signal like "no private bath") missed real room-for-rent
+  listings that had no strong negative signal, which is why the default
+  flipped. Also: a "roo" listing already marked `details_fetched` from
+  before `room_attrs` existed has an empty `room_attrs` indistinguishable
+  from "genuinely has no badges" -- `main.py`'s `run()` re-queues those for
+  one more detail fetch (see the room_attrs backfill comment there) rather
+  than leave them unclassifiable forever. Don't remove that backfill
+  without another way to fix already-cached listings.
 - Outreach *eligibility* (`outreach.py`) is gated by deterministic,
   auditable rules only — never a model's self-reported confidence. A
   listing is only ever marked "ready to send" (RentCast listings alone;

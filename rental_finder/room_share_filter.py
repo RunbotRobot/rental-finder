@@ -2,23 +2,29 @@
 happened to get posted in Craigslist's "rooms & shares" category.
 
 That category ("roo") mixes two very different things: a private bedroom
-in someone else's occupied home (shared kitchen/bathroom/common areas --
-what most people mean by "room for rent"), and self-contained mother-in-law
-suites, ADUs, and studios that some posters file there anyway (the unit is
-an extra structure/carve-out on the same lot, so "rooms & shares" can feel
+in someone else's occupied home (shared kitchen/common areas -- what most
+people mean by "room for rent"), and self-contained mother-in-law suites,
+ADUs, and studios that some posters file there anyway (the unit is an
+extra structure/carve-out on the same lot, so "rooms & shares" can feel
 like the closest fit even though nothing is actually shared).
 
-Like spam_filter.py, this is a signal, not a verdict, and it's
-deliberately conservative in the same direction as the county filter
-(_same_county() in main.py): when the available text and structured
-attributes don't clearly say "you'll be sharing common space with someone
-else," this KEEPS the listing rather than risk dropping a real
-mother-in-law suite/ADU/studio for want of the right keyword. A listing is
-only ever excluded on a real signal that it's occupied, shared housing --
-Craigslist's own "no private bath" attribute, or explicit language like
-"roommate"/"shared kitchen" -- and an explicit self-contained signal (ADU,
-in-law, private entrance, ...) always wins over an ambiguous or absent
-shared-housing signal.
+The rule: once a "roo" listing has actually been read (detail page
+fetched), it's an occupied shared room BY DEFAULT -- that's what the
+category means -- unless the listing itself says otherwise (an explicit
+self-contained signal: ADU, in-law, private entrance, studio, detached,
+...). A "private bath" attribute or an otherwise-neutral description of
+the house is not that signal on its own: renting a bedroom with its own
+bathroom in someone else's occupied home is still renting a room, not a
+self-contained unit (confirmed against a real, live listing: "private
+room" + "private bath," a whole-house-sounding description, and NO
+self-contained language of any kind -- that's a room, not an ADU, and
+should be excluded).
+
+Not yet detail-fetched (no description, no room_attrs) is the one case
+this doesn't judge: there's nothing to go on yet, so it's kept until a
+future run actually reads it -- the same "don't drop what you haven't
+verified" instinct as the county filter, but for "haven't looked" rather
+than "looked and it's unclear."
 
 Only ever applies to source == "craigslist", category == "roo" -- RentCast
 has no room-share equivalent, and Craigslist's "apa" (apartments/housing)
@@ -56,37 +62,16 @@ _SELF_CONTAINED_RE = re.compile(
     re.IGNORECASE,
 )
 
-_SHARED_HOUSE_RE = re.compile(
-    "|".join(
-        [
-            r"room\s?mate",
-            r"house\s?mate",
-            r"shared kitchen",
-            r"share (?:the |our |my )?kitchen",
-            r"shared common",
-            r"share (?:the |our |my )?common",
-            r"shared bathroom",
-            r"share (?:the |our |my )?bath(?:room)?",
-            r"shared living",
-            r"co-?living",
-            r"other tenants?",
-            r"\bshared room\b",
-            r"share (?:the |our |my )?house\b",
-            r"share (?:the |our |my )?home\b",
-        ]
-    ),
-    re.IGNORECASE,
-)
-
 
 def is_occupied_shared_room(listing: Listing) -> bool:
-    """True only for a Craigslist "rooms & shares" listing with a real
-    signal that you'd be sharing the home with someone else. False (keep
-    it) for every other category, and for "roo" listings that are
-    ambiguous, self-contained, or not yet detail-fetched -- there's nothing
-    to go on yet in that last case, and the county-filter convention this
-    project already follows is to keep an unverified listing, not drop it."""
+    """True for a Craigslist "rooms & shares" listing that's been read and
+    doesn't say it's self-contained -- an occupied shared room, by default,
+    since that's what the category means. False for every other category,
+    and for a "roo" listing not yet detail-fetched (nothing to judge from
+    yet) or one with an explicit self-contained signal."""
     if listing.source != "craigslist" or listing.category != "roo":
+        return False
+    if not listing.details_fetched:
         return False
 
     text = " ".join(filter(None, [listing.title, listing.description]))
@@ -94,7 +79,4 @@ def is_occupied_shared_room(listing: Listing) -> bool:
 
     if _SELF_CONTAINED_RE.search(text) or "in-law" in attrs_text or "in law" in attrs_text:
         return False
-
-    if "no private bath" in attrs_text or "shared room" in attrs_text:
-        return True
-    return bool(_SHARED_HOUSE_RE.search(text))
+    return True
