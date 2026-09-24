@@ -10010,8 +10010,16 @@
    "bedrooms": 2,
    "description": "Single Family Home: 2 bedroom, 1 bath single level home in North Seattle available to rent September 1st. * Built in the early 1950's; +950 SF; in an older neighborhood, quiet street and great neighbors * the house is small, private, peaceful, clean and bright with lots of windows * hardwood floors throughout * original fireplace with insert * within 15 minute walk to Light Rail. Kitchen: * natural cherry cabinets, * natural stone slab counters * new gas range, dishwasher, & energy star appliances . Bathroom: * heated stone mosaic floor * pedestal sink and vintage tub . Energy efficient: * High-efficiency gas furnace * On-demand hot water (no water heater) * Double pane windows * energy star appliances * no A/C but stays pretty cool in the summer . * garden area * covered outdoor area for entertaining adjacent the kitchen * plum tree, apple tree, raspberries . Separate garage/shed for storage with laundry area: * laundry sink, washer and dryer, small work area Paved off-street parking for 2 - 3 (max) vehicles North Seattle/Haller Lake Location: Haller Lake is geographically north of Greenlake & Northeast of Greenwood * Near the Central Market; Convenient to Light Rail, Northgate Mall; Helen Madison Community Pool * Convenient access to I-5, bus line, Aurora, and Greenwood Avenue First and last month due upon signing. No pets. No smoking. Renter is responsible for all utilities and electric. Please contact me. Thanks",
    "map_address": "14324 Courtland Pl N",
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "apartment",
+    "private bath",
+    "no laundry on site",
+    "off-street parking",
+    "air conditioning"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.732525,
    "pin_lon": -122.337963,
    "pin_accuracy": 10,
