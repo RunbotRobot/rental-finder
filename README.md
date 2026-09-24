@@ -155,13 +155,17 @@ session — asked to check in by you, not a line of this codebase —
 personally writes and sends the email for each one. A listing is marked
 **"ready to send"** only when *every one* of these is true —
 
-- the listing came from **RentCast**, never Craigslist. Craigslist has no
-  real, stable contact address — only its own JS "reply" widget, which for
-  housing posts is usually an in-page message box, not something a script
-  can submit on your behalf. A Craigslist listing that clears every other
-  rule below still gets drafted (see **Craigslist outreach** below for how)
-  — it's only the *sending* that's never automatic for this source.
-- it has a real contact email from the listing provider
+- it has a real, **verified** contact email — from RentCast directly, or
+  recorded through a check-in's research (see the "research" action below)
+  for either source. Craigslist has no real, stable contact address of its
+  own — only its own JS "reply" widget, which for housing posts is usually
+  an in-page message box, not something a script can submit on your behalf
+  — so a Craigslist listing is blocked from this checklist unconditionally
+  *unless* it has one of these verified, cited contacts (`outreach.py`
+  checks for the citation, not just any value in the field, precisely so
+  nothing but a deliberately-recorded contact can ever qualify). A
+  Craigslist listing that clears every other rule below but has no verified
+  contact still gets drafted (see **Craigslist outreach** below for how).
 - it has a verified street address (never a geocoded guess)
 - it has zero spam flags
 - it clears every enabled facility type at `auto_send_buffer_ft` (default
@@ -203,36 +207,48 @@ data), and handles each one of three ways:
   had 6+ separate listings), so candidates are grouped by verified address
   first: one draft per address, saved to every posting at that address, not
   one draft per posting.
-- **RentCast, eligible except RentCast itself gave no contact_email**
-  ("research"): the check-in session searches the web for a real contact
-  (property manager, landlord, leasing office) tied to that specific
-  address, the same personal-judgment standard as everything else here —
-  never guessing or pattern-matching an email/phone that isn't explicitly
-  stated on a real page tied to that address, and always citing the source.
+- **Either source, eligible except for having no VERIFIED contact**
+  ("research"): RentCast gave no contact_email at all, or the listing is
+  Craigslist (whose reply widget is never a real address, so `outreach.py`
+  blocks it unconditionally unless it has a verified contact — see below).
+  For Craigslist specifically, the session first checks whether the poster
+  gave a real, direct email or phone number in the listing's own text
+  (some do, bypassing Craigslist's relay themselves) — the cheapest and
+  most reliable source, no web search needed — before falling back to
+  researching the property/company the same way as for RentCast. Either
+  way, the standard is the same: never guessing or pattern-matching an
+  email/phone that isn't explicitly stated somewhere real, and always
+  citing the source. Craigslist candidates are grouped by verified address
+  first, same reasoning as Craigslist drafting below, and stay a candidate
+  even once a personal reply-box draft already exists for that address — a
+  direct email, once found, is strictly better than a reply-box draft.
   Two confidence tiers decide what happens next, per your explicit call
-  (made after a real batch of 19 researched addresses came back with real
-  variance — 4 with no reliable contact at all, several confirmed only at
-  the building level rather than the specific unit, one source that had
-  already gone stale by the time it was double-checked, and two listings
-  that turned out to be miscategorized entirely — a parking-garage unit
-  priced as a "Single Family," and a 55+ senior community RentCast gave no
-  name or description for at all, so `senior_housing_filter.py` had
-  nothing to catch it with):
+  (made after a real batch of 19 researched RentCast addresses came back
+  with real variance — 4 with no reliable contact at all, several
+  confirmed only at the building level rather than the specific unit, one
+  source that had already gone stale by the time it was double-checked,
+  and two listings that turned out to be miscategorized entirely — a
+  parking-garage unit priced as a "Single Family," and a 55+ senior
+  community RentCast gave no name or description for at all, so
+  `senior_housing_filter.py` had nothing to catch it with):
   - **High or moderate confidence** (a contact clearly tied to the address,
     even if only at the building level, or from a single source that could
     be stale): the session records it via `POST /api/agent/contact`
     (`{id, contact_name?, contact_email, contact_source}` — `contact_source`
     is a required citation of how it was found, never a bare confidence
-    score) and triggers a fresh scan run. That run's `outreach.py` picks the
-    override up as a normal contact_email (see `main.py`'s
-    `load_contact_overrides`) and re-evaluates the SAME gate as any other
-    RentCast listing — nothing about the send decision itself is
-    special-cased for a researched contact. Once that run publishes, the
-    listing shows up as ordinary "ready to send" and gets emailed on the
-    next check-in step, exactly like a RentCast-provided contact would.
+    score; for a same-address Craigslist group, once for every id) and
+    triggers a fresh scan run. That run's `outreach.py` picks the override
+    up as a normal contact_email (see `main.py`'s `load_contact_overrides`)
+    and re-evaluates the SAME gate as any other listing — nothing about the
+    send decision itself is special-cased for a researched contact. Once
+    that run publishes, the listing shows up as ordinary "ready to send"
+    and gets emailed on the next check-in step, same as a RentCast-provided
+    contact — a Craigslist listing that gets one this way skips the
+    reply-box process entirely.
   - **Not found, or you'd rather nothing auto-send from research at all**:
     stays queued as a "research" candidate for a future check-in; nothing
-    is recorded or sent.
+    is recorded or sent. For Craigslist, the reply-box draft flow below
+    still applies as the fallback either way.
   Before recording any contact, the session also does the same
   internal-consistency read described below for Craigslist listings —
   a listing whose category/description doesn't plausibly match what's at
@@ -254,9 +270,14 @@ in the code but is no longer used by the live flow — it's kept for local
 testing of that mechanism only. The scheduled Action never sends email; it
 only computes and publishes which listings are eligible.
 
-**Craigslist outreach.** Every Craigslist listing with a complete profile
-gets a draft the moment the scan runs — from `email_draft.py`'s plain
-template, so it's there immediately, before any check-in ever happens.
+**Craigslist outreach.** This whole flow — a draft you paste in yourself —
+is what happens when no verified direct contact exists for a listing. If a
+check-in's research (see above) finds and records one, that listing
+becomes an ordinary auto-sent email instead once a scan picks the override
+up, same as RentCast, and never needs any of the below. Every Craigslist
+listing with a complete profile gets a draft the moment the scan runs —
+from `email_draft.py`'s plain template, so it's there immediately, before
+any check-in ever happens.
 That template only ever inserts data this tool has verified (address,
 price, bedrooms) plus your own profile text unchanged, so it's safe but
 sometimes reads mechanically (it includes your whole employment/income

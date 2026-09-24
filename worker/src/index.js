@@ -42,22 +42,41 @@
 //                                                  `same_address_ids`: every
 //                                                  posting the one draft should
 //                                                  be saved to.
-//                                    "research" -- RentCast, eligible except
-//                                                  for having no contact_email
-//                                                  at all (RentCast gave none).
-//                                                  The agent researches a real
-//                                                  contact itself and, if
-//                                                  found with enough
-//                                                  confidence, POSTs it to
-//                                                  /api/agent/contact -- see
-//                                                  README's "Outreach and
+//                                    "research" -- either source, eligible
+//                                                  except for having no
+//                                                  VERIFIED contact: RentCast
+//                                                  gave none at all, or the
+//                                                  listing is Craigslist
+//                                                  (which outreach.py blocks
+//                                                  unconditionally unless
+//                                                  contact_source is set --
+//                                                  its own reply widget is
+//                                                  never a real address, but a
+//                                                  poster's own listing text,
+//                                                  or the property/company
+//                                                  behind it, sometimes has a
+//                                                  real one). The agent
+//                                                  researches a real contact
+//                                                  itself and, if found with
+//                                                  enough confidence, POSTs it
+//                                                  to /api/agent/contact --
+//                                                  see README's "Outreach and
 //                                                  auto-send" for the exact
 //                                                  confidence bar and the next
 //                                                  steps (a scan run has to
 //                                                  pick the override up before
 //                                                  it becomes "send"-eligible;
 //                                                  this endpoint only records
-//                                                  the finding).
+//                                                  the finding). Craigslist
+//                                                  entries are grouped by
+//                                                  verified address first,
+//                                                  same as "draft" above and
+//                                                  for the same reason, and
+//                                                  stay a candidate even after
+//                                                  a personal draft already
+//                                                  exists -- a found direct
+//                                                  email is strictly better
+//                                                  than a reply-box draft.
 //     GET  /api/data               read-only: the full raw scan results,
 //                                  same as the site sees. For debugging --
 //                                  the agent endpoints above already
@@ -172,7 +191,12 @@ async function handleApi(request, env, path) {
         l.source === "craigslist" &&
         l.outreach_result === "no automatable contact (Craigslist has no real send address)" &&
         !state[l.id]?.emailed &&
-        !state[l.id]?.draft_body
+        !state[l.id]?.draft_body &&
+        // A verified contact override (see "research" below) has already
+        // been recorded for this listing -- a direct email is on its way
+        // once the next scan picks it up, so a reply-box draft would just
+        // be wasted effort.
+        !state[l.id]?.contact_email
     );
     // Large complexes commonly post the same unit under several different
     // titles -- verified live (the same address showing up 6+ times isn't
@@ -193,14 +217,12 @@ async function handleApi(request, env, path) {
 
     // RentCast, otherwise gate-eligible, but RentCast itself gave no
     // contact_email at all -- "no contact email" is outreach.py's exact
-    // _gate_reason() string for that case (never for Craigslist, which
-    // always fails on the different "no automatable contact ..." reason
-    // above). A prior /api/agent/contact write for this id doesn't remove it
-    // from this list by itself -- it only takes effect once a scan run picks
-    // the override up and outreach_result flips to "ready to send" -- so
-    // skip an id we already wrote a contact for this run to avoid re-
-    // researching it before that scan has happened.
-    const researchNeeded = (raw.listings || [])
+    // _gate_reason() string for that case. A prior /api/agent/contact write
+    // for this id doesn't remove it from this list by itself -- it only
+    // takes effect once a scan run picks the override up and outreach_result
+    // flips to "ready to send" -- so skip an id we already wrote a contact
+    // for this run to avoid re-researching it before that scan has happened.
+    const rentcastResearch = (raw.listings || [])
       .filter(
         (l) =>
           l.source === "rentcast" &&
@@ -210,11 +232,40 @@ async function handleApi(request, env, path) {
       )
       .map((l) => ({ ...l, action: "research" }));
 
+    // Craigslist, otherwise gate-eligible except for having no VERIFIED
+    // contact (outreach.py's _gate_reason() blocks Craigslist unconditionally
+    // unless contact_source is set -- see its comment). Unlike the "draft"
+    // bucket above, this stays a candidate even once a personal draft
+    // already exists: drafting the reply-box message and researching a
+    // direct email are independent, and a direct email found later is
+    // strictly better than a reply-box draft, so it's always worth trying.
+    // Same address-grouping as "draft", for the same reason (a poster's
+    // direct contact info, once found for one unit, almost certainly covers
+    // every other unit posted at that address).
+    const craigslistResearchEligible = (raw.listings || []).filter(
+      (l) =>
+        l.source === "craigslist" &&
+        l.outreach_result === "no automatable contact (Craigslist has no real send address)" &&
+        !state[l.id]?.emailed &&
+        !state[l.id]?.contact_email
+    );
+    const byAddressForResearch = new Map();
+    for (const listing of craigslistResearchEligible) {
+      const key = listing.location || listing.id;
+      if (!byAddressForResearch.has(key)) byAddressForResearch.set(key, []);
+      byAddressForResearch.get(key).push(listing);
+    }
+    const craigslistResearch = [...byAddressForResearch.values()].map((group) => ({
+      ...group[0],
+      action: "research",
+      same_address_ids: group.map((l) => l.id),
+    }));
+
     const profile = (await env.STATE.get("profile", "json")) || {};
     return json({
       profile,
       craigslist_body_limit: CRAIGSLIST_BODY_LIMIT,
-      candidates: [...sendReady, ...draftReady, ...researchNeeded],
+      candidates: [...sendReady, ...draftReady, ...rentcastResearch, ...craigslistResearch],
     });
   }
 

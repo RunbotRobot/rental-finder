@@ -106,42 +106,61 @@
   location at all). If you add a new eligibility rule, add it before the
   contact-email check, never after.
   A source-level check was added ahead of the final contact-email check:
-  `listing.source == "craigslist"` now unconditionally returns "no
-  automatable contact ..." REGARDLESS of contact_email. Before contact
-  overrides existed (see below), Craigslist was safe from ever auto-sending
-  only because craigslist.py never set contact_email -- an assumption, not
-  an enforced rule. Once ANY mechanism can set contact_email on a listing
-  (a research override, or a future manual one), that assumption stops
-  holding on its own, so it's now an explicit, unconditional rule instead:
-  see `test_craigslist_listing_with_a_contact_email_still_never_auto_sends`.
-  Don't remove this guard even if it looks redundant with craigslist.py's
-  behavior -- it's exactly the kind of latent gap this project's
-  "deterministic, auditable" philosophy exists to close before it's found
-  live instead of in review.
-- Since RentCast returns no contact of its own (see the fetch-diagnostic
-  note above), a RentCast listing that clears every OTHER outreach rule can
-  get a contact_email from a **contact override** instead --
-  `main.py`'s `load_contact_overrides()` reads it from the same overrides
-  CSV as address overrides (`/api/overrides`, now
+  `listing.source == "craigslist" and not listing.contact_source` returns
+  "no automatable contact ...". Before contact overrides existed (see
+  below), Craigslist was safe from ever auto-sending only because
+  craigslist.py never set contact_email -- an assumption, not an enforced
+  rule. Once ANY mechanism can set contact_email on a listing (a research
+  override), that assumption stops holding on its own. This check makes it
+  an explicit rule instead, but -- per the owner's later, explicit ask --
+  NOT an unconditional one: a Craigslist listing with a VERIFIED override
+  (contact_source set, meaning a check-in actually recorded a cited
+  contact via POST /api/agent/contact -- see below) is allowed through,
+  same as any other listing. What stays blocked is an UNVERIFIED
+  contact_email on a Craigslist listing -- one that got there some other
+  way, with no citation to back it -- see
+  `test_craigslist_listing_with_an_unverified_contact_email_still_never_auto_sends`
+  and `test_craigslist_listing_with_a_verified_contact_override_can_auto_send`.
+  Don't loosen this to "any contact_email" -- the citation requirement is
+  the entire safety property; without it, this degrades back to trusting
+  whatever ends up in the field, exactly what this file's eligibility rule
+  above exists to rule out.
+- Since neither source reliably supplies a real contact on its own (0/500
+  from RentCast -- see the fetch-diagnostic note above; Craigslist's own
+  reply widget is never a real address), a listing that clears every OTHER
+  outreach rule can get a contact_email from a **contact override**
+  instead -- `main.py`'s `load_contact_overrides()` reads it from the same
+  overrides CSV as address overrides (`/api/overrides`, now
   `source_id,address,contact_name,contact_email,contact_source`), applied
   in `run()` right after address overrides, ALWAYS winning when present
   (same "override always wins" precedent as `override_address`). Once
   applied, `outreach.py`'s gate treats it exactly like a RentCast-provided
-  contact -- no special-casing, no separate code path for "researched"
-  vs "provider" contact_email, which is the whole point: the eligibility
-  decision stays 100% in the same deterministic gate regardless of where
-  contact_email came from.
+  contact -- no special-casing, no separate code path for "researched" vs
+  "provider" contact_email (Craigslist still needs contact_source
+  specifically, per the check above, but that's the only source-dependent
+  part) -- the eligibility decision stays 100% in the same deterministic
+  gate regardless of where contact_email came from.
   The override is written by a check-in session via
   `POST /api/agent/contact` (`{id, contact_name?, contact_email,
-  contact_source}`, either token) when it does web research for a
-  `"research"`-action candidate from `/api/agent/candidates` (RentCast,
-  otherwise gate-eligible, `outreach_result == "no contact email"`
-  specifically -- never Craigslist, which has its own, permanently-
-  ineligible reason string). `contact_source` is REQUIRED and must be a
-  real citation (e.g. "AI research (high confidence): <url>"), never a
-  bare confidence label -- every write needs to be auditable later. The
+  contact_source}`, either token) for a `"research"`-action candidate from
+  `/api/agent/candidates`: RentCast with `outreach_result == "no contact
+  email"`, or Craigslist with `outreach_result == "no automatable contact
+  ..."` (grouped by verified address, same as the "draft" bucket and for
+  the same reason -- a poster's direct contact found for one unit almost
+  certainly covers every unit posted at that address, so `/api/agent/contact`
+  gets called once per id in `same_address_ids`). For Craigslist, check the
+  listing's OWN description for a direct email/phone the poster gave first
+  -- cheaper and more reliable than web research, and some posters do
+  bypass Craigslist's relay themselves. `contact_source` is REQUIRED and
+  must be a real citation (e.g. "AI research (high confidence): <url>", or
+  "found directly in the listing's own description"), never a bare
+  confidence label -- every write needs to be auditable later. The
   endpoint can only write contact_name/contact_email/contact_source, same
   narrow-field pattern as `/api/agent/draft` for status/note/address/emailed.
+  A Craigslist listing with a verified contact stops being offered as a
+  "draft" candidate too (the Worker's `draftEligible` filter also checks
+  `!state[l.id]?.contact_email`) -- once a direct email is on its way, a
+  reply-box draft for the same listing is just wasted effort.
   **The owner's explicit confidence policy** (chosen after a real batch of
   19 researched addresses came back with real variance -- 4 with no
   reliable contact, several confirmed only at the building level rather
@@ -154,7 +173,11 @@
   confidence -- skip recording anything only for "not found" or something
   too shaky even for moderate. Don't tighten this to "high confidence only"
   without the owner asking for it back; that stricter option was presented
-  and explicitly not chosen.
+  and explicitly not chosen. This policy was set for RentCast research
+  first, then the owner separately asked for the same research step (and,
+  implicitly, the same policy -- nothing narrower was asked for or applied)
+  to extend to Craigslist too, specifically to also try emailing a poster
+  directly instead of only ever leaving a reply-box draft.
   A contact override does NOT retroactively flip the CURRENT scan's
   `outreach_result` -- exactly like an address override, it only takes
   effect once a fresh scan run re-evaluates the gate. A check-in that

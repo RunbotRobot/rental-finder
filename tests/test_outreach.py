@@ -74,15 +74,15 @@ def test_craigslist_listing_never_auto_sends_even_with_perfect_data(monkeypatch)
     assert listing.draft_subject is not None
 
 
-def test_craigslist_listing_with_a_contact_email_still_never_auto_sends(monkeypatch):
+def test_craigslist_listing_with_an_unverified_contact_email_still_never_auto_sends(monkeypatch):
     """Regression guard for a gap introduced by supporting contact overrides
     for RentCast (main.py's load_contact_overrides): before that, Craigslist
     always failed the contact_email check simply because craigslist.py never
     set it -- an assumption, not an enforced rule. This proves the source
-    check in _gate_reason() makes it a hard rule instead: even a Craigslist
-    listing that somehow does have a contact_email (e.g. a manually-entered
-    one) must never become gate-eligible, since there's still no scriptable
-    way to actually send to it."""
+    check in _gate_reason() makes it a hard rule instead: a Craigslist
+    listing with a contact_email but NO contact_source (i.e. not recorded
+    through the verified /api/agent/contact override -- some other,
+    unverified path) must never become gate-eligible."""
     calls = []
     monkeypatch.setattr("rental_finder.outreach.send_email", lambda *a, **k: calls.append(a) or (True, "sent"))
     listing = _good_rentcast_listing(source_id="cl-with-contact", contact_email="found@example.com")
@@ -91,6 +91,29 @@ def test_craigslist_listing_with_a_contact_email_still_never_auto_sends(monkeypa
     assert listing.outreach_result == "no automatable contact (Craigslist has no real send address)"
     assert newly_emailed == set()
     assert calls == []
+
+
+def test_craigslist_listing_with_a_verified_contact_override_can_auto_send(monkeypatch):
+    """The intended new capability: a Craigslist listing whose contact was
+    found and recorded through the verified override path (contact_source
+    set -- see POST /api/agent/contact) is treated exactly like a
+    RentCast-provided contact once every other rule clears. The owner asked
+    for Craigslist research specifically so a real, direct email -- either
+    one the poster gave in their own listing text, or one found the same way
+    as for RentCast -- can be emailed directly instead of only ever getting
+    a manual reply-box draft."""
+    sent = {}
+    monkeypatch.setattr(
+        "rental_finder.outreach.send_email",
+        lambda to, subject, body, settings: (sent.setdefault("to", to), (True, "sent"))[1],
+    )
+    listing = _good_rentcast_listing(source_id="cl-verified", contact_email="landlord@example.com")
+    listing.source = "craigslist"
+    listing.contact_source = "AI research (high confidence): https://example.com/listing"
+    newly_emailed = process([listing], SETTINGS, COMPLETE_PROFILE, already_emailed=set())
+    assert listing.outreach_result == "sent"
+    assert newly_emailed == {"cl-verified"}
+    assert sent["to"] == "landlord@example.com"
 
 
 def test_craigslist_listing_without_a_verified_address_is_not_offered_as_a_draft_candidate():
