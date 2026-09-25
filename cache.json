@@ -3812,7 +3812,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6900 South 125th Street, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-20",
    "last_seen": "2026-09-25"
   },
@@ -5195,7 +5195,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "13280 Linden Ave N, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-20",
    "last_seen": "2026-09-25"
   },
@@ -8475,6 +8475,7 @@
    "bedrooms": 2,
    "description": "6 WEEKS Free! 2611 84th St Ct S, Lakewood, WA 98499 At our Lakewood apartment community, we offer more than just a place to live, we create a place to feel at home. From the moment you walk through the door, you\u2019ll experience a welcoming environment with well-maintained grounds, comfortable apartment homes, and a team dedicated to resident satisfaction. Conveniently located near shopping, parks, and everyday essentials, our community also offers resident activities that make it easy to connect with neighbors and enjoy a true sense of community. Apartment Features: Patio/Balcony Stainless Appliances Additional Storage Newly Upgraded Luxury Plank flooring Quartz CountertopsSelect homes Community Features: Gorgeous Lakeside Location Close to JBLM, Shopping & Dining Online Payments Available Easy Access to Freeways Walking & Biking Trails Community Park Call: show contact info For more information, visit us at: https://livesuhrco.com/mm7ozvhz/crown-pointe Pricing and availability are subject to change daily. Photos may not be of the exact advertised unit. Contact us today for the most up to date information.",
    "map_address": "2611 84th St Ct S",
+   "room_attrs": [],
    "details_fetched": true,
    "pin_lat": 47.180447,
    "pin_lon": -122.471721,
@@ -8485,9 +8486,17 @@
    "county": "Pierce County",
    "nearest_facility_ft": {},
    "facility_checked": {},
-   "geocoded_from": "2611 84th St Ct S, Lakewood, WA",
+   "source": "craigslist",
+   "url": "https://www.craigslist.org/view/d/tacoma-gorgeous-lakeside-location-patio/9FPYgG6MBeTjjtnnygDA4u",
+   "title": "Gorgeous Lakeside Location, Patio/Balcony, 2BD 1BA",
+   "price": 1695.0,
+   "category": "apa",
+   "location_text": "2611 84th St Ct S, Lakewood, WA",
+   "contact_name": null,
+   "contact_email": null,
+   "geocoded_from": null,
    "first_seen": "2026-09-20",
-   "last_seen": "2026-09-22"
+   "last_seen": "2026-09-25"
   },
   "wDm6UyCeDFXG8QmTFF7E5L": {
    "posted_at": null,
@@ -14794,8 +14803,19 @@
    "bedrooms": 1,
    "description": "Furnished room 2 mins away from St. Joseph Hospital & 5 mins from Downtown/UWT. Private entrance, tenant-only bathroom/kitchen/laundry. Clean, designed for comfortable living. $775+ $100 flat utilities (no surprises) No pet. No smoking. Minimum 6-months stay. Available now. Move-in ready. Message me for details or to schedule a viewing.",
    "map_address": null,
-   "room_attrs": [],
-   "details_fetched": false,
+   "room_attrs": [
+    "monthly",
+    "private room",
+    "cats are ok - purrr",
+    "apartment",
+    "private bath",
+    "dogs are ok - wooof",
+    "laundry on site",
+    "furnished",
+    "street parking",
+    "air conditioning"
+   ],
+   "details_fetched": true,
    "pin_lat": 47.6036,
    "pin_lon": -122.3256,
    "pin_accuracy": 22,
@@ -19582,8 +19602,8 @@
    "price": 1356.0,
    "category": "apa",
    "location_text": "Seattle",
-   "contact_name": null,
-   "contact_email": null,
+   "contact_name": "Community Roots Housing (Liberty Bank Building)",
+   "contact_email": "leasinginfo@communityrootshousing.org",
    "geocoded_from": null,
    "first_seen": "2026-09-20",
    "last_seen": "2026-09-25"
@@ -37797,7 +37817,7 @@
    "location_text": "Seattle - Seattle Pinball Museum",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "506 Maynard Ave S, Seattle - Seattle Pinball Museum",
+   "geocoded_from": null,
    "first_seen": "2026-09-21",
    "last_seen": "2026-09-25"
   },
@@ -37953,7 +37973,7 @@
    "location_text": "Seattle - Seattle Pinball Museum",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "506 Maynard Ave S, Seattle - Seattle Pinball Museum",
+   "geocoded_from": null,
    "first_seen": "2026-09-21",
    "last_seen": "2026-09-25"
   },
@@ -57842,7 +57862,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1100 23rd Ave, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-22",
    "last_seen": "2026-09-25"
   },
@@ -60119,23 +60139,51 @@
    "last_seen": "2026-09-24"
   },
   "bYAPwm7o7KD1tA9STZhCqR": {
-   "posted_at": null,
-   "bedrooms": null,
-   "description": null,
-   "map_address": null,
-   "details_fetched": false,
-   "pin_lat": null,
-   "pin_lon": null,
-   "pin_accuracy": null,
-   "latitude": null,
-   "longitude": null,
-   "location_precision": "none",
-   "county": null,
-   "nearest_facility_ft": {},
-   "facility_checked": {},
-   "geocoded_from": null,
+   "posted_at": "2026-09-13T02:33:59-0700",
+   "bedrooms": 1,
+   "description": "You Read it Right!! Only 500/wk - All Inclusive! Attractive New Lower Weekly or Monthly Rates (include another bed for only 100 more) Includes: Cable Television, Relaxing Pool, Room, Kids Stay FREE, High Speed Wi-Fi, 24-Hour Concierge, AC/Heat 20651 Military Rd South Seattle WA 98198 Conveniently situated near the I-5 freeway at Military Road, Motel 6 Seattle South offers easy access to key destinations in the region. Just two miles from SeaTac International Airport, it provides a practical choice for travelers seeking comfort and affordability. The location is ideal for exploring the vibrant city of Seattle and the surrounding area, with attractions like the iconic Space Needle just a short drive away. Guests can enjoy modern rooms equipped with complimentary Wi-Fi, making it easy to stay connected during your stay. Feature List Ice/Vending Machines, Pets Allowed, Free WiFi (Wi-Fi), Kids Stay Free, Truck Parking, Shower/tub Combination, Closed-captioned TV Accessibility, Wheelchair Accessible Parking, Concierge & Registration, Vending Machines show contact info Motel 6 - Seattle South Numerous local parks, including Angle Lake Park and North SeaTac Park, provide scenic outdoor spaces for relaxation and recreation. The community also hosts several events throughout the year, such as the International Festival and Shakespeare in the Park, adding to the local cultural scene. Dining and shopping options are readily accessible nearby, making it convenient to find everything needed for an enjoyable visit. With its central position and budget-friendly rates, Motel 6 Seattle South is an excellent choice for exploring the Pacific Northwest.",
+   "map_address": "20651 Military Road South",
+   "room_attrs": [
+    "weekly",
+    "cats are ok - purrr",
+    "apartment",
+    "dogs are ok - wooof",
+    "laundry on site",
+    "furnished",
+    "off-street parking",
+    "no smoking",
+    "wheelchair accessible",
+    "air conditioning"
+   ],
+   "details_fetched": true,
+   "pin_lat": 47.3929,
+   "pin_lon": -122.3129,
+   "pin_accuracy": 22,
+   "latitude": 47.41656017034,
+   "longitude": -122.287734614641,
+   "location_precision": "address",
+   "county": "King County",
+   "nearest_facility_ft": {
+    "school": 1859.9485798690612,
+    "park": null,
+    "childcare": 6646.078077840102
+   },
+   "facility_checked": {
+    "school": true,
+    "park": true,
+    "childcare": true
+   },
+   "source": "craigslist",
+   "url": "https://www.craigslist.org/view/d/seattle-affordable-weekly-rate/bYAPwm7o7KD1tA9STZhCqR",
+   "title": "AFFORDABLE WEEKLY RATE >> Microwave, Kids Stay Free, English & Spanish",
+   "price": 500.0,
+   "category": "apa",
+   "location_text": "Seattle South",
+   "contact_name": null,
+   "contact_email": null,
+   "geocoded_from": "20651 Military Road South, Seattle South",
    "first_seen": "2026-09-22",
-   "last_seen": "2026-09-22"
+   "last_seen": "2026-09-25"
   },
   "pj8d8aqjtFSMsMqSTxtTzp": {
    "posted_at": "2026-09-10T17:32:09-0700",
@@ -70020,6 +70068,7 @@
    "bedrooms": 1,
    "description": "This is a one bedroom and one bathroom apartment with its own entry located on street level with no stairs. It's been recently remodeled. Has electric cadet/baseboard heat, tile floors (no carpets). Comes with Range, Fridge, W/D hookups. Zoning is from residential to commercial to light Industrial uses. Rent : $1,250 plus utility charge for water, sewer, garbage and electric: $100/mo extra for each person, 2 people max). Deposit - $1500* (On Approval of Credit and rental/criminal history*); Utility deposit $700; Screening: $80. These rent/deposit rates are for a good credit and rental history, clean background and stable, sufficient income (Min. 12 month at a current job, 3.5 times the rent income minimum). No evictions, no unlawful detainer filings, no judgments, no rental collections, no criminal history. Rental history/payments verified. Non smoking unit. Small pets under 20 lbs with $50/mo rent and $500 deposit. Address : 2747 Center Street Tacoma WA 98409.  (253) 759-99nine8 // No response will be made to emails. Please, drive/stop by first prior to scheduling viewing. Very private location with fewer neighbors.",
    "map_address": "center near pine",
+   "room_attrs": [],
    "details_fetched": true,
    "pin_lat": 47.234053,
    "pin_lon": -122.473762,
@@ -70030,9 +70079,17 @@
    "county": "Pierce County",
    "nearest_facility_ft": {},
    "facility_checked": {},
+   "source": "craigslist",
+   "url": "https://www.craigslist.org/view/d/tacoma-private-location-bd-bath/1S2BqSrNiFY9j6BBkMxstf",
+   "title": "Private location, 1 bd 1 bath Apartment. Can be used as office.",
+   "price": 1250.0,
+   "category": "apa",
+   "location_text": "Tacoma Central",
+   "contact_name": null,
+   "contact_email": null,
    "geocoded_from": null,
    "first_seen": "2026-09-23",
-   "last_seen": "2026-09-23"
+   "last_seen": "2026-09-25"
   },
   "iBEuD4JZKa7b7KvXHTbYDM": {
    "posted_at": "2026-09-04T10:27:32-0700",
@@ -71491,8 +71548,8 @@
    "price": 1799.0,
    "category": "apa",
    "location_text": "Seattle",
-   "contact_name": null,
-   "contact_email": null,
+   "contact_name": "Vintage Housing (Latitude 112)",
+   "contact_email": "latitude112-vint@m.knck.io",
    "geocoded_from": null,
    "first_seen": "2026-09-23",
    "last_seen": "2026-09-25"
@@ -74884,7 +74941,7 @@
    "location_text": "Renton - Renton Village",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "412 Monroe Ave NE, Renton - Renton Village",
+   "geocoded_from": null,
    "first_seen": "2026-09-23",
    "last_seen": "2026-09-25"
   },
@@ -74928,7 +74985,7 @@
    "location_text": "Renton - Renton Village",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "412 Monroe Ave NE, Renton - Renton Village",
+   "geocoded_from": null,
    "first_seen": "2026-09-23",
    "last_seen": "2026-09-25"
   },
@@ -75211,7 +75268,7 @@
    "location_text": "West Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "4400 SW Alaska St, West Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-23",
    "last_seen": "2026-09-25"
   },
@@ -172279,8 +172336,8 @@
    "price": 1490.0,
    "category": "apa",
    "location_text": "Seattle",
-   "contact_name": null,
-   "contact_email": null,
+   "contact_name": "Community Roots Housing (Liberty Bank Building)",
+   "contact_email": "leasinginfo@communityrootshousing.org",
    "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
@@ -173222,8 +173279,8 @@
    "price": 1648.0,
    "category": "apa",
    "location_text": "231 S 177th Pl, Burien, WA",
-   "contact_name": null,
-   "contact_email": null,
+   "contact_name": "Indigo Real Estate (Avon Park Apartments)",
+   "contact_email": "hello@indigorealestate.com",
    "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
@@ -175232,7 +175289,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1816 Bellevue Ave, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -175276,7 +175333,7 @@
    "location_text": "Tukwila - Southcenter",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "229 Andover Park E, Tukwila - Southcenter",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -175321,7 +175378,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "407 NE 73rd St, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -175364,7 +175421,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1816 Bellevue Ave, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -175399,7 +175456,7 @@
    "location_text": "Bremerton",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "309 NE Fairgrounds Road, Bremerton",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -175432,7 +175489,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -175465,7 +175522,7 @@
    "location_text": "tacoma / pierce",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1017 S Pearl St, tacoma / pierce",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -175535,7 +175592,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -175568,7 +175625,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -175638,7 +175695,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -175717,7 +175774,7 @@
    "location_text": "Seattle - 3 Minutes to the Space Needle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "420 Wall St, Seattle - 3 Minutes to the Space Needle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -175796,7 +175853,7 @@
    "location_text": "Bellevue",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "4747 148th Avenue NE, Bellevue",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -175840,7 +175897,7 @@
    "location_text": "Kent",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "329 Ridgeview Dr, Kent",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -175883,7 +175940,7 @@
    "location_text": "Kent",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "10820 SE 211th Place, Kent",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -175960,7 +176017,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1901 Franklin Ave E, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -175995,7 +176052,7 @@
    "location_text": "Sumner",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "15881 64th St. E, Sumner",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176038,7 +176095,7 @@
    "location_text": "Des Moines, Seattle , and Normandy Park",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1145 South 216th Street, Des Moines, Seattle , and Normandy Park",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176084,7 +176141,7 @@
    "location_text": "Seattle - Downtown Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "201 Yesler Way, Seattle - Downtown Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176163,7 +176220,7 @@
    "location_text": "Kent",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "23605 62ND AVE., Kent",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176209,7 +176266,7 @@
    "location_text": "Seattle - 20 Minute Drive to Space Needle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "12548 Lake City Way NE, Seattle - 20 Minute Drive to Space Needle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176325,7 +176382,7 @@
    "location_text": "?? Find Your New Home at Hill Crest in West Seattle!",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "7524 35th Ave SW, ?? Find Your New Home at Hill Crest in West Seattle!",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176403,7 +176460,7 @@
    "location_text": "Seatac",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "15311 33rd Ave S, Seatac",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176484,7 +176541,7 @@
    "location_text": "South Lake Union",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "206 5th Ave N, South Lake Union",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176520,7 +176577,7 @@
    "location_text": "tacoma / pierce",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "3422 86th St S, tacoma / pierce",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176555,7 +176612,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "29 St. Helens Ave, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176590,7 +176647,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "29 St. Helens Ave, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176635,7 +176692,7 @@
    "location_text": "Redmond, Downtown Redmond",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "15808 Bear Creek Parkway, Redmond, Downtown Redmond",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176670,7 +176727,7 @@
    "location_text": "tacoma / pierce",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "2205 S 74th St, tacoma / pierce",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176750,7 +176807,7 @@
    "location_text": "Lake Forest Park",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "15530 Bothell Way NE, Lake Forest Park",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176794,7 +176851,7 @@
    "location_text": "Covington",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "17110 SE 276th Street, Covington",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176919,7 +176976,7 @@
    "location_text": "Seattle - International District",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "913 S Jackson Street, Seattle - International District",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -176963,7 +177020,7 @@
    "location_text": "Sandpoint area of Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "5100 40th Ave Ne, Sandpoint area of Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177000,7 +177057,7 @@
    "location_text": "Federal Way - Redondo Sqaure",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "28621 25th Pl S, Federal Way - Redondo Sqaure",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177046,7 +177103,7 @@
    "location_text": "Seattle - International District",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "913 S Jackson Street, Seattle - International District",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177083,7 +177140,7 @@
    "location_text": "Federal Way - Steel Lake Park",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "28621 25th Pl S, Federal Way - Steel Lake Park",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177129,7 +177186,7 @@
    "location_text": "Renton",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "2715 Sunset Ln NE, Renton",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177175,7 +177232,7 @@
    "location_text": "Kent",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "11101 Southeast 208th Street, Kent",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177211,7 +177268,7 @@
    "location_text": "Lakewood",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "8920 Gravelly Lake Dr SW, Lakewood",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177286,7 +177343,7 @@
    "location_text": "Kitsap",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "4999 Sidney Road SW, Kitsap",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177321,7 +177378,7 @@
    "location_text": "Lakewood",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "8311 83rd ST SW, Lakewood",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177366,7 +177423,7 @@
    "location_text": "Bitter Lake",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "916 N 143rd St, Bitter Lake",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177484,7 +177541,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "7339 43rd S., Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177530,7 +177587,7 @@
    "location_text": "Seattle - International District",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "913 S Jackson Street, Seattle - International District",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177565,7 +177622,7 @@
    "location_text": "Bremerton",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1124 Callahan dr, Bremerton",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177601,7 +177658,7 @@
    "location_text": "Fife",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "5610 23rd St E Fife, Fife",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177637,7 +177694,7 @@
    "location_text": "Fife",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "5610 23rd St E Fife, Fife",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177716,7 +177773,7 @@
    "location_text": "Bremerton",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1124 Callahan dr, Bremerton",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177751,7 +177808,7 @@
    "location_text": "Bremerton",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1124 Callahan dr, Bremerton",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177823,7 +177880,7 @@
    "location_text": "Lakewood",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "8311 83rd ST SW, Lakewood",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177869,7 +177926,7 @@
    "location_text": "Seattle - International District",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "913 S Jackson Street, Seattle - International District",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177904,7 +177961,7 @@
    "location_text": "Auburn",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1902 A St Se, Auburn",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177939,7 +177996,7 @@
    "location_text": "Bremerton",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1901 WINFIELD AVE, Bremerton",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -177985,7 +178042,7 @@
    "location_text": "Seattle - International District",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "913 S Jackson Street, Seattle - International District",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178029,7 +178086,7 @@
    "location_text": "Tukwila - Southcenter",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "229 Andover Park E, Tukwila - Southcenter",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178063,7 +178120,7 @@
    "location_text": "North End Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "3015 N. Pearl Street, North End Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178109,7 +178166,7 @@
    "location_text": "Seattle - International District",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "913 S Jackson Street, Seattle - International District",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178145,7 +178202,7 @@
    "location_text": "Puyallup",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "3107 East Main Ave, Puyallup",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178180,7 +178237,7 @@
    "location_text": "Bremerton",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1901 WINFIELD AVE, Bremerton",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178216,7 +178273,7 @@
    "location_text": "snohomish county",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "8123 236th St. SW, snohomish county",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178305,7 +178362,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "7339 43rd S., Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178340,7 +178397,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "4023 S Lawrence Street, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178422,7 +178479,7 @@
    "location_text": "Seattle - International District",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "913 S Jackson Street, Seattle - International District",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178457,7 +178514,7 @@
    "location_text": "Lakewood",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "8311 83rd ST SW, Lakewood",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178524,7 +178581,7 @@
    "location_text": "Tacoma South",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1811 S 76th Street, Tacoma South",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178563,7 +178620,7 @@
    "location_text": "Tacoma South",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1811 S 76th Street, Tacoma South",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178599,7 +178656,7 @@
    "location_text": "Puyallup, Tacoma, Sumner, Fife, Edgewood, Milton",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "407 Valley Avenue NE, Puyallup, Tacoma, Sumner, Fife, Edgewood, Milton",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178710,7 +178767,7 @@
    "location_text": "West Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "2222 SW, West Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178743,7 +178800,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178776,7 +178833,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178809,7 +178866,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178842,7 +178899,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178875,7 +178932,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178919,7 +178976,7 @@
    "location_text": "West Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "2222 SW, West Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -178963,7 +179020,7 @@
    "location_text": "Bellevue",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "14911 NE 1st Place, Bellevue",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -179007,7 +179064,7 @@
    "location_text": "Bellevue",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "14911 NE 1st Place, Bellevue",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -179051,7 +179108,7 @@
    "location_text": "West Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "3050 SW, West Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -179095,7 +179152,7 @@
    "location_text": "West Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "3050 SW, West Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -179245,7 +179302,7 @@
    "location_text": "tacoma / pierce",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "10214 Lakeview Ave SW, tacoma / pierce",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -179289,7 +179346,7 @@
    "location_text": "West Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "3050 SW, West Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -179333,7 +179390,7 @@
    "location_text": "West Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "2222 SW, West Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -179369,7 +179426,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "5701 Orchard St West, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -179405,7 +179462,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "5701 Orchard St West, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -179449,7 +179506,7 @@
    "location_text": "West Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "3050 SW, West Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -179484,7 +179541,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "5228 S Mason Ave, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -179517,7 +179574,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -179550,7 +179607,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -179583,7 +179640,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "6409 S 12TH ST, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -179627,7 +179684,7 @@
    "location_text": "West Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "3050 SW, West Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -190651,7 +190708,7 @@
    "location_text": "Puyallup",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "10003 167th St. Ct. E - 12-B, Puyallup",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -190694,7 +190751,7 @@
    "location_text": "Kent",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "10820 SE 211th Place, Kent",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -190737,7 +190794,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "1816 Bellevue Ave, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -190782,7 +190839,7 @@
    "location_text": "Seattle",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "3010 1st Ave, Seattle",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -190826,7 +190883,7 @@
    "location_text": "Tukwila - Southcenter",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "229 Andover Park E, Tukwila - Southcenter",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -190866,7 +190923,7 @@
    "location_text": "Tacoma",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "102 N G St, Tacoma",
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   },
@@ -190903,7 +190960,171 @@
    "location_text": "Federal Way - Steel Lake Park",
    "contact_name": null,
    "contact_email": null,
-   "geocoded_from": "28621 25th Pl S, Federal Way - Steel Lake Park",
+   "geocoded_from": null,
+   "first_seen": "2026-09-25",
+   "last_seen": "2026-09-25"
+  },
+  "kSwpjee9CLAUnAVBGVKh8Y": {
+   "posted_at": "2026-09-24T20:33:23-0700",
+   "bedrooms": 0,
+   "description": "O2 2401 3rd Avenue, Seattle, WA, 98121 Call Now - show contact info x 106 OR Text 106 to show contact info to text our team directly. Want more info? See the link below: https://avenue5.aptfeatures.com/l2st4z O2 - A Luxury High-Rise Apartment Community in the Heart of Belltown! studio | 1 bath | 362 square feet Features \u2713 \u00a0Water & City Views \u2713 \u00a0Hardwood Floors \u2713 \u00a0Refrigerator with water and ice dispenser \u2713 \u00a0Dishwasher \u2713 \u00a0Double-pane windows \u2713 \u00a0Stainless Steel Appliances \u2713 \u00a0Patio/Balcony \u2713 \u00a0Central Air Conditioning & Heating \u2713 \u00a0Washer/Dryer \u2713 \u00a0Soft close cabinetry \u2713 \u00a0Bay Windows \u2713 \u00a0(*) In Select Homes \u2713 \u00a0USB Ports \u2713 \u00a0Walk-in Closets Community Features \u2713 \u00a0Karaoke Room \u2713 \u00a0Fitness Center \u2713 \u00a0Package Lockers \u2713 \u00a0Dog Run \u2713 \u00a0Terrace Gardens \u2713 \u00a0Rooftop Terrace \u2713 \u00a0Retail Space \u2713 \u00a0BBQs \u2713 \u00a0Sky Lounge \u2713 \u00a0Yoga Room \u2713 \u00a0Pet Wash Station Community Info Located in Seattle\u2019s historic Belltown neighborhood on 3rd and Battery, O2 is the contrast you\u2019ve been looking for. Five blocks away from the Seattle waterfront leaves you in the heart of it all with the option to retreat. Walk to catch a show at the speak-easy style Big Picture, or head to Vue Lounge to take a load off after a long work week. Breathe in the beauty of the Northwest on our Sky Lounge Rooftop Terrace or find your balance in one of our yoga sanctuaries. This is the spa that you deserve, right in your own home. Our apartment homes make it too easy for you to flourish. With a healthy contrast of natural woods and metals, you will find a wholeness that ensures a smooth transition into your new home. Enjoy the simplicity and beauty of natural wood floors, large bay windows, and balconies to soak it all in. With lounge spaces, a yoga studio, a high-intensity training room, a karaoke room, a community garden, and a sky lounge, we will offer ample room for indoor & outdoor entertaining. Learn more about the spectacular amenities & start your new era of living. Additional Details *At this time we are offering Virtual Tours & In-Person Tours by appointment only. Pets: Cats, Dogs (< 75lb) Pet notes: $400 deposit + $50/month pet rent Security Deposit: $400 Lease length options: 9 - 15 Months Application fee: $44 per applicant 18+ Parking type: Garage Parking notes: $250-$300 per month Pet Policy O2 welcomes your furry loved ones. Refundable deposit and monthly pet rent apply. Some breed and weight restrictions may apply. Pets: Cats, Dogs (< 75lb) Pet notes: $400 deposit + $50/month pet rent Income Requirements O2 Income Requirements are 2.5 times the amount of rent Gross Income. Office Hours Monday-Sunday:9:00AM-6:00PM Equal Housing Opportunity 3DFH5mW8G",
+   "map_address": "2401 3rd Avenue",
+   "room_attrs": [
+    "monthly",
+    "cats are ok - purrr",
+    "apartment",
+    "dogs are ok - wooof",
+    "w/d in unit",
+    "attached garage",
+    "no smoking",
+    "wheelchair accessible",
+    "air conditioning",
+    "ev charging"
+   ],
+   "details_fetched": true,
+   "pin_lat": 47.63962,
+   "pin_lon": -122.360938,
+   "pin_accuracy": 10,
+   "latitude": 47.6154423,
+   "longitude": -122.34666,
+   "location_precision": "address",
+   "county": "King County",
+   "nearest_facility_ft": {
+    "school": 899.5219611656623,
+    "park": 490.4590164544933,
+    "childcare": 1912.2430540166488
+   },
+   "facility_checked": {
+    "school": true,
+    "park": true,
+    "childcare": true
+   },
+   "source": "craigslist",
+   "url": "https://www.craigslist.org/view/d/seattle-rare-opportunity-studio-ba-with/kSwpjee9CLAUnAVBGVKh8Y",
+   "title": "Rare Opportunity: Studio/1 BA with Karaoke Room & BBQs",
+   "price": 1706.0,
+   "category": "apa",
+   "location_text": "Belltown",
+   "contact_name": null,
+   "contact_email": null,
+   "geocoded_from": "2401 3rd Avenue, Belltown",
+   "first_seen": "2026-09-25",
+   "last_seen": "2026-09-25"
+  },
+  "3nMAYDKcJBv6zShPnwZsGP": {
+   "posted_at": "2026-09-24T20:33:17-0700",
+   "bedrooms": 0,
+   "description": "Looking for an affordable place to call home this fall? Vermont Inn Apartments offers furnished studios in the heart of downtown Seattle, right across from the Space Needle. STUDIO DETAILS \u2022 6-month leases: $1,000\u2013$1,100/month \u2022 All utilities included \u2022 Fully furnished studios \u2022 24-hour front desk \u2022 High-speed WiFi available for $50/month ROOFTOP VIEWS Enjoy our furnished rooftop deck with stunning Space Needle & Olympic Mountain views. COMMUNITY AMENITIES \u2022 2 on-site laundry rooms \u2022 Coins & credit/debit cards accepted \u2022 Furnished rooftop deck \u2022 24-hour front desk \u2022 WiFi available for $50/month GREAT DOWNTOWN LOCATION Walk Score: 99 | Transit Score: 99 Close to restaurants, shopping, entertainment, public transportation, Seattle Center, and the Space Needle. APPLICATION REQUIREMENTS \u2022 Proof of income required \u2022 Background check includes residential history, credit & eviction records \u2022 $45 non-refundable application fee APPLY ONLINE: www.vermont-inn.com TOURS DAILY \u2013 NO APPOINTMENT NEEDED! Walk-in tours are available 10 AM\u20136 PM daily. MAKE YOUR FALL MOVE!",
+   "map_address": "4th Ave near Clay St",
+   "room_attrs": [
+    "monthly",
+    "apartment",
+    "laundry on site",
+    "furnished",
+    "attached garage",
+    "no smoking"
+   ],
+   "details_fetched": true,
+   "pin_lat": 47.618184,
+   "pin_lon": -122.348975,
+   "pin_accuracy": 7,
+   "latitude": 47.618184,
+   "longitude": -122.348975,
+   "location_precision": "area",
+   "county": null,
+   "nearest_facility_ft": {},
+   "facility_checked": {},
+   "source": "craigslist",
+   "url": "https://www.craigslist.org/view/d/seattle-affordable-month-lease-studio/3nMAYDKcJBv6zShPnwZsGP",
+   "title": "Affordable 6-Month Lease Studio In Belltown| Utilities Included",
+   "price": 1100.0,
+   "category": "apa",
+   "location_text": "Belltown / Downtown Seattle",
+   "contact_name": null,
+   "contact_email": null,
+   "geocoded_from": null,
+   "first_seen": "2026-09-25",
+   "last_seen": "2026-09-25"
+  },
+  "upbTjk4xP8N4L781tbD2Sh": {
+   "posted_at": "2026-09-22T11:33:01-0700",
+   "bedrooms": 1,
+   "description": "Only 500 per week! Affordable, Long Stay Rates Created w/ You & Your Family in Mind (add a 2nd bed for only 100 more) It's easy!! Includes: Children Stay Free, Room, Individually Controlled AC/Heat, 24-Hour Desk, Free Cable TV, Wifi, Pool Experience a comfortable and convenient stay at Motel 6 Seattle South, ideally situated off I-5 at Military Road, just two miles from SeaTac Airport. The location offers easy access to major highways, public transportation, and an array of shopping and dining options, making it an excellent choice for travelers exploring the Pacific Northwest. Guests can take advantage of modern amenities such as free Wi-Fi in well-maintained rooms, ensuring a productive and relaxed stay. The area boasts numerous parks, including Angle Lake Park, Valley Ridge Park, and North SeaTac Park, providing ample outdoor recreation opportunities. Motel 6 - Seattle South show contact info 20651 Military Road South Seattle WA 98198 Unit Features Recently Renovated (Select Rooms) Free WiFi (Wi-Fi) Truck Parking Vending Machines Free Local Calls Shower/tub Combination Accessible Rooms Plus Mass Transit Climate-controlled Air Conditioning (AC) Free Coffee Airport within 20 miles Kids Stay Free Wheelchair Accessible Parking, Concierge & Registration Cultural events like the International Festival and Parade, Shakespeare in the Park, and the Music in the Park Series add vibrancy to the local community. A visit to the iconic Space Needle offers breathtaking views of the Seattle skyline and downtown area. After a day of sightseeing, you can unwind in a clean, comfortable room designed to meet a variety of travel needs. With its prime location and welcoming atmosphere, Motel 6 Seattle South is an excellent choice for your trip to the region.",
+   "map_address": "20651 Military Road South",
+   "room_attrs": [
+    "weekly",
+    "cats are ok - purrr",
+    "apartment",
+    "dogs are ok - wooof",
+    "laundry on site",
+    "furnished",
+    "off-street parking",
+    "no smoking",
+    "wheelchair accessible",
+    "air conditioning"
+   ],
+   "details_fetched": true,
+   "pin_lat": 47.416914,
+   "pin_lon": -122.288475,
+   "pin_accuracy": 5,
+   "latitude": 47.41656017034,
+   "longitude": -122.287734614641,
+   "location_precision": "address",
+   "county": "King County",
+   "nearest_facility_ft": {
+    "school": 1859.9485798690612,
+    "park": null,
+    "childcare": 6646.078077840102
+   },
+   "facility_checked": {
+    "school": true,
+    "park": true,
+    "childcare": true
+   },
+   "source": "craigslist",
+   "url": "https://www.craigslist.org/view/d/kent-all-inclusive-flat-weekly-rate/upbTjk4xP8N4L781tbD2Sh",
+   "title": "All-Inclusive Flat WEEKLY RATE! Included Wifi & Cable, Kids Stay FREE",
+   "price": 500.0,
+   "category": "apa",
+   "location_text": "Seattle South",
+   "contact_name": null,
+   "contact_email": null,
+   "geocoded_from": "20651 Military Road South, Seattle South",
+   "first_seen": "2026-09-25",
+   "last_seen": "2026-09-25"
+  },
+  "iQtF1p7rQPYYuFhpzZN2z4": {
+   "posted_at": "2026-09-24T20:28:04-0700",
+   "bedrooms": 0,
+   "description": "Looking for a comfortable place to call home this fall? Vermont Inn Apartments offers fully furnished studios in the heart of Belltown, giving you the perfect combination of comfort, convenience, and city living. MAKE YOUR FALL MOVE! Our furnished studios are perfect for short-term or long-term stays and put you close to Seattle's best restaurants, shopping, entertainment, attractions, and public transportation. STUDIO DETAILS \u2022 Fully furnished studios \u2022 Approximately 240\u2013360 sq. ft. \u2022 Monthly rates from $1,495\u2013$1,895, depending on unit size \u2022 Select units feature king-size beds \u2022 Some studios include larger sit-down tables \u2022 Convenient Belltown / downtown location AMAZING ROOFTOP VIEWS Enjoy crisp fall evenings on our furnished rooftop deck while taking in panoramic views of the Space Needle and Olympic Mountains. COMMUNITY AMENITIES \u2022 Furnished rooftop deck \u2022 Space Needle & Olympic Mountain views \u2022 Two on-site laundry rooms \u2022 Coins and credit/debit cards accepted \u2022 24-hour front desk service \u2022 Weekly housekeeping included with monthly rentals \u2022 High-speed WiFi available for $50/month LIVE CLOSE TO EVERYTHING With a Walk Score of 99 and Transit Score of 99, you can easily explore Seattle without going far. Enjoy nearby: Restaurants & cafes Coffee shops Shopping Entertainment & nightlife Space Needle & Seattle Center Public transportation APPLICATION REQUIREMENTS Applicants must provide proof of income and complete a background screening, including residential history, credit, and eviction records. $45 non-refundable application fee. COME TOUR THIS FALL! Walk-in tours are available daily from 10 AM\u20136 PM \u2014 no appointment necessary! Ready to make your move? Visit our website to learn more and apply today: www.vermont-inn.com Come see the apartments, experience the rooftop views, and find your next home at Vermont Inn Apartments. FALL IS THE PERFECT TIME TO MAKE YOUR MOVE!",
+   "map_address": "4th Ave near Clay St",
+   "room_attrs": [
+    "monthly",
+    "apartment",
+    "laundry on site",
+    "furnished",
+    "attached garage",
+    "no smoking"
+   ],
+   "details_fetched": true,
+   "pin_lat": 47.618184,
+   "pin_lon": -122.348975,
+   "pin_accuracy": 7,
+   "latitude": 47.618184,
+   "longitude": -122.348975,
+   "location_precision": "area",
+   "county": "King County",
+   "nearest_facility_ft": {},
+   "facility_checked": {},
+   "source": "craigslist",
+   "url": "https://www.craigslist.org/view/d/seattle-your-fall-home-awaits-furnished/iQtF1p7rQPYYuFhpzZN2z4",
+   "title": "Your Fall Home Awaits| Furnished Month-To-Month Studio In Belltown",
+   "price": 1595.0,
+   "category": "apa",
+   "location_text": "Belltown / Downtown Seattle",
+   "contact_name": null,
+   "contact_email": null,
+   "geocoded_from": null,
    "first_seen": "2026-09-25",
    "last_seen": "2026-09-25"
   }
