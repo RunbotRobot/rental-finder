@@ -133,7 +133,10 @@
     // research that already came up empty.
     if ($("#f-no-contact").checked && listing.source === "rentcast" && !listing.contact_email) return false;
     const q = $("#f-search").value.trim().toLowerCase();
-    if (q && !`${listing.title} ${listing.location || ""}`.toLowerCase().includes(q)) return false;
+    const haystack = $("#f-search-desc").checked
+      ? `${listing.title} ${listing.location || ""} ${listing.description || ""}`
+      : `${listing.title} ${listing.location || ""}`;
+    if (q && !haystack.toLowerCase().includes(q)) return false;
     return true;
   }
 
@@ -323,7 +326,7 @@
       $("#profile-status").textContent = `Couldn't save: ${err.message}`;
     }
   };
-  for (const id of ["f-tier", "f-category", "f-status", "f-new", "f-clean", "f-no-contact"]) $(`#${id}`).onchange = render;
+  for (const id of ["f-tier", "f-category", "f-status", "f-new", "f-clean", "f-no-contact", "f-search-desc"]) $(`#${id}`).onchange = render;
   $("#f-search").oninput = render;
 
   load();
