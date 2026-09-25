@@ -350,3 +350,37 @@
   doesn't read this marker and doesn't need to; it only controls what's
   visible on the page, while this marker is what actually stops duplicate
   research.
+- Extending the research/contact-override process to Craigslist (per the
+  owner's ask) surfaced two more things worth knowing:
+  1. **Craigslist posting ids churn faster than a scan cycle.** A contact
+     recorded for a Craigslist id is only useful if that exact id is still
+     in the next scan's results -- and in practice, several buildings'
+     postings had already expired and been reposted under a brand-new id
+     (Malmo, Kirin, Liberty Bank Building, Avon Park, and Latitude 112 all
+     did this within roughly 10-40 minutes) before a triggered scan even
+     finished running. The contact_email/contact_source found for the old
+     id doesn't transfer to the new one automatically -- overrides are
+     keyed by listing id, not by address -- so a check-in has to notice the
+     repost and re-apply the same contact to the new id by hand. This is
+     expected, not a bug: it's inherent to Craigslist ids being per-posting
+     rather than per-property (unlike RentCast's stable, address-derived
+     ids). If a recorded Craigslist contact never seems to reach "ready to
+     send," check whether the id it was recorded against is still in
+     `/api/data` at all before assuming something's broken. Matching
+     overrides by verified address instead of by id would fix this, but is
+     a real architecture change (main.py's load_contact_overrides and the
+     overrides CSV are both keyed by source_id today) -- flagged for the
+     owner to decide, not changed unilaterally.
+  2. **`room_share_filter.py` only inspects `roo`-category listings**, but
+     a real one slipped through under `apa`: "Roost on 23rd" was posted as
+     an ordinary apartment listing, yet its own description reads "Roost on
+     23rd: Room for Rent with Private Attached Bath," and Trulia
+     independently lists the property as a "Rooming House." A 161 sq ft "1
+     bed 1 bath" at $795 is also a strong practical tell on its own --
+     ordinary studios don't run that small. Excluded from outreach by hand
+     (marked research-checked, not researched for a contact) rather than
+     by changing the filter, same reasoning as the senior-housing gap
+     above: worth a human decision on whether/how to extend the filter to
+     apa-category listings, not something to change unilaterally mid
+     check-in. If you hit another "room for rent" or "private attached
+     bath" posting under apa, it's the same failure mode, not a one-off.
