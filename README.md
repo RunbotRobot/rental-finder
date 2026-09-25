@@ -180,11 +180,31 @@ personally writes and sends the email for each one. A listing is marked
   listing is in hand, well before any lease is signed)
 - it hasn't been emailed before (tracked on the site, so a rerun never
   double-contacts anyone)
+- its contact email isn't on the **company-level do-not-contact list**
+  (see below)
 - **your applicant profile is complete** — specifically, has your own
   disclosure text (see below)
 
 Anything that fails even one of these gets a drafted email anyway, marked
 with the specific reason it isn't gate-eligible, instead of a silent skip.
+
+**Company-level do-not-contact notes.** Some property managers list units
+at several different addresses at once, so a per-address record isn't
+enough to stop repeat contact — this surfaced for real when a property
+manager told the applicant directly he wouldn't pass their screening, and
+a *second* listing from that same company, at a different address, still
+went out as an auto-sent email the same day. `POST /api/company-notes`
+(`{contact_email, company?, note}`, either token) records a note keyed by
+the contact's email, normalized (lowercased/trimmed) so it matches
+regardless of which listing or address it's attached to. `outreach.py`
+checks it for every listing with a contact email, RentCast or a verified
+Craigslist override alike, and blocks auto-send with the reason "company
+flagged: ..." if it matches. The site shows the same note prominently on
+any card whose contact email matches, whether or not that listing was ever
+gate-eligible in the first place. This is separate from, and doesn't
+replace, the address-level building-group display (the same unit posted
+under several titles) — a company note exists specifically for the case
+that grouping can't catch.
 
 **RentCast itself has no usable contact for any current listing.** As of
 the most recent direct fetch (500 listings, checked live), 0 had a

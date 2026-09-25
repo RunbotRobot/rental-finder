@@ -2,6 +2,7 @@ import csv
 import json
 
 from rental_finder.main import (
+    load_company_notes,
     load_contact_overrides,
     load_contact_overrides_by_address,
     load_emailed_ids,
@@ -170,3 +171,55 @@ def test_contact_overrides_by_address_ignores_older_5_column_rows(tmp_path):
         [("rc1", "", "Jane Doe", "jane@example.com", "AI research (high confidence): https://example.com/listing")],
     )
     assert load_contact_overrides_by_address(path) == {}
+
+
+def test_company_notes_missing_file_is_empty_dict(tmp_path):
+    assert load_company_notes(tmp_path / "missing.json") == {}
+
+
+def test_company_notes_full_entry_is_loaded_and_normalized(tmp_path):
+    path = tmp_path / "company_notes.json"
+    path.write_text(
+        json.dumps(
+            {
+                "Info@FoundationGroupRE.com  ": {
+                    "contact_email": "Info@FoundationGroupRE.com",
+                    "company": "The Foundation Group LLC",
+                    "note": "Told directly applicant wouldn't pass screening (guarantor situation).",
+                    "updated": "2026-09-25T00:00:00.000Z",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    result = load_company_notes(path)
+    assert result == {
+        "info@foundationgroupre.com": (
+            "The Foundation Group LLC",
+            "Told directly applicant wouldn't pass screening (guarantor situation).",
+        )
+    }
+
+
+def test_company_notes_missing_note_is_skipped(tmp_path):
+    path = tmp_path / "company_notes.json"
+    path.write_text(json.dumps({"a@example.com": {"company": "A LLC", "note": "  "}}), encoding="utf-8")
+    assert load_company_notes(path) == {}
+
+
+def test_company_notes_missing_company_is_none(tmp_path):
+    path = tmp_path / "company_notes.json"
+    path.write_text(json.dumps({"a@example.com": {"note": "not worth contacting"}}), encoding="utf-8")
+    assert load_company_notes(path) == {"a@example.com": (None, "not worth contacting")}
+
+
+def test_company_notes_unreadable_file_is_empty_dict(tmp_path):
+    path = tmp_path / "company_notes.json"
+    path.write_text("not json", encoding="utf-8")
+    assert load_company_notes(path) == {}
+
+
+def test_company_notes_non_dict_json_is_empty_dict(tmp_path):
+    path = tmp_path / "company_notes.json"
+    path.write_text(json.dumps(["not", "a", "dict"]), encoding="utf-8")
+    assert load_company_notes(path) == {}

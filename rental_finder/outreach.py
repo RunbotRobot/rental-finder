@@ -32,7 +32,11 @@ logger = logging.getLogger(__name__)
 
 
 def _gate_reason(
-    listing: Listing, settings: Settings, profile: ApplicantProfile, already_emailed: set[str]
+    listing: Listing,
+    settings: Settings,
+    profile: ApplicantProfile,
+    already_emailed: set[str],
+    company_notes: dict[str, tuple[str | None, str]],
 ) -> str | None:
     """None if every auto-send condition is met; otherwise why not."""
     if listing.source_id in already_emailed:
@@ -74,18 +78,43 @@ def _gate_reason(
     # gate-eligible without a cited contact_source to back it up.
     if listing.source == "craigslist" and not listing.contact_source:
         return "no automatable contact (Craigslist has no real send address)"
+    # Checked before the final contact_email check, same ordering rule as
+    # everything else in this function: a company-level block is exactly
+    # the kind of thing that should stop a send even once every other rule
+    # has cleared. Keyed by contact_email (normalized lowercase/trimmed) --
+    # not address, and not the site's building-group cards, which only
+    # group postings that share the SAME address -- because a single
+    # property manager can list units at many different addresses, and the
+    # thing being blocked is the company, not any one building. Added after
+    # a real incident: Foundation Group manages units at more than one
+    # address, and the owner had already been told directly they wouldn't
+    # pass screening there, but a second listing from the same company at a
+    # different address still got auto-emailed the same day. See
+    # main.py's load_company_notes() and worker/src/index.js's
+    # /api/company-notes for how this gets recorded.
+    if listing.contact_email:
+        note = company_notes.get(listing.contact_email.strip().lower())
+        if note is not None:
+            company, text = note
+            label = f"company flagged ({company})" if company else "company flagged"
+            return f"{label}: {text}"
     if not listing.contact_email:
         return "no contact email"
     return None
 
 
 def process(
-    listings: list[Listing], settings: Settings, profile: ApplicantProfile, already_emailed: set[str]
+    listings: list[Listing],
+    settings: Settings,
+    profile: ApplicantProfile,
+    already_emailed: set[str],
+    company_notes: dict[str, tuple[str | None, str]] | None = None,
 ) -> set[str]:
     """Fills in draft_subject/draft_body/outreach_result on every listing in
     place. Returns the set of source_ids actually emailed this run, for the
     caller to persist so a future run never double-sends."""
     newly_emailed: set[str] = set()
+    company_notes = company_notes or {}
 
     for listing in listings:
         draft = build_draft(listing, profile)
@@ -94,7 +123,7 @@ def process(
             continue
         listing.draft_subject, listing.draft_body = draft
 
-        reason = _gate_reason(listing, settings, profile, already_emailed)
+        reason = _gate_reason(listing, settings, profile, already_emailed, company_notes)
         if reason is not None:
             listing.outreach_result = reason
             continue

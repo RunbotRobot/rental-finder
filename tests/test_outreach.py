@@ -182,3 +182,56 @@ def test_send_failure_is_reported_and_not_marked_emailed(monkeypatch):
     newly_emailed = process([listing], SETTINGS, COMPLETE_PROFILE, already_emailed=set())
     assert listing.outreach_result == "send failed: SMTP error: boom"
     assert newly_emailed == set()
+
+
+def test_company_flagged_listing_never_auto_sends(monkeypatch):
+    """The Foundation Group incident this was built for: a listing that
+    clears every other rule (address, spam, buffer, has a contact_email)
+    must still be blocked once its contact_email matches a recorded company
+    note -- regardless of which address or posting it's attached to."""
+    calls = []
+    monkeypatch.setattr("rental_finder.outreach.send_email", lambda *a, **k: calls.append(a) or (True, "sent"))
+    listing = _good_rentcast_listing(source_id="rc-flagged", contact_email="info@foundationgroupre.com")
+    company_notes = {"info@foundationgroupre.com": ("The Foundation Group LLC", "wouldn't pass screening")}
+    newly_emailed = process([listing], SETTINGS, COMPLETE_PROFILE, already_emailed=set(), company_notes=company_notes)
+    assert listing.outreach_result == "company flagged (The Foundation Group LLC): wouldn't pass screening"
+    assert newly_emailed == set()
+    assert calls == []
+
+
+def test_company_note_lookup_is_case_and_whitespace_insensitive(monkeypatch):
+    monkeypatch.setattr("rental_finder.outreach.send_email", lambda *a, **k: (True, "sent"))
+    listing = _good_rentcast_listing(source_id="rc-flagged-2", contact_email="  Info@FoundationGroupRE.com  ")
+    company_notes = {"info@foundationgroupre.com": (None, "wouldn't pass screening")}
+    newly_emailed = process([listing], SETTINGS, COMPLETE_PROFILE, already_emailed=set(), company_notes=company_notes)
+    assert listing.outreach_result == "company flagged: wouldn't pass screening"
+    assert newly_emailed == set()
+
+
+def test_company_notes_do_not_affect_unrelated_contacts(monkeypatch):
+    sent = {}
+    monkeypatch.setattr(
+        "rental_finder.outreach.send_email",
+        lambda to, subject, body, settings: (sent.setdefault("to", to), (True, "sent"))[1],
+    )
+    listing = _good_rentcast_listing()
+    company_notes = {"someoneelse@example.com": (None, "wouldn't pass screening")}
+    newly_emailed = process([listing], SETTINGS, COMPLETE_PROFILE, already_emailed=set(), company_notes=company_notes)
+    assert listing.outreach_result == "sent"
+    assert newly_emailed == {"rc1"}
+
+
+def test_craigslist_listing_with_verified_contact_still_blocked_by_company_note(monkeypatch):
+    """A company note must apply to a Craigslist listing with a VERIFIED
+    contact override too, not just RentCast -- the block is on the company,
+    not the source."""
+    calls = []
+    monkeypatch.setattr("rental_finder.outreach.send_email", lambda *a, **k: calls.append(a) or (True, "sent"))
+    listing = _good_rentcast_listing(source_id="cl-flagged", contact_email="info@foundationgroupre.com")
+    listing.source = "craigslist"
+    listing.contact_source = "AI research (high confidence): https://example.com/listing"
+    company_notes = {"info@foundationgroupre.com": ("The Foundation Group LLC", "wouldn't pass screening")}
+    newly_emailed = process([listing], SETTINGS, COMPLETE_PROFILE, already_emailed=set(), company_notes=company_notes)
+    assert listing.outreach_result == "company flagged (The Foundation Group LLC): wouldn't pass screening"
+    assert newly_emailed == set()
+    assert calls == []

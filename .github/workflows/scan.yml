@@ -50,6 +50,8 @@ jobs:
           curl -sSf -H "Authorization: Bearer $API_TOKEN" "$WORKER_URL/api/profile" -o applicant_profile.json
           curl -sSf -H "Authorization: Bearer $API_TOKEN" "$WORKER_URL/api/emailed" -o emailed.json
           echo "$(python3 -c 'import json; print(len(json.load(open("emailed.json"))))') listings already emailed"
+          curl -sSf -H "Authorization: Bearer $API_TOKEN" "$WORKER_URL/api/company-notes" -o company_notes.json
+          echo "$(python3 -c 'import json; print(len(json.load(open("company_notes.json"))))') company-level do-not-contact notes"
 
       # No --send-emails and no Gmail credentials here on purpose: this
       # workflow only ever computes and publishes which listings are

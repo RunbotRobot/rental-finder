@@ -21,6 +21,13 @@
   let data = null;    // latest scan payload
   let state = {};     // {id: {status, note, address, emailed}}
   let profile = {};   // applicant profile, see applicant_profile.py
+  // {normalized_email: {contact_email, company, note, updated}} -- a
+  // company-level do-not-contact note (see worker/src/index.js's
+  // /api/company-notes), keyed by contact_email rather than address or
+  // listing id since that's the one thing shared across every listing from
+  // the same property manager, however many different addresses they post
+  // under.
+  let companyNotes = {};
   // Locations (see groupByAddress's key) with at least one contacted
   // listing -- recomputed on every render() from the FULL listing set, not
   // just what's currently shown, so contacting one unit in a building
@@ -59,7 +66,9 @@
     if (!token) return showAuth();
     $("#status").textContent = "Loading…";
     try {
-      [data, state, profile] = await Promise.all([api("/api/data"), api("/api/state"), api("/api/profile")]);
+      [data, state, profile, companyNotes] = await Promise.all([
+        api("/api/data"), api("/api/state"), api("/api/profile"), api("/api/company-notes"),
+      ]);
     } catch (err) {
       if (err.message === "unauthorized") {
         const typedLength = token.length;
@@ -143,6 +152,13 @@
   // "emailed" elsewhere in this file.
   function isContacted(listing, review) {
     return Boolean(review.emailed) || listing.outreach_result === "sent";
+  }
+
+  // Same normalization as worker/src/index.js's POST /api/company-notes and
+  // main.py's load_company_notes() -- lowercase/trimmed contact_email.
+  function companyNoteFor(listing) {
+    if (!listing.contact_email) return null;
+    return companyNotes[listing.contact_email.trim().toLowerCase()] || null;
   }
 
   function passes(listing) {
@@ -264,6 +280,14 @@
     $(".distances", node).textContent = parts.length ? `nearest: ${parts.join(" · ")}` : listing.precision === "address" ? "distance check pending" : "add the street address below to get distances";
 
     $(".flags", node).textContent = listing.spam_flags.length ? `⚠ ${listing.spam_flags.join(", ")}` : "";
+    const companyNote = companyNoteFor(listing);
+    const companyNoteEl = $(".company-note", node);
+    if (companyNote) {
+      companyNoteEl.textContent = `🚫 ${companyNote.company ? `${companyNote.company}: ` : ""}${companyNote.note}`;
+      companyNoteEl.classList.remove("hidden");
+    } else {
+      companyNoteEl.classList.add("hidden");
+    }
     $(".desc", node).textContent = listing.description || "";
     const dateParts = [listing.posted && `posted ${listing.posted}`, listing.first_seen && `first seen ${listing.first_seen}`];
     if (listing.contact_email) dateParts.push(`contact: ${listing.contact_email}${listing.contact_source ? " (via research)" : ""}`);
