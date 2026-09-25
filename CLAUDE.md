@@ -429,3 +429,13 @@
   contact found"), pass `dismiss: true` -- a plain research-checked call
   without it only stops future research, it doesn't hide the listing from
   the owner's own view.
+- The site's "map" link used to always point at OpenStreetMap; the owner
+  found its park/school coverage worse than Google Maps' for judging a
+  listing's surroundings. `worker/public/app.js` now builds that link from
+  a `map-provider` select in the filters row (Google Maps/Apple
+  Maps/OpenStreetMap, default Google Maps), persisted client-side only via
+  `localStorage` (`rf-map-provider`) -- this is a per-device display
+  preference, not scan data, so it has no business in the Worker's KV state
+  and doesn't need a server round-trip. If you touch the map link again,
+  keep building it through the `mapUrl()` helper rather than hardcoding a
+  single provider's URL format.

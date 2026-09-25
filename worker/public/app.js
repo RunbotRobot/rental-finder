@@ -4,6 +4,20 @@
   let token = "";
   try { token = localStorage.getItem(TOKEN_KEY) || ""; } catch { /* private mode etc. */ }
 
+  const MAP_PROVIDER_KEY = "rf-map-provider";
+  const MAP_PROVIDERS = new Set(["google", "apple", "osm"]);
+  let mapProvider = "google";
+  try {
+    const stored = localStorage.getItem(MAP_PROVIDER_KEY);
+    if (stored && MAP_PROVIDERS.has(stored)) mapProvider = stored;
+  } catch { /* private mode etc. */ }
+
+  function mapUrl(lat, lon) {
+    if (mapProvider === "apple") return `https://maps.apple.com/?ll=${lat},${lon}&q=${lat},${lon}`;
+    if (mapProvider === "osm") return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=17`;
+    return `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+  }
+
   let data = null;    // latest scan payload
   let state = {};     // {id: {status, note, address, emailed}}
   let profile = {};   // applicant profile, see applicant_profile.py
@@ -264,7 +278,7 @@
     }
 
     const map = $(".act-map", node);
-    if (listing.lat != null && listing.lon != null) map.href = `https://www.openstreetmap.org/?mlat=${listing.lat}&mlon=${listing.lon}#map=17`;
+    if (listing.lat != null && listing.lon != null) map.href = mapUrl(listing.lat, listing.lon);
     else map.remove();
 
     const star = $(".act-star", node);
@@ -328,6 +342,12 @@
   };
   for (const id of ["f-tier", "f-category", "f-status", "f-new", "f-clean", "f-no-contact", "f-search-desc"]) $(`#${id}`).onchange = render;
   $("#f-search").oninput = render;
+  $("#map-provider").value = mapProvider;
+  $("#map-provider").onchange = () => {
+    mapProvider = $("#map-provider").value;
+    try { localStorage.setItem(MAP_PROVIDER_KEY, mapProvider); } catch {}
+    render();
+  };
 
   load();
 })();
