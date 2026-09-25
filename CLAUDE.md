@@ -533,3 +533,25 @@
   lives in main.py, not inside the mocked function) -- pass
   `request_delay_seconds=0` in a test's `Settings(...)` or the suite gets
   slow for no reason (this one cost ~3s/test until caught).
+- The owner asked for a filter to hide listings already contacted, WITH a
+  specific group-level rule: if any posting in a `.building-group` (see the
+  address-grouping note above) has been contacted, hide the whole group,
+  not just the contacted posting. A "contacted" listing left un-hidden next
+  to its siblings would defeat the point -- the other units at that address
+  are the same building, already reached via the one that was contacted.
+  `worker/public/app.js` gained a `f-hide-contacted` checkbox (checked by
+  default, same "already handled -> hide" precedent as `f-clean`/
+  `f-no-contact`). `isContacted(listing, review)` is `review.emailed ||
+  listing.outreach_result === "sent"` -- the same two conditions the
+  `.dates`/`.outreach` display already treats as "emailed" elsewhere in
+  this file. `render()` recomputes a `contactedLocationKeys` Set from the
+  FULL `data.listings` (via the SAME `location`-based grouping key
+  `groupByAddress()` uses) before filtering, not from whatever's already
+  visible -- so a contacted listing still poisons its group even if IT
+  specifically has since been dismissed or spam-flagged out of view on its
+  own. `passes()` then drops any listing whose group key is in that set.
+  Verified in a Playwright fixture test: a 2-listing group where only one
+  id had `state[id].emailed` set collapsed to 0 visible (both hidden), a
+  standalone RentCast listing with `outreach_result: "sent"` was hidden on
+  its own, and an untouched listing at a different address stayed visible
+  -- unchecking the filter brought all 4 back.
