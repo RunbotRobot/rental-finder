@@ -555,3 +555,42 @@
   standalone RentCast listing with `outreach_result: "sent"` was hidden on
   its own, and an untouched listing at a different address stayed visible
   -- unchecking the filter brought all 4 back.
+- **`buffer_tiers_ft`'s first tier and `auto_send_buffer_ft` both changed
+  from round placeholder numbers to a real, CCO-confirmed one.** The owner
+  initially asked to change the first tier from 500 to 550 and auto-contact
+  that tier too, citing "550 feet is the legal minimum" -- flagged before
+  making the change, because the owner's OWN previously-stated restriction
+  (from the Bayview conversation) was categorical ("don't enter places
+  minors congregate"), not distance-based, so a sudden specific number
+  needed a source check before it drove automated outreach. The owner then
+  confirmed directly with their CCO: 550 ft IS the actual statutory
+  minimum distance from a school/playground; above that, approval is the
+  CCO's case-by-case discretion (1000 ft "much more likely" to be
+  approved, but not required -- a listing between 550-999 ft can still be
+  fine). The owner was also explicit that outreach itself isn't a
+  violation and doesn't commit to anything -- final approval is still the
+  CCO's call once a real address is in hand, well before signing a lease;
+  the realistic downside of outreach to a listing the CCO later declines
+  is a lost non-refundable application fee, not a supervision violation.
+  With that confirmed, changed `buffer_tiers_ft` from `(500, 1000, 1320,
+  2640)` to `(550, 1000, 1320, 2640)` and `auto_send_buffer_ft` from 1000
+  to 550 (config.py). Since clearing 1000 ft always also clears 550 ft,
+  this is a strict widening of the auto-send pool -- nothing that used to
+  qualify stops qualifying. Updated README's buffer-tiers/auto-send
+  sections to state 550 ft is a real statutory number now, not an
+  arbitrary placeholder, and to keep being explicit that clearing it means
+  outreach happens, not that an address is approved. Don't move
+  `auto_send_buffer_ft` back toward 1000 "to be safe" without the owner
+  asking -- 550 is the number their CCO actually gave as the floor, and
+  the whole point of this change was to stop being more conservative than
+  the real legal minimum requires. On the flip side, don't lower it
+  further below 550 without an equally direct, sourced confirmation --
+  that number is doing real safety work, not decoration, precisely because
+  it's the actual legal floor and not a margin above it.
+  On the park-polygon-vs-playground-location gap raised when this was
+  flagged: the owner considered it and explicitly wants to KEEP that
+  conservative behavior (clearing a park's full boundary polygon means
+  definitely clearing any playground inside it) -- don't change
+  `compliance.py`'s park-distance measurement to target playground
+  equipment specifically without the owner asking for that; it's a
+  deliberate choice, not an oversight.

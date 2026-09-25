@@ -20,14 +20,18 @@ for exactly what "automatic" means here and where the hard stops are.
 ## Why several buffer distances instead of one
 
 Supervision conditions are often silent on an exact distance, leaving it
-to a CCO's judgment. Guessing one number and filtering on it would be
-either needlessly restrictive or quietly wrong. So the report shows, for
-each listing, whether it clears **500 ft, 1000 ft, 1/4 mile, and 1/2 mile**
-of every facility type (`buffer_tiers_ft` in `rental_finder/config.py`),
-and the run summary counts how many clean, located listings survive at
-each tier. That's the thing to bring to your CCO: *"at 1000 ft there are
-nine candidates; at a quarter mile there are two"* is a conversation about
-a real tradeoff, not a hypothetical.
+to a CCO's judgment above whatever legal floor applies. So the report
+shows, for each listing, whether it clears **550 ft, 1000 ft, 1/4 mile, and
+1/2 mile** of every facility type (`buffer_tiers_ft` in
+`rental_finder/config.py`), and the run summary counts how many clean,
+located listings survive at each tier. 550 ft isn't an arbitrary round
+number here -- it's the statutory minimum distance from a school/
+playground the owner's CCO confirmed directly; above that, approval is
+the CCO's case-by-case call (1000 ft is "much more likely" to be
+approved, per the CCO, but not a hard requirement). That's the thing to
+bring to your CCO: *"at 1000 ft there are nine candidates; at a quarter
+mile there are two"* is a conversation about a real tradeoff, not a
+hypothetical.
 
 **This tool cannot tell you whether an address will be approved.** Every
 result is a starting point for that conversation, not an answer.
@@ -169,7 +173,11 @@ personally writes and sends the email for each one. A listing is marked
 - it has a verified street address (never a geocoded guess)
 - it has zero spam flags
 - it clears every enabled facility type at `auto_send_buffer_ft` (default
-  1000 ft; independent of the tiers shown in the report)
+  550 ft -- the CCO-confirmed statutory floor, not the "more likely to be
+  approved" 1000 ft tier; independent of the tiers shown in the report.
+  Clearing this is what makes outreach happen automatically, not what
+  gets an address approved -- that's still the CCO's call once a real
+  listing is in hand, well before any lease is signed)
 - it hasn't been emailed before (tracked on the site, so a rerun never
   double-contacts anyone)
 - **your applicant profile is complete** — specifically, has your own
@@ -467,9 +475,11 @@ on the search fetch; the fallback is to run `python -m rental_finder.main
   treating it as viable, and see **Outreach and auto-send** for the
   disclosure/legal caveats around emailing landlords.
 - **An email is not a compliance check.** Auto-send only verifies the
-  things this tool can verify (distance, spam score, a real contact). It
-  does not know your CCO's actual buffer, and clearing every check here is
-  not the same as an address being approved.
+  things this tool can verify (distance, spam score, a real contact) against
+  `auto_send_buffer_ft` -- the statutory floor, if you've confirmed one with
+  your CCO, not their actual case-by-case approval standard above it.
+  Clearing every check here means outreach happens; it is not the same as
+  an address being approved.
 - **Craigslist's HTML changes.** Selectors live in
   `rental_finder/sources/craigslist.py`; the tool warns rather than failing
   silently if it finds zero results.

@@ -46,10 +46,18 @@ class Settings:
     manual_max_rent: float = 2200.0
 
     # Compliance buffers (feet) to report side-by-side, since there's no
-    # documented rule to target and a tighter buffer sharply shrinks
-    # inventory. Seeing the count at each tier is meant to give you and your
-    # CCO something concrete to negotiate over, instead of guessing blind.
-    buffer_tiers_ft: tuple[int, ...] = (500, 1000, 1320, 2640)  # last two are 1/4 and 1/2 mile
+    # single target -- a tighter buffer sharply shrinks inventory, and
+    # above the legal floor it's the CCO's discretion, not a fixed rule.
+    # Seeing the count at each tier is meant to give you and your CCO
+    # something concrete to negotiate over, instead of guessing blind.
+    # The first tier is 550, not a round 500 -- the owner's CCO confirmed
+    # 550 ft is the actual statutory minimum distance from a school/
+    # playground; above that, approval is the CCO's case-by-case call
+    # (1000 ft is "much more likely" to be approved, per the CCO, but not
+    # a hard requirement -- a listing between 550 and 1000 can still be
+    # fine). Don't round this back to 500 -- that was never the real
+    # number, just this project's original placeholder tier.
+    buffer_tiers_ft: tuple[int, ...] = (550, 1000, 1320, 2640)  # last two are 1/4 and 1/2 mile
 
     # Facility types to check proximity against. See compliance.py for what
     # each one covers -- and, just as important, what it doesn't.
@@ -95,7 +103,19 @@ class Settings:
     # A listing must clear every enabled facility type at this buffer to be
     # auto-sendable; should be one of buffer_tiers_ft. Independent of the
     # tiers shown in the report, which stay untouched by this setting.
-    auto_send_buffer_ft: int = 1000
+    # Lowered from 1000 to 550 (buffer_tiers_ft's new first tier) after the
+    # owner confirmed with their CCO that 550 ft is the actual statutory
+    # floor, not just this project's original round-number placeholder.
+    # The owner explicitly asked for this, understanding what it does and
+    # doesn't mean: outreach is not a violation and does not commit to
+    # anything -- final approval is still the CCO's case-by-case call once
+    # an actual address is in hand, made well before any lease is signed.
+    # The realistic downside of contacting a 550-999 ft listing that the
+    # CCO later declines is losing a non-refundable application fee, not a
+    # supervision violation. Since clearing 1000 ft always also clears 550,
+    # this is a strict widening of the auto-send pool, not a replacement --
+    # it never makes anything that used to qualify stop qualifying.
+    auto_send_buffer_ft: int = 550
     # Local files the Action fetches from the Worker before each run: which
     # listings you've already contacted (so a rerun never double-emails),
     # and your applicant profile (name/contact/disclosure text for the
