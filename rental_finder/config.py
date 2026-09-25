@@ -84,6 +84,18 @@ class Settings:
     # since it's edited by a check-in session (like this file), not the
     # owner directly.
     manual_listings_path: str = "manual_listings.txt"
+    # JSON fetched from the Worker's GET /api/company-notes: a small,
+    # company-level (not per-listing, not per-address) blocklist keyed by
+    # normalized contact_email, e.g. {"info@foundationgroupre.com":
+    # {"company": "...", "note": "...", "updated": "..."}}. Built after a
+    # real incident: Foundation Group manages units at multiple different
+    # addresses, so the existing address-based grouping (same_address_ids,
+    # the site's building-group cards) never caught the fact that a listing
+    # from the SAME COMPANY at a DIFFERENT address was still getting
+    # auto-emailed after the owner had already been told they wouldn't pass
+    # screening there. See outreach.py's _gate_reason() for how this blocks
+    # auto-send, and worker/src/index.js for how a check-in records one.
+    company_notes_path: str = "company_notes.json"
 
     # RentCast (sources/rentcast.py): a paid structured-listings API, skipped
     # entirely if no key is configured. Centered on the same SeaTac point as

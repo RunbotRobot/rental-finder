@@ -15,8 +15,9 @@ whose posting ids churn on every repost) -> fetch detail pages (capped)
 -> spam flags -> drop occupied shared rooms (keeping mother-in-law
 suites/ADUs/studios) -> drop age-restricted (55+/62+) listings ->
 geocode/locate -> drop out-of-county -> drop too-far-south -> distance
-checks -> draft + (maybe) send outreach emails -> save cache -> CSV + JSON
-+ summary.
+checks -> draft + (maybe) send outreach emails, blocking any listing whose
+contact_email matches a recorded company note (see load_company_notes) ->
+save cache -> CSV + JSON + summary.
 """
 
 from __future__ import annotations
@@ -154,6 +155,42 @@ def load_contact_overrides_by_address(path: str | Path) -> dict[str, tuple[str |
             name = (row.get("contact_name") or "").strip() or None
             result[address] = (name, email, source)
         return result
+
+
+def load_company_notes(path: str | Path) -> dict[str, tuple[str | None, str]]:
+    """(company, note) per normalized (lowercase/trimmed) contact_email, from
+    the JSON the Worker's GET /api/company-notes returns -- see
+    worker/src/index.js and outreach.py's _gate_reason(). This is a
+    company-level block, not an address-level one: the site's own
+    building-group cards (worker/public/app.js's groupByAddress()) only
+    catch a company reposting at the SAME address, which doesn't help when
+    the same property manager lists units at several different addresses
+    (the real incident this was built for: two Foundation Group listings at
+    two different addresses both got auto-emailed the same day, after the
+    owner had already been told directly they wouldn't pass screening
+    there). A malformed or missing file yields an empty dict rather than
+    failing the whole run -- this is a nice-to-have safety net, not
+    something a run should ever hard-fail over."""
+    path = Path(path)
+    if not path.exists():
+        return {}
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        logger.warning("Ignoring unreadable company-notes file %s: %s", path, exc)
+        return {}
+    if not isinstance(raw, dict):
+        return {}
+    result: dict[str, tuple[str | None, str]] = {}
+    for email, entry in raw.items():
+        if not isinstance(entry, dict):
+            continue
+        note = (entry.get("note") or "").strip()
+        if not note:
+            continue
+        company = (entry.get("company") or "").strip() or None
+        result[email.strip().lower()] = (company, note)
+    return result
 
 
 def load_emailed_ids(path: str | Path) -> set[str]:
@@ -358,7 +395,8 @@ def run(
 
     profile = load_profile(settings.profile_path)
     already_emailed = load_emailed_ids(settings.emailed_path)
-    newly_emailed = outreach.process(in_county, settings, profile, already_emailed)
+    company_notes = load_company_notes(settings.company_notes_path)
+    newly_emailed = outreach.process(in_county, settings, profile, already_emailed, company_notes)
     if newly_emailed:
         logger.info("Sent %d new outreach email(s)", len(newly_emailed))
     if emailed_out_path:
@@ -402,6 +440,11 @@ def main() -> None:
     )
     parser.add_argument("--profile", default=DEFAULT_SETTINGS.profile_path)
     parser.add_argument("--emailed", default=DEFAULT_SETTINGS.emailed_path, help="Path to the list of already-emailed listing ids")
+    parser.add_argument(
+        "--company-notes",
+        default=DEFAULT_SETTINGS.company_notes_path,
+        help="Path to the company-level do-not-contact notes JSON (see worker/src/index.js's /api/company-notes)",
+    )
     parser.add_argument("--emailed-out", default=None, help="Write newly-emailed listing ids here, for the caller to persist")
     parser.add_argument(
         "--send-emails",
@@ -435,6 +478,7 @@ def main() -> None:
         manual_listings_path=args.manual_listings,
         profile_path=args.profile,
         emailed_path=args.emailed,
+        company_notes_path=args.company_notes,
         send_emails=args.send_emails,
         auto_send_buffer_ft=args.auto_send_buffer_ft,
         rentcast_api_key=os.environ.get("RENTCAST_API_KEY") or None,

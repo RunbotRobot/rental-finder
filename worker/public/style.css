@@ -90,6 +90,11 @@ form input { flex: 1; }
 .chip.unk { background: var(--unk-bg); color: var(--unk-ink); }
 .distances, .flags, .dates, .outreach { margin: 2px 0; font-size: 14px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .flags { color: var(--no-ink); }
+/* Company-level do-not-contact note (see /api/company-notes) -- deliberately
+   more prominent than .flags: this isn't a heuristic spam guess, it's a
+   company the owner already knows isn't worth contacting, however many
+   different addresses they post under. */
+.company-note { margin: 6px 0; padding: 6px 10px; border-radius: 8px; background: var(--no-bg); color: var(--no-ink); font-size: 14px; font-weight: 600; }
 .outreach:empty { display: none; }
 .outreach.sent { color: var(--yes-ink); font-weight: 600; }
 .outreach.ready { color: var(--yes-ink); }

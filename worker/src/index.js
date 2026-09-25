@@ -149,6 +149,32 @@
 //                               research_note/status, and status can only
 //                               ever be set to "dismissed" this way, never
 //                               anything else and never cleared.
+//     GET  /api/company-notes   {normalized_email: {contact_email, company,
+//                               note, updated}} -- a company-level (not
+//                               per-listing, not per-address) do-not-
+//                               contact note, keyed by contact_email
+//                               lowercased/trimmed. Read by the site to show
+//                               a warning on any card whose contact_email
+//                               matches, and by main.py's
+//                               load_company_notes() to block auto-send.
+//     POST /api/company-notes   body: {contact_email, company?, note}.
+//                               Records that a whole company (not just one
+//                               address) isn't worth contacting -- e.g. the
+//                               owner was told directly they wouldn't pass
+//                               a property manager's screening, and that
+//                               manager lists units at more than one
+//                               address, so the site's own address-based
+//                               building-group cards (see groupByAddress()
+//                               in public/app.js) can't catch a second
+//                               listing from them at a different address.
+//                               note is required, same auditability
+//                               reasoning as contact_source above. Keyed by
+//                               contact_email rather than a listing id or
+//                               address on purpose: that's the one thing
+//                               that's actually the same across every
+//                               listing from the same company, regardless
+//                               of which address or which posting it's
+//                               attached to.
 //
 // Each listing's review state is its own KV key ("state:<id>"), not one
 // shared JSON blob -- found the hard way, live, during a real outreach
@@ -473,6 +499,32 @@ async function handleApi(request, env, path) {
     if (body.dismiss === true) entry.status = "dismissed";
     entry.updated = entry.research_checked_at;
     await writeListingState(env, body.id, entry);
+    return json({ ok: true });
+  }
+
+  if (path === "/api/company-notes" && request.method === "GET") {
+    return json((await env.STATE.get("company_notes", "json")) || {});
+  }
+
+  if (path === "/api/company-notes" && request.method === "POST") {
+    const body = await request.json();
+    const email = typeof body.contact_email === "string" ? body.contact_email.trim().toLowerCase() : "";
+    const note = typeof body.note === "string" ? body.note.trim() : "";
+    if (!email.includes("@") || email.length > 200 || !note || note.length > 2000) {
+      return json({ error: "expected {contact_email, company?, note} -- note is required" }, 400);
+    }
+    if (body.company !== undefined && (typeof body.company !== "string" || body.company.length > 200)) {
+      return json({ error: "company must be a string under 200 characters" }, 400);
+    }
+    // A single, low-write-frequency KV value (like "profile"), not a
+    // per-entry key like listing state -- company notes are written rarely,
+    // by one check-in session at a time, so the race condition that made
+    // per-listing state its own key (see the comment above readAllState())
+    // doesn't apply here.
+    const notes = (await env.STATE.get("company_notes", "json")) || {};
+    const company = typeof body.company === "string" && body.company.trim() ? body.company.trim() : notes[email]?.company;
+    notes[email] = { contact_email: email, company, note, updated: new Date().toISOString() };
+    await env.STATE.put("company_notes", JSON.stringify(notes));
     return json({ ok: true });
   }
 

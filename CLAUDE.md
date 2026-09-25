@@ -594,3 +594,71 @@
   `compliance.py`'s park-distance measurement to target playground
   equipment specifically without the owner asking for that; it's a
   deliberate choice, not an oversight.
+- **Company-level do-not-contact notes**, built after a real incident
+  during a check-in: the owner got a rejection response from Foundation
+  Group ("The Foundation Group LLC," info@foundationgroupre.com) saying he
+  wouldn't likely pass their screening, and added that as a note on the
+  one listing he found it on -- but Foundation Group manages units at
+  MULTIPLE different addresses, and a second listing from the same
+  company, at a different address, had already been auto-emailed the same
+  day (confirmed live: both listings' `emailed` timestamps were identical
+  down to the second). The existing address-based grouping
+  (`same_address_ids` in worker/src/index.js, `groupByAddress()` in
+  worker/public/app.js) only catches a company reposting at the SAME
+  address -- it has no way to connect two listings at two different
+  addresses back to the same property manager, which is exactly the gap
+  here. Fixed with a new, company-level (not per-listing, not per-address)
+  mechanism, keyed by contact_email rather than address or listing id,
+  since that's the one thing that's actually shared across every posting
+  from the same company regardless of how many buildings they manage:
+  - `POST /api/company-notes` (`{contact_email, company?, note}`, either
+    token -- same reasoning as `/api/agent/contact`/`/api/agent/research-
+    checked`: a check-in records this, not just the owner) writes into a
+    single, low-write-frequency KV key ("company_notes"), keyed by
+    contact_email normalized (lowercased/trimmed) -- a single value like
+    "profile," not a key-per-entry like listing state, since these are
+    written rarely by one session at a time and never race the way
+    per-listing state did (see the comment above `readAllState()` for that
+    history). `note` is required, same auditability reasoning as
+    `contact_source` -- never a bare "bad" flag with no explanation.
+    `GET /api/company-notes` reads the whole map back (either token).
+  - `outreach.py`'s `_gate_reason()` checks it for every listing that has a
+    contact_email, RentCast or a verified Craigslist override alike --
+    checked right before the final, generic contact-email check (per this
+    file's existing ordering rule: any new eligibility rule goes before
+    that check, never after), since a listing needs a contact_email to
+    look up in the first place. Blocks with `"company flagged (<company>):
+    <note>"` (or without the parenthetical if no company name was given).
+    `main.py`'s new `load_company_notes()` reads the JSON the Worker
+    endpoint returns (fetched fresh each scan, same pattern as
+    `applicant_profile.json`/`emailed.json` -- see scan.yml) into
+    `{normalized_email: (company, note)}`; a malformed or missing file
+    yields an empty dict rather than failing the run, since this is a
+    safety net, not something a run should ever hard-fail over.
+  - The site (`worker/public/app.js`'s `load()`) fetches
+    `/api/company-notes` alongside data/state/profile and shows the note
+    prominently (`.company-note`, styled like a stronger version of
+    `.flags`) on ANY card whose `contact_email` matches, whether or not
+    that listing was ever gate-eligible in the first place -- so a
+    dismissed or already-spam-flagged listing from a noted company still
+    shows the warning if it's ever looked at again.
+  - Verified live via `wrangler dev --local`: POSTed a note through
+    AGENT_TOKEN, confirmed GET returns it normalized, confirmed a second
+    POST without `company` preserves the previously-recorded company name
+    rather than clearing it. Verified via a Playwright fixture that two
+    listings sharing a contact_email at two different addresses both show
+    the note while an unrelated listing doesn't, and that matching is
+    case/whitespace-insensitive. Verified the Python-side gate blocks a
+    listing with a matching contact_email even when every other rule
+    (address, spam, buffer, Craigslist verified-contact) clears.
+  - If you're the check-in session and a landlord/property manager tells
+    the owner directly (or you find out some other way) that a whole
+    company isn't worth contacting, record it here (`POST
+    /api/company-notes`) -- not just a per-listing note -- and remember a
+    fresh scan has to run before the block actually takes effect on
+    listings besides the one you're looking at, same as any other override
+    in this file.
+  - The real Foundation Group note (company "The Foundation Group LLC",
+    email "info@foundationgroupre.com") should be recorded through this
+    mechanism once it ships, so both existing listings (and any future one
+    from the same company) show the warning and never auto-send again.
