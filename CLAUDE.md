@@ -409,3 +409,23 @@
      apa-category listings, not something to change unilaterally mid
      check-in. If you hit another "room for rent" or "private attached
      bath" posting under apa, it's the same failure mode, not a one-off.
+- The owner searched the site for a listing they knew was miscategorized
+  (Roost on 23rd, marked research-checked) and, after finding it, dismissed
+  it by hand and asked for that to happen automatically going forward for
+  the same kind of listing: one identified during a check-in as genuinely
+  not a match at all (senior housing, a garage/commercial unit, a room in a
+  shared house, corporate short-term housing, ...) rather than merely "no
+  contact found yet." `POST /api/agent/research-checked` gained an optional
+  `dismiss: true` -- when present it ALSO sets `status` to `"dismissed"` on
+  that listing's state entry, alongside the usual research_checked_at/
+  research_note. This is a narrow, explicit, owner-requested exception to
+  AGENT_TOKEN never touching review state: the check is a strict `=== true`
+  (a stray string or truthy-but-wrong value does nothing), and the only
+  value it can ever write is the literal string `"dismissed"` -- never able
+  to un-dismiss, star, or set any other status, so a leaked token's blast
+  radius here stays "things disappear from the default view," never
+  "things get un-hidden or re-categorized." If you're the check-in session
+  and you exclude a listing for being a genuinely bad match (not just "no
+  contact found"), pass `dismiss: true` -- a plain research-checked call
+  without it only stops future research, it doesn't hide the listing from
+  the owner's own view.

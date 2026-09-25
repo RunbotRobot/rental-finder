@@ -23,7 +23,10 @@
 //   AGENT_TOKEN (narrow, read-mostly -- for the Claude session that drafts
 //   and sends outreach email; deliberately can't touch review state, the
 //   full profile-editing endpoint, or the raw scan data, so holding it in a
-//   chat session is a much smaller exposure than the full token would be):
+//   chat session is a much smaller exposure than the full token would be.
+//   One narrow, explicit exception: /api/agent/research-checked's dismiss
+//   flag, which can only ever set status to "dismissed", never anything
+//   else and never clear it -- see that endpoint below):
 //     GET  /api/agent/candidates   listings ready for outreach, plus the
 //                                  profile (read-only, bundled in so the
 //                                  agent never needs a second call). Three
@@ -120,20 +123,32 @@
 //                               it as a contact override (see /api/overrides
 //                               above and main.py's load_contact_overrides).
 //     POST /api/agent/research-checked
-//                               body: {id, note}. Records that a check-in
-//                               researched this "research"-kind candidate and
-//                               found nothing usable -- note is required (what
-//                               was checked / why it came up empty), same
-//                               auditability reasoning as contact_source. This
-//                               is deliberately NOT a contact_email/
-//                               contact_source write: it never makes anything
-//                               eligible, and unlike a found contact it has no
-//                               effect once a scan runs -- it only removes the
-//                               id from a future /api/agent/candidates
-//                               response's "research" bucket (see below), so a
-//                               later check-in doesn't repeat research that
-//                               already came up empty. Can only write
-//                               research_checked_at/research_note.
+//                               body: {id, note, dismiss?}. Records that a
+//                               check-in researched this "research"-kind
+//                               candidate and found nothing usable -- note is
+//                               required (what was checked / why it came up
+//                               empty), same auditability reasoning as
+//                               contact_source. This is deliberately NOT a
+//                               contact_email/contact_source write: it never
+//                               makes anything eligible, and unlike a found
+//                               contact it has no effect once a scan runs --
+//                               it only removes the id from a future
+//                               /api/agent/candidates response's "research"
+//                               bucket (see below), so a later check-in
+//                               doesn't repeat research that already came up
+//                               empty. dismiss: true also sets status to
+//                               "dismissed" -- the one, narrow exception to
+//                               AGENT_TOKEN never touching review state,
+//                               added because the owner asked for genuinely
+//                               bad matches (senior housing, a garage/
+//                               commercial unit, a room in a shared house,
+//                               corporate short-term housing, ...) to
+//                               disappear from the site's default view
+//                               automatically, not just from future research.
+//                               Can only write research_checked_at/
+//                               research_note/status, and status can only
+//                               ever be set to "dismissed" this way, never
+//                               anything else and never cleared.
 //
 // Each listing's review state is its own KV key ("state:<id>"), not one
 // shared JSON blob -- found the hard way, live, during a real outreach
@@ -441,11 +456,21 @@ async function handleApi(request, env, path) {
     const idMatch = typeof body.id === "string" && body.id.match(LISTING_ID_RE);
     const note = typeof body.note === "string" ? body.note.trim() : "";
     if (!idMatch || !note || note.length > 500) {
-      return json({ error: "expected {id, note} -- note is required" }, 400);
+      return json({ error: "expected {id, note, dismiss?} -- note is required" }, 400);
     }
     const entry = await readListingState(env, body.id);
     entry.research_checked_at = new Date().toISOString();
     entry.research_note = note;
+    // Narrow, explicit, owner-requested exception to AGENT_TOKEN's usual
+    // "can't touch review state" rule: dismiss is a boolean the caller must
+    // pass on purpose, and the only value it can ever write is "dismissed"
+    // -- never able to un-dismiss, star, or set any other status, so a
+    // leaked token's blast radius here is still just "things disappear from
+    // the default view," never "things get un-hidden or re-categorized."
+    // For a listing that's genuinely not a match at all (senior housing,
+    // a garage/commercial unit, a room in a shared house, corporate
+    // short-term housing, ...) rather than merely "no contact found yet."
+    if (body.dismiss === true) entry.status = "dismissed";
     entry.updated = entry.research_checked_at;
     await writeListingState(env, body.id, entry);
     return json({ ok: true });
