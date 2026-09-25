@@ -69,6 +69,13 @@ form input { flex: 1; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin: 10px 0; }
 .card.starred { border-color: var(--star); }
 .card.dismissed { opacity: .55; }
+/* Multiple postings at the same address (see app.js's groupByAddress) --
+   stacked under one shared header instead of each repeating its own address/
+   distance/map info. */
+.building-group { border: 1px solid var(--line); border-radius: 12px; margin: 10px 0; overflow: hidden; }
+.building-group .group-header { margin: 0; padding: 8px 14px; font-size: 13px; font-weight: 650; color: var(--ink-2); background: var(--bg); border-bottom: 1px solid var(--line); }
+.building-group .card { margin: 0; border: none; border-radius: 0; border-top: 1px solid var(--line); }
+.building-group .card:first-of-type { border-top: none; }
 .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .price { font-size: 20px; font-weight: 650; }
 .badges { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }

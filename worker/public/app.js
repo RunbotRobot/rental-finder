@@ -160,7 +160,49 @@
     const shown = data.listings.filter(passes);
     $("#status").textContent = `${shown.length} of ${data.listings.length} listings`;
     const tpl = $("#card-tpl");
-    for (const listing of shown) list.appendChild(card(listing, tpl));
+    for (const group of groupByAddress(shown)) list.appendChild(renderGroup(group, tpl));
+  }
+
+  // Same grouping key the outreach agent already uses to send one draft/
+  // contact per building instead of one per posting (worker/src/index.js's
+  // /api/agent/candidates) -- a plain string match on the listing's own
+  // `location`, not a normalized/geocoded address. A listing with no
+  // location groups alone, same as there. Large complexes commonly post
+  // several units (or the same unit under several titles) at once; this is
+  // purely a display grouping -- each listing keeps its own row, its own
+  // state (star/dismiss/note/emailed), and its own Craigslist reply link.
+  function groupByAddress(listings) {
+    const byKey = new Map();
+    for (const listing of listings) {
+      const key = listing.location || listing.id;
+      if (!byKey.has(key)) byKey.set(key, []);
+      byKey.get(key).push(listing);
+    }
+    return [...byKey.values()];
+  }
+
+  function renderGroup(group, tpl) {
+    if (group.length === 1) return card(group[0], tpl);
+    const wrap = document.createElement("div");
+    wrap.className = "building-group";
+    const header = document.createElement("p");
+    header.className = "group-header";
+    header.textContent = `${group.length} postings at ${group[0].location}`;
+    wrap.appendChild(header);
+    group.forEach((listing, i) => {
+      const node = card(listing, tpl);
+      // The address, distance chips, map link, and child care check link are
+      // identical for every listing in the group (same location) -- show
+      // them once, on the first card, instead of repeating them per unit.
+      if (i > 0) {
+        for (const sel of [".location", ".tiers", ".distances", ".act-map", ".act-ccc"]) {
+          const el = $(sel, node);
+          if (el) el.classList.add("hidden");
+        }
+      }
+      wrap.appendChild(node);
+    });
+    return wrap;
   }
 
   function card(listing, tpl) {
