@@ -128,6 +128,10 @@
     if (cat && listing.category !== cat) return false;
     if ($("#f-new").checked && !listing.new) return false;
     if ($("#f-clean").checked && listing.spam_score > 0) return false;
+    // Doesn't drop the listing from the underlying data -- only from view --
+    // so a future outreach check-in still sees it and doesn't repeat contact
+    // research that already came up empty.
+    if ($("#f-no-contact").checked && listing.source === "rentcast" && !listing.contact_email) return false;
     const q = $("#f-search").value.trim().toLowerCase();
     if (q && !`${listing.title} ${listing.location || ""}`.toLowerCase().includes(q)) return false;
     return true;
@@ -318,7 +322,7 @@
       $("#profile-status").textContent = `Couldn't save: ${err.message}`;
     }
   };
-  for (const id of ["f-tier", "f-category", "f-status", "f-new", "f-clean"]) $(`#${id}`).onchange = render;
+  for (const id of ["f-tier", "f-category", "f-status", "f-new", "f-clean", "f-no-contact"]) $(`#${id}`).onchange = render;
   $("#f-search").oninput = render;
 
   load();
