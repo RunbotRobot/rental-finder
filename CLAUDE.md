@@ -328,3 +328,25 @@
   community listings from the original 19-address batch, RentCast data
   quality rather than a bug here, and worth a quick category/unit-label
   sanity check on every candidate before researching or drafting for it.
+- The owner asked for a way to hide RentCast listings that couldn't be
+  contacted, but the underlying gap that surfaced first: nothing recorded
+  when a check-in researched a listing and came up empty (per this file's
+  own confidence policy above, "not found" is deliberately never written
+  as a contact_email/contact_source) -- a not-yet-researched listing and
+  an already-researched-and-failed one were indistinguishable, so a future
+  check-in had no way to skip repeating work already done. Fixed with a
+  new, separate marker: `POST /api/agent/research-checked` (`{id, note}`,
+  either token, note required, same auditability reasoning as
+  contact_source) writes ONLY `research_checked_at`/`research_note` --
+  never a contact_email, never anything outreach.py's gate looks at, and
+  no scan run needs to pick it up for it to matter. Its only effect is on
+  `/api/agent/candidates`: an id carrying this marker drops out of the
+  "research" bucket (both RentCast and Craigslist) so it's never re-offered
+  as something to research again. If you're the check-in session and you
+  research a candidate and come up empty, call this before moving on --
+  otherwise the next check-in repeats your work. The site's own toggle
+  ("hide RentCast, no contact found," `worker/public/index.html`/`app.js`)
+  is a separate, client-side-only view filter on `!contact_email` -- it
+  doesn't read this marker and doesn't need to; it only controls what's
+  visible on the page, while this marker is what actually stops duplicate
+  research.

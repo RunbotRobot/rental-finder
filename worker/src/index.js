@@ -113,6 +113,21 @@
 //                               still only happens once a scan run applies
 //                               it as a contact override (see /api/overrides
 //                               above and main.py's load_contact_overrides).
+//     POST /api/agent/research-checked
+//                               body: {id, note}. Records that a check-in
+//                               researched this "research"-kind candidate and
+//                               found nothing usable -- note is required (what
+//                               was checked / why it came up empty), same
+//                               auditability reasoning as contact_source. This
+//                               is deliberately NOT a contact_email/
+//                               contact_source write: it never makes anything
+//                               eligible, and unlike a found contact it has no
+//                               effect once a scan runs -- it only removes the
+//                               id from a future /api/agent/candidates
+//                               response's "research" bucket (see below), so a
+//                               later check-in doesn't repeat research that
+//                               already came up empty. Can only write
+//                               research_checked_at/research_note.
 //
 // Each listing's review state is its own KV key ("state:<id>"), not one
 // shared JSON blob -- found the hard way, live, during a real outreach
@@ -305,13 +320,20 @@ async function handleApi(request, env, path) {
     // takes effect once a scan run picks the override up and outreach_result
     // flips to "ready to send" -- so skip an id we already wrote a contact
     // for this run to avoid re-researching it before that scan has happened.
+    // A prior /api/agent/research-checked write DOES remove it here, and for
+    // good -- unlike a contact override, that marker has nothing waiting on a
+    // future scan to take effect; it exists specifically so a listing a
+    // check-in already dug through and found nothing for doesn't come back as
+    // a candidate again next time (RentCast ids are address-derived and
+    // stable, so the same listing really can resurface run after run).
     const rentcastResearch = (raw.listings || [])
       .filter(
         (l) =>
           l.source === "rentcast" &&
           l.outreach_result === "no contact email" &&
           !state[l.id]?.emailed &&
-          !state[l.id]?.contact_email
+          !state[l.id]?.contact_email &&
+          !state[l.id]?.research_checked_at
       )
       .map((l) => ({ ...l, action: "research" }));
 
@@ -325,12 +347,18 @@ async function handleApi(request, env, path) {
     // Same address-grouping as "draft", for the same reason (a poster's
     // direct contact info, once found for one unit, almost certainly covers
     // every other unit posted at that address).
+    // Same research_checked_at exclusion as RentCast above, for the same
+    // "don't ask a check-in to redo work already done" reason -- shorter-
+    // lived here in practice, since a Craigslist posting's id doesn't survive
+    // it expiring and being reposted, but still worth honoring for however
+    // long the same posting stays live across more than one check-in.
     const craigslistResearchEligible = (raw.listings || []).filter(
       (l) =>
         l.source === "craigslist" &&
         l.outreach_result === "no automatable contact (Craigslist has no real send address)" &&
         !state[l.id]?.emailed &&
-        !state[l.id]?.contact_email
+        !state[l.id]?.contact_email &&
+        !state[l.id]?.research_checked_at
     );
     const byAddressForResearch = new Map();
     for (const listing of craigslistResearchEligible) {
@@ -386,6 +414,21 @@ async function handleApi(request, env, path) {
     entry.contact_email = email;
     entry.contact_source = source;
     entry.updated = new Date().toISOString();
+    await writeListingState(env, body.id, entry);
+    return json({ ok: true });
+  }
+
+  if (path === "/api/agent/research-checked" && request.method === "POST") {
+    const body = await request.json();
+    const idMatch = typeof body.id === "string" && body.id.match(LISTING_ID_RE);
+    const note = typeof body.note === "string" ? body.note.trim() : "";
+    if (!idMatch || !note || note.length > 500) {
+      return json({ error: "expected {id, note} -- note is required" }, 400);
+    }
+    const entry = await readListingState(env, body.id);
+    entry.research_checked_at = new Date().toISOString();
+    entry.research_note = note;
+    entry.updated = entry.research_checked_at;
     await writeListingState(env, body.id, entry);
     return json({ ok: true });
   }
