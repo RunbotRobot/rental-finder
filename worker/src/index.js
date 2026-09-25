@@ -213,10 +213,18 @@ async function readAllState(env) {
   let cursor;
   for (;;) {
     const page = await env.STATE.list({ prefix: "state:", cursor });
-    for (const key of page.keys) {
-      const value = await env.STATE.get(key.name, "json");
-      if (value) result[key.name.slice("state:".length)] = value;
-    }
+    // One get() per key, in parallel -- reading N different keys never
+    // touches the same key twice, so this has none of the race exposure
+    // that made concurrent WRITES to the old shared blob unsafe (see the
+    // module comment above). Awaiting each get() sequentially here was a
+    // real, measured regression from that same per-key migration: a live
+    // check confirmed /api/state taking 10+ seconds cold with under 100
+    // keys, one KV round trip at a time, on a page the owner loads on
+    // their phone.
+    const values = await Promise.all(page.keys.map((key) => env.STATE.get(key.name, "json")));
+    page.keys.forEach((key, i) => {
+      if (values[i]) result[key.name.slice("state:".length)] = values[i];
+    });
     if (page.list_complete) break;
     cursor = page.cursor;
   }
