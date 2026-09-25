@@ -21,6 +21,12 @@
   let data = null;    // latest scan payload
   let state = {};     // {id: {status, note, address, emailed}}
   let profile = {};   // applicant profile, see applicant_profile.py
+  // Locations (see groupByAddress's key) with at least one contacted
+  // listing -- recomputed on every render() from the FULL listing set, not
+  // just what's currently shown, so contacting one unit in a building
+  // still hides the rest of that building's group even if e.g. it's since
+  // been dismissed or spam-flagged out of view on its own.
+  let contactedLocationKeys = new Set();
 
   const fmt = (n) => Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
   const tierLabel = (ft) => (ft === 1320 ? "¼ mi" : ft === 2640 ? "½ mi" : `${ft} ft`);
@@ -130,8 +136,18 @@
     if (categories.includes(previous)) sel.value = previous;
   }
 
+  // A listing counts as contacted once either an auto-sent RentCast email
+  // went out (outreach_result === "sent") or the owner clicked "mark
+  // replied" for a Craigslist reply-box message (review.emailed) -- the
+  // same two conditions the .outreach/.dates display already treats as
+  // "emailed" elsewhere in this file.
+  function isContacted(listing, review) {
+    return Boolean(review.emailed) || listing.outreach_result === "sent";
+  }
+
   function passes(listing) {
     const review = state[listing.id] || {};
+    if ($("#f-hide-contacted").checked && contactedLocationKeys.has(listing.location || listing.id)) return false;
     const status = $("#f-status").value;
     if (status === "active" && review.status === "dismissed") return false;
     if (status === "starred" && review.status !== "starred") return false;
@@ -157,6 +173,10 @@
   function render() {
     const list = $("#list");
     list.innerHTML = "";
+    contactedLocationKeys = new Set();
+    for (const l of data.listings) {
+      if (isContacted(l, state[l.id] || {})) contactedLocationKeys.add(l.location || l.id);
+    }
     const shown = data.listings.filter(passes);
     $("#status").textContent = `${shown.length} of ${data.listings.length} listings`;
     const tpl = $("#card-tpl");
@@ -382,7 +402,7 @@
       $("#profile-status").textContent = `Couldn't save: ${err.message}`;
     }
   };
-  for (const id of ["f-tier", "f-category", "f-status", "f-new", "f-clean", "f-no-contact", "f-search-desc"]) $(`#${id}`).onchange = render;
+  for (const id of ["f-tier", "f-category", "f-status", "f-new", "f-clean", "f-no-contact", "f-hide-contacted", "f-search-desc"]) $(`#${id}`).onchange = render;
   $("#f-search").oninput = render;
   $("#map-provider").value = mapProvider;
   $("#map-provider").onchange = () => {
