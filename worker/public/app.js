@@ -188,6 +188,7 @@
     $(".desc", node).textContent = listing.description || "";
     const dateParts = [listing.posted && `posted ${listing.posted}`, listing.first_seen && `first seen ${listing.first_seen}`];
     if (listing.contact_email) dateParts.push(`contact: ${listing.contact_email}${listing.contact_source ? " (via research)" : ""}`);
+    else if (review.research_checked_at) dateParts.push(`researched ${new Date(review.research_checked_at).toLocaleDateString()}, no contact found${review.research_note ? ` (${review.research_note})` : ""}`);
     $(".dates", node).textContent = dateParts.filter(Boolean).join(" · ");
 
     const outreach = $(".outreach", node);
