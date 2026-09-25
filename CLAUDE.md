@@ -439,3 +439,22 @@
   and doesn't need a server round-trip. If you touch the map link again,
   keep building it through the `mapUrl()` helper rather than hardcoding a
   single provider's URL format.
+- The owner sends lots of Craigslist outreach and noticed the site showing
+  many near-duplicate cards for the same building -- large complexes
+  commonly post several units (or the same unit under several titles) at
+  once, same thing the outreach agent already collapses into one draft per
+  address (see `same_address_ids` above). `worker/public/app.js`'s
+  `render()` now groups the currently-filtered listings the same way
+  (`groupByAddress()`, a plain string match on `listing.location` -- same
+  key the Worker uses, not a normalized/geocoded address) and renders a
+  single `.building-group` wrapper with one shared header instead of N
+  separate cards. This is DISPLAY-ONLY: each posting inside the group is
+  still the exact same `.card` from `card()`, keeps its own state (star/
+  dismiss/note/emailed) and its own Craigslist reply link -- only the
+  address/distance-tier/map/child-care-check parts (identical for every
+  posting at that address) are hidden on every unit but the first, since
+  repeating those was the actual clutter. A location that isn't shared
+  (including one that's missing/empty) still renders exactly as a single,
+  unwrapped card, same as before this change -- don't lose that fallback
+  if you touch this, since the owner specifically didn't want the common
+  one-listing case to look any different.
