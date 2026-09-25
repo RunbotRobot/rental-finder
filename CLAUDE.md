@@ -458,3 +458,49 @@
   unwrapped card, same as before this change -- don't lose that fallback
   if you touch this, since the owner specifically didn't want the common
   one-listing case to look any different.
+- The owner asked why nothing but apartments seemed to be surfacing when
+  they specifically want mother-in-law suites/ADUs. Investigated live: the
+  data already has non-apartment property types (RentCast "Single Family"/
+  "Condo"/"Townhouse", Craigslist "roo"), but the card badge shows bedroom
+  count instead of property type whenever bedrooms is known, so nothing
+  visually distinguishes them -- and of 690 cached listings, only 2 used
+  ADU/mother-in-law/in-law-suite language at all, both flagged
+  `duplicate-description` and hidden by the "hide spam-flagged" filter
+  (checked by default). Not a bug to fix unilaterally (badge redesign and
+  whether that spam flag is a false positive here are both product
+  decisions) -- flagged to the owner, no code changed for this part.
+  Separately, the owner found a real MIL suite by hand (outside the normal
+  search's categories/radius/recency) and asked to add it. Built
+  `manual_listings.txt` (repo root, one Craigslist URL per line, `#`
+  comments) for exactly this: `main.py`'s new `load_manual_listing_urls()`
+  reads it; `run()` fetches any URL whose source_id isn't already among the
+  organically-scraped listings via `sources/craigslist.py`'s new
+  `fetch_manual_listing()` (thin wrapper around the new, unit-tested
+  `_parse_manual_listing()`, which parses title/price/bedrooms/category/
+  neighborhood straight from the detail page -- it has all of that and
+  more -- then calls the existing `parse_detail_page()` for the rest) and
+  merges the result in BEFORE the price filter/cache-restore/spam-filter/
+  room-share-filter/senior-filter/geocode steps, so a manually-added
+  listing is indistinguishable from one the search found on its own by the
+  time any of those run. This is a committed repo file (like this one),
+  edited by a check-in session on the owner's behalf, not fetched from the
+  Worker like the overrides CSVs -- the owner has no terminal, and there
+  was no reason to build a new Worker endpoint for something only a
+  session ever writes to. Verified live: the real MIL-suite listing added
+  this way came through with category "apa", area precision (Craigslist
+  gave no street address, same as any other listing without one -- an
+  address override still applies normally once the owner gets one), zero
+  spam flags, and wasn't caught by the room-share filter (self-contained,
+  no strong-shared language).
+  **Test-suite gotcha hit while building this**: `Settings.manual_listings_path`
+  defaults to `"manual_listings.txt"`, a real, committed, git-tracked file
+  -- unlike `overrides_path`/`cache_path`/`profile_path`/`emailed_path`,
+  whose default filenames are never committed. A test that constructs
+  `Settings(...)` without overriding this field and calls `run()` from the
+  repo root (as `tests/test_main_rentcast_gate.py` did) will find the real
+  file and make a REAL network request fetching it mid-test-suite. Fixed by
+  adding `manual_listings_path=str(tmp_path / "none_manual.txt")` to that
+  test alongside its other tmp-path overrides. If you add another test that
+  calls `run()` directly, give it the same treatment -- this file being
+  real and committed is the whole point of it, so the fix is on the test
+  side, not by making the default path fictional.

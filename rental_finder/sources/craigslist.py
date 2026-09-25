@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 _BEDROOMS_RE = re.compile(r"(\d+)\s*BR\b", re.IGNORECASE)
 _BODY_BOILERPLATE = "QR Code Link to This Post"
+_CATEGORY_RE = re.compile(r"cat=(apa|roo)\b")
 
 
 class Blocked(Exception):
@@ -159,6 +160,77 @@ def parse_detail_page(html: str, listing: Listing) -> None:
             pass
 
     listing.details_fetched = True
+
+
+def _parse_manual_listing(html: str, url: str) -> Listing | None:
+    """Everything a search-result row would normally supply -- title, price,
+    bedrooms, category, neighborhood -- parsed straight from a detail page
+    instead, since it has all of that and more; parse_detail_page() then
+    fills in the rest exactly like a normal detail fetch (description,
+    room_attrs, map pin, ...), so the result is indistinguishable from a
+    listing fetch_listings() found on its own. Returns None if the page
+    doesn't look like an active posting (expired/removed) -- the title/price
+    this always shows on a live posting are what's checked for that."""
+    soup = BeautifulSoup(html, "html.parser")
+    title_el = soup.select_one("#titletextonly")
+    price_el = soup.select_one("h1.postingtitle .price")
+    if title_el is None or price_el is None:
+        logger.warning("Manual listing doesn't look like an active posting anymore, skipping: %s", url)
+        return None
+
+    category_match = _CATEGORY_RE.search(html)
+    if category_match is None:
+        logger.warning("Could not determine category for manual listing, assuming apa: %s", url)
+    category = category_match.group(1) if category_match else "apa"
+
+    bedrooms = None
+    housing_el = soup.select_one("h1.postingtitle .housing")
+    if housing_el is not None:
+        match = _BEDROOMS_RE.search(housing_el.get_text(" ", strip=True))
+        if match:
+            bedrooms = int(match.group(1))
+
+    # The title's last <span> is the neighborhood in parens, e.g.
+    # "...Jet Tub</span><span> (Central District)</span>" -- same text a
+    # search-result row's .location would have carried.
+    neighborhood = None
+    title_span = soup.select_one("h1.postingtitle .postingtitletext")
+    if title_span is not None:
+        spans = title_span.find_all("span", recursive=False)
+        if spans:
+            last = spans[-1].get_text(strip=True)
+            if last.startswith("(") and last.endswith(")"):
+                neighborhood = last[1:-1]
+
+    listing = Listing(
+        source="craigslist",
+        source_id=url.rstrip("/").rsplit("/", 1)[-1].replace(".html", ""),
+        url=url,
+        title=title_el.get_text(strip=True),
+        price=_parse_price(price_el.get_text(strip=True)),
+        category=category,
+        location_text=neighborhood,
+        bedrooms=bedrooms,
+    )
+    parse_detail_page(html, listing)
+    return listing
+
+
+def fetch_manual_listing(url: str, settings: Settings, session: requests.Session) -> Listing | None:
+    """Build a full Listing from a single Craigslist posting URL the owner
+    found directly (shared by a poster, surfaced outside the two searched
+    categories/radius, or just noticed browsing) rather than through
+    fetch_listings()'s search-page scrape. See main.py's
+    load_manual_listing_urls() for where the URL list comes from, and
+    _parse_manual_listing() for the actual parsing. Returns None on a
+    request failure too (blocked/network/timeout) -- logged, not raised, so
+    one bad manual URL doesn't stop the whole run."""
+    try:
+        resp = _get(session, url, settings)
+    except (Blocked, requests.RequestException) as exc:
+        logger.warning("Failed to fetch manual listing %s: %s", url, exc)
+        return None
+    return _parse_manual_listing(resp.text, url)
 
 
 def fetch_details(listings: list[Listing], settings: Settings, session: requests.Session) -> int:

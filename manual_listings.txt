@@ -1,0 +1,6 @@
+# Craigslist listing URLs to include even if the normal search scrape
+# (categories "apa"/"roo", 25mi radius from postal 98188) doesn't find them
+# -- one URL per line, '#' for comments. See rental_finder/main.py's
+# load_manual_listing_urls() and rental_finder/sources/craigslist.py's
+# fetch_manual_listing().
+https://www.craigslist.org/view/d/seattle-mother-in-law-bedroom-bath/aCBbsLQ7BxQD3AqSGDrMBt

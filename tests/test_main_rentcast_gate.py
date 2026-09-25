@@ -30,7 +30,8 @@ def _run(tmp_path, today, rentcast_calls, force_rentcast=False):
     settings = Settings(
         rentcast_api_key="fake-key", cache_path=str(tmp_path / "cache.json"),
         overrides_path=str(tmp_path / "none.csv"), profile_path=str(tmp_path / "none_profile.json"),
-        emailed_path=str(tmp_path / "none_emailed.json"), fetch_details=False,
+        emailed_path=str(tmp_path / "none_emailed.json"), manual_listings_path=str(tmp_path / "none_manual.txt"),
+        fetch_details=False,
     )
     with (
         patch("rental_finder.main.craigslist.fetch_listings", return_value=[]),

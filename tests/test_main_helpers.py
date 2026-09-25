@@ -1,11 +1,33 @@
 import csv
 import json
 
-from rental_finder.main import load_contact_overrides, load_contact_overrides_by_address, load_emailed_ids
+from rental_finder.main import (
+    load_contact_overrides,
+    load_contact_overrides_by_address,
+    load_emailed_ids,
+    load_manual_listing_urls,
+)
 
 
 def test_missing_file_is_empty_set(tmp_path):
     assert load_emailed_ids(tmp_path / "missing.json") == set()
+
+
+def test_manual_listing_urls_missing_file_is_empty_list(tmp_path):
+    assert load_manual_listing_urls(tmp_path / "missing.txt") == []
+
+
+def test_manual_listing_urls_skips_blank_lines_and_comments(tmp_path):
+    path = tmp_path / "manual_listings.txt"
+    path.write_text(
+        "# manually-added listings\nhttps://www.craigslist.org/view/d/one/abc\n\n"
+        "  https://www.craigslist.org/view/d/two/def  \n# another comment\n",
+        encoding="utf-8",
+    )
+    assert load_manual_listing_urls(path) == [
+        "https://www.craigslist.org/view/d/one/abc",
+        "https://www.craigslist.org/view/d/two/def",
+    ]
 
 
 def test_loads_ids_from_file(tmp_path):
