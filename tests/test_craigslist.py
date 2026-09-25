@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 
 from rental_finder.models import Listing
-from rental_finder.sources.craigslist import _parse_result_row, parse_detail_page
+from rental_finder.sources.craigslist import _parse_manual_listing, _parse_result_row, parse_detail_page
 
 # Trimmed from the live markup.
 SEARCH_ROW = """
@@ -74,3 +74,53 @@ def test_parse_detail_page_without_map_or_body():
     assert listing.details_fetched
     assert listing.description is None
     assert listing.pin_lat is None
+
+
+# Trimmed from a real, live "apa"-category detail page for a listing the
+# owner found directly (not through the normal search scrape) -- see
+# main.py's load_manual_listing_urls/fetch_manual_listing.
+MANUAL_LISTING_URL = "https://www.craigslist.org/view/d/seattle-mother-in-law-bedroom-bath/aCBbsLQ7BxQD3AqSGDrMBt"
+MANUAL_LISTING_PAGE = """
+<html><body>
+<a href="/search/subarea/see?cat=apa">apartments / housing for rent</a>
+<h1 class="postingtitle">
+    <span class="postingtitletext">
+<span class="price">$1,195</span> <span class="housing">/ 1br - 750ft<sup>2</sup> - </span><span id="titletextonly">Mother-In-Law 1 Bedroom 1 Bath w/ Jacuzzi Massaging Jet Tub</span><span> (Central District)</span>    </span>
+</h1>
+<div id="map" class="viewposting" data-latitude="47.612607" data-longitude="-122.295856" data-accuracy="5"></div>
+<p class="mapaddress"><small><a href="https://www.google.com/maps/search/47.612607,-122.295856">google map</a></small></p>
+<div class="attrgroup"><span class="attr important">in-law</span></div>
+<section id="postingbody">QR Code Link to This Post Basement MIL with your own separate entrance, living room, kitchen, bath, and laundry room.</section>
+</body></html>
+"""
+
+
+def test_parse_manual_listing():
+    listing = _parse_manual_listing(MANUAL_LISTING_PAGE, MANUAL_LISTING_URL)
+    assert listing.source == "craigslist"
+    assert listing.source_id == "aCBbsLQ7BxQD3AqSGDrMBt"
+    assert listing.url == MANUAL_LISTING_URL
+    assert listing.title == "Mother-In-Law 1 Bedroom 1 Bath w/ Jacuzzi Massaging Jet Tub"
+    assert listing.price == 1195.0
+    assert listing.category == "apa"
+    assert listing.bedrooms == 1
+    assert listing.location_text == "Central District"
+    # parse_detail_page() ran too, exactly like a normal detail fetch.
+    assert listing.details_fetched
+    assert listing.description == "Basement MIL with your own separate entrance, living room, kitchen, bath, and laundry room."
+    assert (listing.pin_lat, listing.pin_lon) == (47.612607, -122.295856)
+    # No real address on the page, just a Google-Maps-search link -- .mapaddress
+    # picks up that link's visible text verbatim (a pre-existing parse_detail_page
+    # quirk, not specific to a manual listing). Harmless: has_street_number()
+    # still correctly rejects it, so this never reads as an address precision.
+    assert listing.map_address == "google map"
+
+
+def test_parse_manual_listing_missing_category_defaults_to_apa():
+    page = MANUAL_LISTING_PAGE.replace('cat=apa">apartments / housing for rent', 'cat=xyz">something else')
+    listing = _parse_manual_listing(page, MANUAL_LISTING_URL)
+    assert listing.category == "apa"
+
+
+def test_parse_manual_listing_returns_none_for_an_expired_posting():
+    assert _parse_manual_listing("<html><body><p>This posting has been deleted by its author.</p></body></html>", MANUAL_LISTING_URL) is None

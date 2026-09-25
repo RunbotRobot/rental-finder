@@ -57,6 +57,14 @@ class Settings:
     # Optional CSV of `source_id,address` for addresses you got from a poster
     # after contacting them; these take priority over the listing's own text.
     overrides_path: str = "address_overrides.csv"
+    # Optional plain-text file, one Craigslist listing URL per line (# for
+    # comments), for a listing found directly rather than through the
+    # normal search-page scrape -- see sources/craigslist.py's
+    # fetch_manual_listing() and main.py's load_manual_listing_urls(). A
+    # committed repo file, not something fetched from the Worker each run,
+    # since it's edited by a check-in session (like this file), not the
+    # owner directly.
+    manual_listings_path: str = "manual_listings.txt"
 
     # RentCast (sources/rentcast.py): a paid structured-listings API, skipped
     # entirely if no key is configured. Centered on the same SeaTac point as

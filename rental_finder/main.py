@@ -2,8 +2,10 @@
 
     python -m rental_finder.main --out candidates.csv -v
 
-Pipeline: fetch search results (Craigslist + RentCast) -> drop over-budget
--> restore cache -> apply address overrides -> apply contact overrides (a
+Pipeline: fetch search results (Craigslist + RentCast) -> add any manually-
+listed Craigslist URLs the normal search scrape didn't find (see
+load_manual_listing_urls) -> drop over-budget -> restore cache -> apply
+address overrides -> apply contact overrides (a
 verified/researched contact_email for a listing RentCast/Craigslist itself
 gave none for -- see load_contact_overrides), falling back to a contact
 found for another listing at the same address when this listing's own id
@@ -22,6 +24,7 @@ import argparse
 import csv
 import json
 import logging
+import time
 from datetime import date, datetime, timezone
 from pathlib import Path
 
@@ -52,6 +55,20 @@ def _same_county(county: str | None, expected: str) -> bool:
         return True  # unknown -- keep it rather than risk dropping a real match
     bare_expected = expected.replace(" County", "").strip().lower()
     return bare_expected in county.lower()
+
+
+def load_manual_listing_urls(path: str | Path) -> list[str]:
+    """One Craigslist listing URL per line, for a listing found directly
+    (shared by a poster, outside the normal search categories/radius, or
+    just noticed browsing) rather than through the usual search-page
+    scrape -- see sources/craigslist.py's fetch_manual_listing(). Blank
+    lines and lines starting with '#' are skipped. A plain text file, not a
+    CSV like the overrides below, since there's nothing per-row to record
+    beyond the URL itself."""
+    path = Path(path)
+    if not path.exists():
+        return []
+    return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip() and not line.strip().startswith("#")]
 
 
 def load_overrides(path: str | Path) -> dict[str, str]:
@@ -212,6 +229,20 @@ def run(
                 len(stale),
             )
             listings += stale
+
+    manual_urls = load_manual_listing_urls(settings.manual_listings_path)
+    if manual_urls:
+        existing_craigslist_ids = {l.source_id for l in listings if l.source == "craigslist"}
+        for url in manual_urls:
+            source_id = url.rstrip("/").rsplit("/", 1)[-1].replace(".html", "")
+            if source_id in existing_craigslist_ids:
+                continue  # the normal search scrape already found this one
+            manual_listing = craigslist.fetch_manual_listing(url, settings, session)
+            if manual_listing is not None:
+                listings.append(manual_listing)
+                existing_craigslist_ids.add(manual_listing.source_id)
+            time.sleep(settings.request_delay_seconds)
+
     listings = [l for l in listings if l.price is not None and l.price <= settings.max_rent]
     logger.info("%d listings within budget", len(listings))
     if limit:
@@ -347,6 +378,12 @@ def main() -> None:
     parser.add_argument("--no-details", action="store_true", help="Skip fetching listing pages this run")
     parser.add_argument("--cache", default=DEFAULT_SETTINGS.cache_path)
     parser.add_argument("--overrides", default=DEFAULT_SETTINGS.overrides_path)
+    parser.add_argument(
+        "--manual-listings",
+        default=DEFAULT_SETTINGS.manual_listings_path,
+        help="Path to a text file of Craigslist listing URLs (one per line) to add even if the "
+        "normal search scrape didn't find them",
+    )
     parser.add_argument("--profile", default=DEFAULT_SETTINGS.profile_path)
     parser.add_argument("--emailed", default=DEFAULT_SETTINGS.emailed_path, help="Path to the list of already-emailed listing ids")
     parser.add_argument("--emailed-out", default=None, help="Write newly-emailed listing ids here, for the caller to persist")
@@ -378,6 +415,7 @@ def main() -> None:
         fetch_details=not args.no_details,
         cache_path=args.cache,
         overrides_path=args.overrides,
+        manual_listings_path=args.manual_listings,
         profile_path=args.profile,
         emailed_path=args.emailed,
         send_emails=args.send_emails,

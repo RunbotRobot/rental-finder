@@ -397,6 +397,24 @@ source_id,address
 CSV.) The next run geocodes and distance-checks those listings like any
 other.
 
+### Manually added listings
+
+The Craigslist search only covers two categories ("apts/housing" and
+"rooms & shares") within a set radius and price cap — a listing found some
+other way (shared directly, outside that radius, or just noticed browsing)
+won't show up on its own. List its URL in `manual_listings.txt` (one per
+line, `#` for comments):
+
+```
+https://www.craigslist.org/view/d/seattle-mother-in-law-bedroom-bath/aCBbsLQ7BxQD3AqSGDrMBt
+```
+
+The next run fetches that listing's own page directly and runs it through
+every normal step — spam flags, room-share/senior-housing filters,
+geocoding, distance checks — exactly like any listing the search itself
+found. It's still subject to the same rent cap and distance-unknown-without-
+a-street-address rule as everything else.
+
 ## Running it as a website (phone-friendly)
 
 The scan can't run in a browser, so the site is three parts: a scheduled
