@@ -4,8 +4,9 @@
 
 Pipeline: fetch search results (Craigslist + RentCast) -> add any manually-
 listed Craigslist URLs the normal search scrape didn't find (see
-load_manual_listing_urls) -> drop over-budget -> restore cache -> apply
-address overrides -> apply contact overrides (a
+load_manual_listing_urls) -> drop over-budget (manual listings get the
+separate, higher manual_max_rent cap instead of max_rent -- see config.py)
+-> restore cache -> apply address overrides -> apply contact overrides (a
 verified/researched contact_email for a listing RentCast/Craigslist itself
 gave none for -- see load_contact_overrides), falling back to a contact
 found for another listing at the same address when this listing's own id
@@ -231,6 +232,7 @@ def run(
             listings += stale
 
     manual_urls = load_manual_listing_urls(settings.manual_listings_path)
+    manual_source_ids: set[str] = set()
     if manual_urls:
         existing_craigslist_ids = {l.source_id for l in listings if l.source == "craigslist"}
         for url in manual_urls:
@@ -241,9 +243,17 @@ def run(
             if manual_listing is not None:
                 listings.append(manual_listing)
                 existing_craigslist_ids.add(manual_listing.source_id)
+                manual_source_ids.add(manual_listing.source_id)
             time.sleep(settings.request_delay_seconds)
 
-    listings = [l for l in listings if l.price is not None and l.price <= settings.max_rent]
+    # A manual addition gets the separate, higher manual_max_rent cap (see
+    # config.py) -- it's already been personally reviewed, unlike the
+    # organic search results max_rent exists to filter.
+    listings = [
+        l
+        for l in listings
+        if l.price is not None and l.price <= (settings.manual_max_rent if l.source_id in manual_source_ids else settings.max_rent)
+    ]
     logger.info("%d listings within budget", len(listings))
     if limit:
         listings = listings[:limit]
@@ -372,6 +382,12 @@ def main() -> None:
     parser.add_argument("--out", default="candidates.csv", help="Output CSV path")
     parser.add_argument("--json", default=None, help="Also write the web UI's data.json here")
     parser.add_argument("--max-rent", type=float, default=DEFAULT_SETTINGS.max_rent)
+    parser.add_argument(
+        "--manual-max-rent",
+        type=float,
+        default=DEFAULT_SETTINGS.manual_max_rent,
+        help="Separate, higher rent cap for manual_listings.txt entries only -- see config.py",
+    )
     parser.add_argument("--postal", default=DEFAULT_SETTINGS.postal_code)
     parser.add_argument("--radius-miles", type=int, default=DEFAULT_SETTINGS.search_radius_miles)
     parser.add_argument("--max-detail-fetches", type=int, default=DEFAULT_SETTINGS.max_detail_fetches)
@@ -409,6 +425,7 @@ def main() -> None:
 
     settings = Settings(
         max_rent=args.max_rent,
+        manual_max_rent=args.manual_max_rent,
         postal_code=args.postal,
         search_radius_miles=args.radius_miles,
         max_detail_fetches=args.max_detail_fetches,

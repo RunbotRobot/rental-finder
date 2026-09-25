@@ -4,3 +4,4 @@
 # load_manual_listing_urls() and rental_finder/sources/craigslist.py's
 # fetch_manual_listing().
 https://www.craigslist.org/view/d/seattle-mother-in-law-bedroom-bath/aCBbsLQ7BxQD3AqSGDrMBt
+https://www.craigslist.org/view/d/bothell-bedroom-15-bathroom-mil-unit/7rBLrjUKgBUBRDjAgNgog7

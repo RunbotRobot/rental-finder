@@ -33,6 +33,17 @@ class Settings:
 
     # Affordability
     max_rent: float = 1900.0
+    # A separate, higher cap for manual_listings.txt entries only (see
+    # sources/craigslist.py's fetch_manual_listing()). Each one is already a
+    # listing the owner personally reviewed and chose to add -- unlike
+    # max_rent, which exists to keep an automated, unreviewed search from
+    # pulling in things nobody looked at, a manual addition has already had
+    # that judgment call made for it. Still a real cap, not unlimited, as a
+    # backstop against a wildly-expensive listing slipping through
+    # unnoticed if this file ever grows long. Raised from max_rent's $1900
+    # after the owner asked to pursue a $2,000 + half-utilities listing;
+    # adjust freely if a future one needs more headroom.
+    manual_max_rent: float = 2200.0
 
     # Compliance buffers (feet) to report side-by-side, since there's no
     # documented rule to target and a tighter buffer sharply shrinks
