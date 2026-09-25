@@ -92,6 +92,11 @@ form input { flex: 1; }
 .actions button { padding: 6px 10px; min-height: 36px; font-size: 14px; }
 .card.starred .act-star { border-color: var(--star); color: var(--star); }
 .act-replied.replied { border-color: var(--yes-ink); color: var(--yes-ink); }
+/* Force this onto its own line regardless of how many action buttons/links
+   precede it -- otherwise it lands on the same line as "map"/"child care
+   check" for RentCast listings but wraps for Craigslist ones (which have
+   the extra "reply on Craigslist" link), which read as inconsistent. */
+.act-replied { flex-basis: 100%; }
 .edit { flex-direction: column; margin-top: 8px; }
 .edit-buttons { display: flex; gap: 8px; }
 .note { margin: 6px 0 0; font-size: 14px; white-space: pre-wrap; }
