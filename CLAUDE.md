@@ -504,3 +504,32 @@
   calls `run()` directly, give it the same treatment -- this file being
   real and committed is the whole point of it, so the fix is on the test
   side, not by making the default path fictional.
+- A second manually-added listing (a Bothell/Kirkland-border MIL unit) was
+  $2,000/month + half utilities -- over `max_rent` ($1,900), which would
+  have made `manual_listings.txt` pointless for it: the pipeline fetches a
+  manual URL but then applies the SAME price filter to everything
+  regardless of source, so an over-cap manual listing was being silently
+  dropped before ever reaching `data.json`. The owner asked to raise the
+  cap for manual additions specifically (not the general search cap) --
+  added `Settings.manual_max_rent` (config.py, default $2,200) as a
+  separate, higher ceiling that only applies to listings sourced from
+  `manual_listings.txt`. Rationale for why it's higher, not just removed
+  entirely: a manual addition has already been personally reviewed and
+  chosen by the owner, so the cap exists purely as a backstop against
+  something wildly expensive slipping in unnoticed if this file ever grows
+  long, not to filter out things nobody looked at -- so it stays a real
+  number, just a more generous one, and it's easy to bump again (`--manual-
+  max-rent` CLI flag exists too) if a future listing needs more headroom.
+  `main.py`'s `run()` tracks which source_ids came from
+  `fetch_manual_listing()` in a `manual_source_ids` set and looks up the
+  cap per-listing from that, rather than a blanket settings value, so
+  organically-scraped listings are completely unaffected. Verified live
+  (`python -m rental_finder.main --no-details`): the $2,000 Bothell
+  listing now comes through as `price: 2000.0`, and the existing Central
+  District MIL listing is unaffected. Also worth remembering for future
+  tests: `time.sleep(settings.request_delay_seconds)` runs for real
+  between each manual-listing fetch in `run()` even when
+  `craigslist.fetch_manual_listing` itself is mocked out (the sleep call
+  lives in main.py, not inside the mocked function) -- pass
+  `request_delay_seconds=0` in a test's `Settings(...)` or the suite gets
+  slow for no reason (this one cost ~3s/test until caught).

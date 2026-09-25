@@ -412,8 +412,12 @@ https://www.craigslist.org/view/d/seattle-mother-in-law-bedroom-bath/aCBbsLQ7BxQ
 The next run fetches that listing's own page directly and runs it through
 every normal step — spam flags, room-share/senior-housing filters,
 geocoding, distance checks — exactly like any listing the search itself
-found. It's still subject to the same rent cap and distance-unknown-without-
-a-street-address rule as everything else.
+found, with one exception: it's checked against `manual_max_rent`
+(config.py, $2,200 by default) instead of the normal `max_rent` ($1,900) —
+a manual addition has already been personally reviewed, so the cap exists
+only as a backstop, not to filter out things nobody looked at. It's still
+subject to the same distance-unknown-without-a-street-address rule as
+everything else.
 
 ## Running it as a website (phone-friendly)
 
