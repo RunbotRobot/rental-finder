@@ -1,6 +1,7 @@
+import csv
 import json
 
-from rental_finder.main import load_contact_overrides, load_emailed_ids
+from rental_finder.main import load_contact_overrides, load_contact_overrides_by_address, load_emailed_ids
 
 
 def test_missing_file_is_empty_set(tmp_path):
@@ -70,3 +71,80 @@ def test_contact_overrides_address_only_row_is_ignored(tmp_path):
     path = tmp_path / "overrides.csv"
     _write_overrides_csv(path, [("cl1", "123 Main St, Kent, WA", "", "", "")])
     assert load_contact_overrides(path) == {}
+
+
+def _write_overrides_csv_with_contact_address(path, rows):
+    """Like _write_overrides_csv, but with the newer 6th contact_address
+    column -- the listing's own address at the moment a contact was
+    recorded, written by the Worker (see worker/src/index.js's
+    /api/agent/contact), which load_contact_overrides_by_address() keys on.
+    Uses csv.writer (unlike _write_overrides_csv's naive join) since a real
+    address routinely contains a comma, which the address-matching feature
+    exists specifically to handle correctly."""
+    header = ["source_id", "address", "contact_name", "contact_email", "contact_source", "contact_address"]
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(header)
+        writer.writerows(rows)
+
+
+def test_contact_overrides_by_address_missing_file_is_empty_dict(tmp_path):
+    assert load_contact_overrides_by_address(tmp_path / "missing.csv") == {}
+
+
+def test_contact_overrides_by_address_full_row_is_loaded(tmp_path):
+    path = tmp_path / "overrides.csv"
+    _write_overrides_csv_with_contact_address(
+        path,
+        [
+            (
+                "cl1",
+                "",
+                "Jane Doe",
+                "jane@example.com",
+                "AI research (high confidence): https://example.com/listing",
+                "1210 N 152nd St, Shoreline",
+            )
+        ],
+    )
+    result = load_contact_overrides_by_address(path)
+    assert result == {
+        "1210 N 152nd St, Shoreline": (
+            "Jane Doe",
+            "jane@example.com",
+            "AI research (high confidence): https://example.com/listing",
+        )
+    }
+
+
+def test_contact_overrides_by_address_row_without_a_contact_address_is_skipped(tmp_path):
+    """A row recorded before this column existed, or for a listing that had
+    already dropped out of the current scan when the contact was written (so
+    the Worker had nothing to look up), has no contact_address -- this
+    fallback just doesn't apply for it, same as if it were never there. The
+    id-keyed override from load_contact_overrides is unaffected either way."""
+    path = tmp_path / "overrides.csv"
+    _write_overrides_csv_with_contact_address(
+        path, [("cl2", "", "Jane Doe", "jane@example.com", "AI research: https://example.com", "")]
+    )
+    assert load_contact_overrides_by_address(path) == {}
+
+
+def test_contact_overrides_by_address_row_without_a_source_is_skipped(tmp_path):
+    path = tmp_path / "overrides.csv"
+    _write_overrides_csv_with_contact_address(
+        path, [("cl3", "", "Jane Doe", "jane@example.com", "", "1210 N 152nd St, Shoreline")]
+    )
+    assert load_contact_overrides_by_address(path) == {}
+
+
+def test_contact_overrides_by_address_ignores_older_5_column_rows(tmp_path):
+    """A CSV written before this column existed (5 columns, no
+    contact_address) must not crash this reader -- it just finds nothing to
+    key on, since csv.DictReader leaves the missing trailing field as None."""
+    path = tmp_path / "overrides.csv"
+    _write_overrides_csv(
+        path,
+        [("rc1", "", "Jane Doe", "jane@example.com", "AI research (high confidence): https://example.com/listing")],
+    )
+    assert load_contact_overrides_by_address(path) == {}

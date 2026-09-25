@@ -5,11 +5,17 @@
 //     PUT  /api/data            store scan results
 //     GET  /api/state           review state for every listing {id: {status, note, address, emailed, updated}}
 //     PATCH /api/state/:id      merge fields into one listing's review state
-//     GET  /api/overrides       CSV of `source_id,address,contact_name,contact_email,contact_source`
-//                               for the Action to feed back into the scan --
-//                               contact_* columns come from POST
-//                               /api/agent/contact below, for a RentCast
-//                               listing RentCast itself gave no contact for.
+//     GET  /api/overrides       CSV of `source_id,address,contact_name,contact_email,
+//                               contact_source,contact_address` for the Action to feed
+//                               back into the scan -- contact_* columns come from POST
+//                               /api/agent/contact below, for a listing RentCast/
+//                               Craigslist itself gave no contact for. contact_address
+//                               (the listing's own address at the moment the contact was
+//                               recorded) lets main.py's load_contact_overrides_by_address()
+//                               apply the same contact to a LATER listing at the same
+//                               address even if its id has changed -- see that function's
+//                               docstring for why this matters specifically for Craigslist,
+//                               whose posting ids churn on every repost.
 //     GET  /api/emailed         JSON array of listing ids already emailed, for the Action's send gate
 //     GET  /api/profile         read the applicant profile
 //     PUT  /api/profile         save the applicant profile
@@ -413,6 +419,18 @@ async function handleApi(request, env, path) {
     if (typeof body.contact_name === "string" && body.contact_name.trim()) entry.contact_name = body.contact_name.trim();
     entry.contact_email = email;
     entry.contact_source = source;
+    // Capture this listing's own address at the moment the contact is
+    // recorded, so a LATER posting at the same address (a Craigslist
+    // repost under a brand-new id -- see the CLAUDE.md note on posting
+    // churn) can inherit this contact via address matching in
+    // main.py's load_contact_overrides_by_address(), without needing a
+    // check-in to notice the repost and manually reapply it. Best-effort
+    // only: if this id isn't in the current scan data (e.g. it already
+    // expired), there's nothing to look up, and the id-keyed override
+    // above still applies on its own regardless.
+    const raw = await env.STATE.get("data", "json");
+    const listing = (raw?.listings || []).find((l) => l.id === body.id);
+    if (listing?.location) entry.contact_address = listing.location;
     entry.updated = new Date().toISOString();
     await writeListingState(env, body.id, entry);
     return json({ ok: true });
@@ -487,7 +505,7 @@ async function handleApi(request, env, path) {
 
   if (path === "/api/overrides" && request.method === "GET") {
     const state = await readAllState(env);
-    const lines = ["source_id,address,contact_name,contact_email,contact_source"];
+    const lines = ["source_id,address,contact_name,contact_email,contact_source,contact_address"];
     for (const [id, entry] of Object.entries(state)) {
       if (entry.address || entry.contact_email) {
         lines.push(
@@ -497,6 +515,7 @@ async function handleApi(request, env, path) {
             csvCell(entry.contact_name || ""),
             csvCell(entry.contact_email || ""),
             csvCell(entry.contact_source || ""),
+            csvCell(entry.contact_address || ""),
           ].join(",")
         );
       }

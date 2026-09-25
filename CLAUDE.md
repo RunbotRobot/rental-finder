@@ -366,11 +366,36 @@
      rather than per-property (unlike RentCast's stable, address-derived
      ids). If a recorded Craigslist contact never seems to reach "ready to
      send," check whether the id it was recorded against is still in
-     `/api/data` at all before assuming something's broken. Matching
-     overrides by verified address instead of by id would fix this, but is
-     a real architecture change (main.py's load_contact_overrides and the
-     overrides CSV are both keyed by source_id today) -- flagged for the
-     owner to decide, not changed unilaterally.
+     `/api/data` at all before assuming something's broken.
+
+     **Fixed** (the owner asked for this after seeing it happen live):
+     address-based contact matching, as a FALLBACK behind the existing
+     id-based match, never instead of it. `POST /api/agent/contact`
+     (`worker/src/index.js`) now looks up the listing's own `location` in
+     the current scan data at write time and stores it as a new
+     `contact_address` field on that state entry (best-effort -- if the id
+     isn't in `raw.listings` anymore, there's nothing to look up, and the
+     id-keyed override still works fine on its own). `GET /api/overrides`
+     gained a 6th CSV column carrying it. `main.py`'s new
+     `load_contact_overrides_by_address()` builds a second, address-keyed
+     map from that column; `run()` checks it only when a listing has no
+     id-level override AND `has_street_number(listing.best_address)` is
+     true -- that street-number guard is the whole safety property here,
+     since matching on a bare area string like "Seattle, WA" would
+     silently cross-wire unrelated buildings that just happen to share a
+     neutral location string. The inherited override's `contact_source`
+     gets `" (same address as a prior posting)"` appended, so the email
+     trail stays honest about where the match actually came from -- it's
+     never indistinguishable from a contact personally verified against
+     that exact id. RentCast doesn't need this (its ids are themselves
+     address-derived, so an id match already catches the same-address
+     case there) but isn't excluded from it either -- it's a correct,
+     harmless no-op there since address-matching can never find anything
+     an id match didn't already find first. Verified live via
+     `wrangler dev --local`: recorded a contact against one id, confirmed
+     `contact_address` appears correctly (comma and all) in the CSV, then
+     confirmed a second, brand-new id at the identical address correctly
+     inherits it while a bare area string never matches anything.
   2. **`room_share_filter.py` only inspects `roo`-category listings**, but
      a real one slipped through under `apa`: "Roost on 23rd" was posted as
      an ordinary apartment listing, yet its own description reads "Roost on

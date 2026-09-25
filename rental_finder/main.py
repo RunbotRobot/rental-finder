@@ -3,9 +3,12 @@
     python -m rental_finder.main --out candidates.csv -v
 
 Pipeline: fetch search results (Craigslist + RentCast) -> drop over-budget
--> restore cache -> apply address overrides -> apply contact overrides
-(a verified/researched contact_email for a RentCast listing RentCast itself
-gave none for -- see load_contact_overrides) -> fetch detail pages (capped)
+-> restore cache -> apply address overrides -> apply contact overrides (a
+verified/researched contact_email for a listing RentCast/Craigslist itself
+gave none for -- see load_contact_overrides), falling back to a contact
+found for another listing at the same address when this listing's own id
+has none (see load_contact_overrides_by_address -- mainly for Craigslist,
+whose posting ids churn on every repost) -> fetch detail pages (capped)
 -> spam flags -> drop occupied shared rooms (keeping mother-in-law
 suites/ADUs/studios) -> drop age-restricted (55+/62+) listings ->
 geocode/locate -> drop out-of-county -> drop too-far-south -> distance
@@ -86,6 +89,52 @@ def load_contact_overrides(path: str | Path) -> dict[str, tuple[str | None, str 
                 continue
             name = (row.get("contact_name") or "").strip() or None
             result[source_id] = (name, email, source)
+        return result
+
+
+def load_contact_overrides_by_address(path: str | Path) -> dict[str, tuple[str | None, str | None, str]]:
+    """(name, email, source) per contact_address, from the same overrides CSV
+    as load_contact_overrides -- a fallback for when a listing has no
+    override recorded against its OWN source_id, but a contact was already
+    found for another listing at the same address.
+
+    This exists specifically for Craigslist: its posting ids are per-post,
+    not per-property, so the same real building reposts under a brand-new id
+    every time it expires and gets relisted -- sometimes within the same
+    hour. A contact recorded via /api/agent/contact against the old id would
+    otherwise be dead the moment that happens, forcing a check-in to notice
+    the repost and manually reapply the same contact to the new id every
+    time (this happened for real, repeatedly, in one check-in: Malmo, Kirin,
+    Liberty Bank Building, Avon Park, and Latitude 112 all reposted under new
+    ids within 10-40 minutes of being researched). contact_address (see
+    worker/src/index.js's /api/agent/contact) is the listing's own
+    best_address at the moment the contact was recorded, written by the
+    Worker, not supplied by the caller.
+
+    RentCast doesn't need this -- its ids are themselves address-derived, so
+    an id match already catches the same-address case there -- but nothing
+    here checks source, since it's harmless (and correctly a no-op) for
+    RentCast: a RentCast id already IS its address, so this can never find a
+    match load_contact_overrides didn't already find first.
+
+    A row missing contact_email, contact_source, or contact_address is
+    skipped, same as load_contact_overrides. If more than one row shares the
+    same contact_address, the last one read wins -- acceptable since in
+    practice they're always the same contact recorded again for a
+    subsequent repost, not two different companies."""
+    path = Path(path)
+    if not path.exists():
+        return {}
+    with path.open(newline="", encoding="utf-8") as f:
+        result: dict[str, tuple[str | None, str | None, str]] = {}
+        for row in csv.DictReader(f):
+            address = (row.get("contact_address") or "").strip()
+            email = (row.get("contact_email") or "").strip()
+            source = (row.get("contact_source") or "").strip()
+            if not address or not email or not source:
+                continue
+            name = (row.get("contact_name") or "").strip() or None
+            result[address] = (name, email, source)
         return result
 
 
@@ -202,8 +251,18 @@ def run(
         listing.override_address = overrides.get(listing.source_id)
 
     contact_overrides = load_contact_overrides(settings.overrides_path)
+    contact_overrides_by_address = load_contact_overrides_by_address(settings.overrides_path)
     for listing in listings:
         override = contact_overrides.get(listing.source_id)
+        # Fallback to an address match only when there's no id match AND the
+        # address is a real street address, not a vague area string --
+        # matching on something like "Seattle, WA" alone would silently
+        # cross-wire unrelated buildings that just share a bare city name.
+        if override is None and listing.best_address and has_street_number(listing.best_address):
+            by_address = contact_overrides_by_address.get(listing.best_address)
+            if by_address is not None:
+                name, email, source = by_address
+                override = (name, email, f"{source} (same address as a prior posting)")
         if override is not None:
             listing.override_contact_name, listing.override_contact_email, listing.contact_source = override
             listing.contact_name = listing.override_contact_name
