@@ -662,3 +662,35 @@
     email "info@foundationgroupre.com") should be recorded through this
     mechanism once it ships, so both existing listings (and any future one
     from the same company) show the warning and never auto-send again.
+    Recorded live via `POST /api/company-notes` (AGENT_TOKEN) once merged
+    and confirmed live.
+- **Applicant profile gained a second, non-outreach section**: "Application
+  questionnaire reference" -- `pronouns`, `household_size`,
+  `bedroom_preference`, `student_status`, `voucher_text`,
+  `eviction_history`, `prior_resident_note`. Built after the owner got a
+  real Community Roots Housing intake questionnaire (name/pronouns,
+  household size, bedroom size, student status, voucher, eviction history,
+  prior-resident status, plus the same sex-offender-registration question
+  outreach emails answer with `disclosure_text`) and asked for the answers
+  saved so a future one doesn't start from scratch. These fields are pure
+  reference text for a human/session filling out an application by hand --
+  `ApplicantProfile.is_complete()` (Python) only ever checks
+  `name`/`disclosure_text`, and nothing in `outreach.py`/`email_draft.py`
+  reads any of the new fields, so this can't affect the auto-send gate or
+  drafted-email content. Added to the Worker's `PUT /api/profile` allowlist
+  and the site's profile form (a new "Application questionnaire reference"
+  subsection, separated from the outreach fields by a heading and a note
+  explaining the scope difference) -- `app.js`'s `fillProfileForm()`/submit
+  handler needed no changes since both already work generically off
+  whatever's in the form. Deliberately did NOT add these to
+  `AGENT_TOKEN`'s reach: `PUT /api/profile` stays full-token-only, same as
+  before -- a check-in session can read them back via
+  `GET /api/agent/candidates`'s bundled profile, but recording new ones
+  (or the owner's disclosure text) is still something only the owner does
+  through the site itself. Verified in a Playwright fixture: all seven new
+  fields save via the form, round-trip through a reload, and refill
+  correctly; verified via `wrangler dev --local` that AGENT_TOKEN still
+  gets 401 on `PUT /api/profile` while the full token can write the new
+  fields. If a future application questionnaire asks something these
+  fields don't cover, add another one the same way -- free text, full-token
+  only, never read by the outreach gate.
