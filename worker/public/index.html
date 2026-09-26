@@ -28,7 +28,8 @@
 <section id="profile" class="panel hidden">
   <h2>Applicant profile</h2>
   <p class="meta">
-    Used to draft outreach emails. Nothing sends without <strong>your own</strong>
+    Name/phone/email/move-in/income/employment/disclosure are used to draft
+    outreach emails. Nothing sends without <strong>your own</strong>
     disclosure text below, in your own words &mdash; this tool never writes or
     edits that paragraph. Consider having it reviewed by a tenant/reentry legal
     aid organization first (e.g. Housing Justice Project, Civil Survival Project).
@@ -41,6 +42,19 @@
     <label>Employment, in your own words<textarea name="employment_text" rows="2"></textarea></label>
     <label>Income, in your own words<textarea name="income_text" rows="2"></textarea></label>
     <label>Disclosure, in your own words <strong>(required to send anything)</strong><textarea name="disclosure_text" rows="5" required></textarea></label>
+    <h3>Application questionnaire reference</h3>
+    <p class="meta">
+      Not used by outreach drafting or auto-send &mdash; just saved answers to
+      the questions a landlord/property-manager application commonly asks, so
+      filling one out (like Community Roots Housing's) is faster next time.
+    </p>
+    <label>Pronouns<input name="pronouns" placeholder="e.g. he/him/his"></label>
+    <label>Household size<input name="household_size" placeholder="e.g. 1"></label>
+    <label>Preferred bedroom size<input name="bedroom_preference" placeholder="e.g. Studio preferred, will accept anything within budget"></label>
+    <label>Student status<input name="student_status" placeholder="e.g. Not a full-time student"></label>
+    <label>Housing voucher, in your own words<textarea name="voucher_text" rows="2" placeholder="e.g. type, amount, and time remaining"></textarea></label>
+    <label>Eviction / landlord debt history<input name="eviction_history" placeholder="e.g. No past evictions or outstanding landlord debt"></label>
+    <label>Prior resident of this landlord/org?<input name="prior_resident_note" placeholder="e.g. Not a current or former resident"></label>
     <div class="edit-buttons">
       <button type="submit">Save profile</button>
       <button type="button" id="profile-close" class="ghost">Close</button>

@@ -636,7 +636,17 @@ async function handleApi(request, env, path) {
     }
     if (request.method === "PUT") {
       const body = await request.json();
-      const allowed = ["name", "phone", "email", "move_in_date", "income_text", "employment_text", "disclosure_text"];
+      // The first seven feed outreach drafting (email_draft.py) -- the rest
+      // are pure reference answers for filling out a landlord/property-
+      // manager application questionnaire (household size, voucher status,
+      // etc.), saved here so a future one doesn't start from scratch. Never
+      // read by outreach.py's gate or email_draft.py -- ApplicantProfile
+      // .is_complete() only ever checks name/disclosure_text.
+      const allowed = [
+        "name", "phone", "email", "move_in_date", "income_text", "employment_text", "disclosure_text",
+        "pronouns", "household_size", "bedroom_preference", "student_status", "voucher_text",
+        "eviction_history", "prior_resident_note",
+      ];
       const profile = {};
       for (const key of allowed) {
         if (typeof body[key] === "string" && body[key].length <= 4000) profile[key] = body[key];
