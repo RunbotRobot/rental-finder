@@ -694,3 +694,102 @@
   fields. If a future application questionnaire asks something these
   fields don't cover, add another one the same way -- free text, full-token
   only, never read by the outreach gate.
+- **A real send bounced, and there's no API way to correct it.** During a
+  check-in, a RentCast "send"-ready listing's contact_email
+  (frontdesk@agmrealestategroup.com, recorded by an earlier check-in's
+  moderate-confidence research) hard-bounced ("550 5.1.1 address not
+  found") the moment it was actually emailed. Live research afterward
+  found the property's own official site (niwaseattle.com) confirms the
+  same management company (AGM Real Estate Group) and gives a phone
+  number, but no email anywhere on the site -- a web-search summary
+  suggested `leasing@niwaapartments.com`, but with nothing to verify it
+  against directly, it was NOT recorded (exactly the "AI research" failure
+  mode this project already guards against -- see the Trulia/price-
+  verification note above). This surfaced a real gap: neither
+  `PATCH /api/state/:id` (only patches status/note/address/emailed, never
+  contact_email/contact_source) nor `POST /api/agent/contact` (can only
+  overwrite with another value, never blank one) can clear a bad
+  contact_email once recorded. Deliberately did NOT unmark the 5 affected
+  listings' `emailed` state to "fix" this -- `already_emailed` is checked
+  FIRST in `_gate_reason()`, before contact_email is ever read, so leaving
+  it set is what stops a future scan from re-sending to the same dead
+  address; clearing it would put a real listing back in the auto-send path
+  with a contact that's now proven to be wrong. This is a real,
+  unaddressed gap (no way to correct a bad researched contact short of
+  someone noticing and deciding what to do about it by hand) -- flagged
+  for the owner, not fixed unilaterally, since the fix (e.g., letting
+  either token blank contact_email/contact_source, or a dedicated
+  "known-bad contact" marker) is a real design decision, not an obvious
+  patch. If a future check-in gets another bounce, check here first.
+- **RentCast has its own version of the room-share gap `room_share_filter.py`
+  only catches on Craigslist.** A single outreach check-in turned up THREE
+  University District addresses RentCast lists as ordinary studio/1BR
+  "Apartment" listings that are actually shared-facility rooming houses:
+  4528 20th Ave NE (coin-op laundry, shared bathroom per floor, community
+  kitchen, Davis Property Management), and 4714/4718 17th Ave NE -- the
+  same building, explicitly named "World House" / "Share House" on
+  Zillow, furnished individual rooms with 4 shared kitchens and 6 shared
+  bathrooms across the building. All three were priced far below a normal
+  Seattle studio ($725-750/mo), which is itself a useful tell -- worth
+  checking anywhere in this price range for the same pattern, not just
+  University District specifically. All three dismissed by hand
+  (`research-checked` + `dismiss: true`), same treatment as the Craigslist
+  apa-category room-share gap already documented above. `room_share_filter.py`
+  only ever runs on Craigslist listings (see its own module load in
+  main.py's `run()`) -- RentCast listings never pass through it at all, so
+  this isn't a tightening of an existing filter's logic, it's a source the
+  filter was never wired up to check in the first place. Not fixed
+  unilaterally (same reasoning as the apa-category gap: worth an owner
+  decision on whether/how to extend room_share_filter.py to RentCast, not
+  a unilateral mid-check-in change) -- but if you're doing a check-in and
+  see a suspiciously cheap RentCast studio/1BR (under ~$1,000 in Seattle),
+  this is now a known, recurring failure mode to check for by hand.
+- **`senior_housing_filter.py`'s confirmed gap (see above) is more common
+  than the original two instances suggested.** The same single check-in
+  turned up TWO MORE undetected 55+/61+ communities RentCast gave zero
+  age-restriction language for: **Filipino Community Village** (5727 37th
+  Ave S, Seattle -- "Affordable, 55+" per Apartments.com/HumanGood.org,
+  income-restricted senior housing) and **Tri Court / Park Court Senior
+  Living** (24510 64th Ave S, Kent -- 61+, or 55+ with a disability). Both
+  dismissed by hand. That's 4 confirmed real instances now (2 from the
+  original check-in, 2 from this one) in a relatively small sample of
+  RentCast candidates actually researched -- worth flagging to the owner
+  as a pattern serious enough to reconsider whether the address-lookup
+  approach (checking a listing's address against known senior communities,
+  raised and declined as "a bigger change" the first time this came up)
+  is worth building now, rather than continuing to catch these one at a
+  time by hand indefinitely. Not built unilaterally this check-in either --
+  still the owner's call -- but the hit rate has gone from "two anecdotes"
+  to "a real, recurring pattern" and that's worth surfacing clearly, not
+  just quietly appending another instance to this file.
+- **A third housing-type gap, distinct from the two above**: student-only
+  housing. **Sunrise Cascade** (1100 NE 47th St, Seattle) is legitimate
+  self-contained micro-housing (private bathroom + kitchenette per unit,
+  a shared full kitchen per floor as a building amenity only -- NOT the
+  room-share pattern above) but is explicitly restricted to students per
+  its own marketing. The applicant is not a full-time student (per the
+  new `student_status` profile field -- see above), so this was dismissed
+  as a genuine eligibility mismatch, the same way age-restricted housing
+  is, rather than researched for a contact. No filter change proposed
+  here -- RentCast gives no student-restriction signal to check
+  programmatically any more than it gives age-restriction signal, and a
+  single instance isn't yet the kind of recurring pattern the senior-
+  housing gap has become -- but worth knowing this category exists if it
+  recurs.
+- **A large outreach check-in (this one) left most RentCast research
+  candidates unprocessed, on purpose.** The `/api/agent/candidates`
+  response had 5 "send," 28 "draft" groups, and 141 "research" candidates
+  (28 Craigslist, 113 RentCast). All 5 sends and all 28 drafts were
+  handled; of the 113 RentCast research candidates, only 19 were actually
+  researched -- the other ~94 (plus all 28 Craigslist research candidates,
+  untouched this round) are an explicit, acknowledged backlog for a future
+  check-in, same precedent as the original massive check-in's 94-of-120
+  backlog. Each RentCast address in this batch is a small, mostly-
+  unbranded building or single unit (unlike the branded complexes in the
+  Craigslist "draft" bucket), so verifying a real contact takes a genuine
+  web search plus a primary-source check per address -- not something to
+  rush through with unverified guesses, especially right after the Niwa
+  bounce above. If you're a future check-in picking this backlog up: keep
+  checking RentCast candidates for the room-share and senior-housing
+  patterns above BEFORE researching a contact for them, since they're now
+  confirmed common enough to expect more.
