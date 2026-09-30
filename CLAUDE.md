@@ -793,3 +793,75 @@
   checking RentCast candidates for the room-share and senior-housing
   patterns above BEFORE researching a contact for them, since they're now
   confirmed common enough to expect more.
+- **The owner rewrote the outreach email's voice himself and asked for it
+  to become the generic baseline going forward**, after seeing what had
+  actually been sent and judging it weaker than it could be. His own
+  words, verbatim:
+
+  > Hello!
+  >
+  > I would like to rent from you. Before scheduling a tour and paying an
+  > application fee, I'd like to confirm that I meet your basic screening
+  > requirements. I am a level III sex offender on community custody.
+  > Having only released three months ago, I'm just now starting
+  > employment. I will be making approximately $4,000 per month, and my
+  > parents are able and willing to act as guarantors. My father is a
+  > retired financial planner. I am also able to pay three months' rent
+  > upfront to ease any concerns you may have. I would like to move in as
+  > soon as able.
+  >
+  > Thank you for your consideration!
+  >
+  > James Day
+  > (206) 850-0012
+  > RunbotRobot@gmail.com
+
+  This is a real, substantive change from what had been sent before, not
+  just a rewording: it leads with screening/qualification up front instead
+  of "is it still available," raises income from $3,800 to $4,000/month,
+  adds two NEW concrete facts that hadn't been in the profile anywhere
+  before (released three months ago; father is a retired financial
+  planner), and adds a new concrete offer (three months' rent upfront) --
+  a real financial commitment, not boilerplate, so don't casually drop it
+  from future drafts once it's in the profile. If you're the check-in
+  session personally writing "send"/"draft" emails (see the live-outreach
+  note above -- this is still not email_draft.py's job), use this as the
+  new baseline voice and content, personalizing only the specific
+  listing/address/price the way every other personally-written email in
+  this project already does -- don't revert to the older, more clinical
+  "I'm writing about the X at Y, I'd like to find out if it's still
+  available" opening.
+  This is the owner's own words about his own situation, same as
+  `disclosure_text` always has been -- nothing here was drafted, edited,
+  or suggested by a session, and nothing here should be, going forward
+  either.
+  **Not yet persisted to the live profile as of this writing** -- writing
+  it there requires `PUT /api/profile`, which is full-token-only (see the
+  `AGENT_TOKEN` narrowness note above); a check-in session holding only
+  `AGENT_TOKEN` can't do this itself and has to ask the owner to paste it
+  in via the site's own ✎ profile screen. The cleanest mapping onto the
+  existing fields (proposed, not yet actioned): the whole paragraph
+  (disclosure + employment status + income + guarantors + father's
+  profession + the upfront-rent offer) goes in `disclosure_text` as one
+  verbatim block, since `email_draft.py`'s template already emits
+  `employment_text`/`income_text`/`disclosure_text` as separate paragraphs
+  in sequence -- leaving the new, richer `disclosure_text` in place while
+  the old `employment_text`/`income_text` also still say their own,
+  now-overlapping things would read redundant in the one live place that
+  still assembles them mechanically (the always-on Craigslist fallback
+  draft). Clearing `employment_text`/`income_text` once the new
+  `disclosure_text` is saved keeps that fallback template's output clean
+  (greeting -> interest line -> move-in timeline -> the new paragraph ->
+  sign-off) without any code change. `move_in_date` ("When available")
+  could optionally become "As soon as able" to match the new phrasing
+  exactly, but that's cosmetic, not load-bearing. Once the owner saves
+  this, `POST /api/agent/candidates`'s bundled profile and the site's
+  fallback drafts pick it up automatically -- no code or scan change
+  needed beyond what already exists.
+  Also worth surfacing once, not repeatedly: README's own disclosure
+  section already suggests having this paragraph reviewed by a
+  tenant/reentry legal aid organization (Housing Justice Project, Civil
+  Survival Project) before relying on it, given how much more specific
+  and financially concrete this version is than the original one-liner.
+  That's the owner's call each time he revises this text, not something a
+  check-in session gates on or nags about.
