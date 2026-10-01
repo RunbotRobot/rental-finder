@@ -865,3 +865,106 @@
   and financially concrete this version is than the original one-liner.
   That's the owner's call each time he revises this text, not something a
   check-in session gates on or nags about.
+- **The owner pasted his new generic email into `disclosure_text` as one
+  block, including its own "Hello!"/"Thank you for your consideration!"/
+  signature** -- exactly as proposed above. This means the auto-generated
+  Craigslist fallback draft (`email_draft.py`'s template, which still
+  wraps whatever's in `disclosure_text` with its own "Hello,"/"I'm writing
+  about..."/"I'm happy to answer any questions... Thank you for your
+  time,"/`profile.name` sign-off) now produces a visibly doubled email --
+  two greetings, two sign-offs (the new one as "James Day", the template's
+  own as "James", since `profile.name` is still just "James" and was never
+  updated). This is cosmetic and self-correcting: a check-in always
+  replaces it with a personally-written one the moment it processes that
+  listing, and the site labels auto-drafted vs personally-drafted so the
+  owner isn't confused by it meanwhile. If you're a check-in session
+  writing real emails, do NOT concatenate `disclosure_text` onto a second
+  greeting/sign-off of your own -- the clean pattern used throughout this
+  check-in: lead with `disclosure_text`'s own "Hello!", insert ONE
+  listing-identifying sentence right before "I would like to rent from
+  you" (e.g. "I'm writing about the 2-bedroom at Latitude 112, listed at
+  $1,799/month."), then paste the rest of `disclosure_text` completely
+  unaltered through to the end. Nothing in `disclosure_text` itself is
+  ever edited or reordered -- only one sentence is added around it, same
+  as the address/price insertions every email in this project has always
+  done.
+- **`POST /api/agent/research-checked` must be called once per id in
+  `same_address_ids`, same as `/api/agent/draft` and `/api/agent/contact`
+  -- it does NOT fan out to a group on its own.** Missed this at first in
+  this check-in: called it once for a group's representative id (e.g. the
+  Sedona Micro Studios group, the two Polaris at Lake City postings, the
+  three Polaris at Together Center postings) and the OTHER ids in that
+  same `same_address_ids` list kept reappearing as "research" candidates,
+  since each id's state entry is independent. Fixed by re-running it for
+  every id in the group. If you're a check-in session processing a
+  grouped research candidate, loop over `same_address_ids` for
+  `research-checked` exactly like you already do for `draft`/`contact` --
+  don't assume the Worker groups it for you the way `/api/agent/draft`'s
+  own documentation might suggest.
+- **A real, confirmed gap: dismissing a listing (`research-checked` with
+  `dismiss: true`) does NOT remove it from the "draft" bucket.** The
+  Worker's `draftEligible` filter only checks
+  `!state[l.id]?.emailed && !state[l.id]?.draft_body && !state[l.id]?.contact_email`
+  -- it never looks at `status` or `research_checked_at` at all, unlike
+  the "research" bucket (which does exclude on `research_checked_at`).
+  Confirmed live: after dismissing Heights by Vintage (55+ senior) and
+  three "Roost"-branded room-share listings this check-in, all four kept
+  showing up in the next `/api/agent/candidates` call under `action:
+  "draft"`, even though they were correctly hidden from the site's
+  default view. This isn't new breakage from anything changed today --
+  it's always worked this way, just never surfaced clearly until a
+  check-in dismissed several listings and then re-fetched candidates in
+  the same session. The practical effect is small (a dismissed listing
+  just keeps re-offering a reply-box draft that should never be written;
+  a check-in that recognizes the id/address from its own dismissal note
+  skips it again, as happened here) but it's a real inconsistency between
+  the two buckets worth fixing properly -- likely by adding the same
+  `!state[l.id]?.research_checked_at` (or a `status !== "dismissed"`)
+  check to `draftEligible`. Flagged for the owner, not changed
+  unilaterally, same as every other gate-logic change in this file.
+- **A 5th confirmed `senior_housing_filter.py` miss, and the first one
+  caught BEFORE drafting rather than after**: Heights by Vintage (SeaTac,
+  "Heights by Vintage 55+ Senior Apartments" per vintagehousing.com's own
+  page title) had zero age language in its Craigslist listing, same as
+  every prior instance -- but this time it surfaced while researching a
+  SIBLING property (Latitude 112, Pointe by Vintage) under the same
+  "Vintage Housing" brand, which turned out to run both senior and
+  non-senior communities under the same naming convention. The lesson:
+  confirming one property's manager is NOT age-restricted never implies
+  anything about a sibling property from the same brand/portfolio --
+  Vintage Housing, Village Concepts, and HumanGood have each now shown up
+  on both sides of this (some properties senior, some not) in this
+  project's history. Check every address individually regardless of
+  brand-name recognition from a previous check.
+- **Income-restricted/affordable-branded buildings keep surfacing a
+  recurring contact-info pattern worth knowing before researching more of
+  them**: Allied Residential (confirmed managing at least Adara at
+  SeaTac, Polaris at Lake City/Eastgate/Together Center, Linden Flats,
+  Kirkland Heights, Village of Newport, Sterling Ridge -- all in this one
+  check-in) consistently exposes only a phone number and a contact form
+  on every property site actually checked directly; the one email that
+  keeps surfacing in search-result summaries (accessibility@apartments247.com)
+  is the website VENDOR's accessibility-feedback address, not a leasing
+  contact, and was declined every time it came up. A few search summaries
+  also claimed property-specific `{name}@alliedresidential.com` addresses
+  (adaraseatac@, thevillage@, sterlingridge@, Kirklandheights@) that
+  looked plausible but could never be confirmed directly on the
+  company's own sites (several 403'd outright) -- all declined,
+  unrecorded, consistent with the post-Niwa standard of never recording
+  an email from a search summary alone. If a future check-in gets an
+  Allied Residential property and WebFetch access to their site actually
+  works (unlike the repeated 403s here), that's worth another look --
+  but don't assume the `{name}@alliedresidential.com` pattern is safe to
+  use just because it recurred across several properties.
+- **Community Roots Housing manages a real multi-building portfolio with
+  one shared leasing email** (`leasinginfo@communityrootshousing.org`),
+  confirmed across three separate properties this check-in -- Liberty
+  Bank Building (sent to live, no bounce), Africatown Plaza, and Oleta.
+  Once confirmed bounce-free for one CRH building, it's reasonable
+  (high-confidence, not a guess) to reuse it for another CRH-managed
+  building found later in the same check-in, same reasoning as the
+  Fathom PM / Real Property Associates precedent already in this file --
+  cite the live bounce-free delivery as part of the confidence note, not
+  just the brand match. If a future CRH building's email to this address
+  ever bounces, treat it the same as the Niwa incident: stop reusing it
+  blind, re-verify.
